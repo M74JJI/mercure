@@ -6,6 +6,8 @@ Dependency lifecycle scripts execute arbitrary code during installation and are 
 
 A package may be allowlisted only when its install-time behavior has been reviewed, is required for the selected toolchain to function correctly, and the matcher is constrained to the reviewed version. New or upgraded versions require renewed review.
 
+An explicit `false` entry records a reviewed dependency whose lifecycle script is intentionally denied. This distinguishes a deliberate security decision from an unreviewed script.
+
 `dangerouslyAllowAllBuilds` is prohibited.
 
 ## Approved builds
@@ -28,6 +30,18 @@ A package may be allowlisted only when its install-time behavior has been review
 - Script: `postinstall` invokes `node postinstall.js`, which uses the package's native-binding preparation path so the platform-specific resolver binding is available at runtime.
 - Decision: approved only for the exact resolved version. The install script is required for reliable native binding resolution in package-manager environments that block dependency lifecycle scripts by default; changing this version requires a fresh source/release and lockfile review.
 
+## Explicitly denied builds
+
+### `@scarf/scarf@1.4.0`
+
+- Purpose: transitive package whose install lifecycle can report dependency-usage analytics.
+- Decision: denied. Mercure does not require install-time analytics for build or runtime correctness, so the lifecycle script has no justified execution path in CI or developer installs.
+
+### `esbuild@0.28.2`
+
+- Purpose: transitive toolchain dependency after the NestJS API build was standardized on Webpack with the TypeScript compiler.
+- Decision: denied. Mercure does not invoke esbuild for the API build, so its native executable preparation script is unnecessary. If a future target intentionally adopts esbuild, this denial must be revisited through a documented build-tool decision.
+
 ## Review procedure
 
 When pnpm reports `ERR_PNPM_IGNORED_BUILDS`:
@@ -35,7 +49,7 @@ When pnpm reports `ERR_PNPM_IGNORED_BUILDS`:
 1. Do not disable `strictDepBuilds`.
 2. Identify the exact package and version.
 3. Review the published package/source and install script.
-4. Confirm the dependency is necessary.
-5. Add only an exact-version approval or an explicit denial.
+4. Confirm whether the dependency actually requires the script for Mercure's selected path.
+5. Record an exact-version `true` approval or `false` denial.
 6. Document the decision in this file.
 7. Re-run installation and all workspace quality gates.
