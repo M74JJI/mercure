@@ -1,7 +1,7 @@
 import nx from '@nx/eslint-plugin';
 import tseslint from 'typescript-eslint';
 
-const sourceFiles = ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx', '**/*.mjs', '**/*.cjs'];
+const sourceFiles = ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'];
 
 export default [
   {
@@ -31,6 +31,12 @@ export default [
         },
       ],
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-extraneous-class': [
+        'error',
+        {
+          allowWithDecorator: true,
+        },
+      ],
       '@nx/enforce-module-boundaries': [
         'error',
         {
