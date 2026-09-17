@@ -12,6 +12,11 @@ sharedWorkspaceLockfile: true
 preferWorkspacePackages: true
 verifyStoreIntegrity: true
 
+# Do not install optional build systems we do not use. @nx/react is pulled by
+# @nx/next and declares @nx/vite as optional; Mercure uses Next.js, not Vite.
+ignoredOptionalDependencies:
+  - '@nx/vite'
+
 # Supply-chain guardrail: newly published dependency versions are quarantined
 # for seven days by default. Security exceptions are exact-version scoped,
 # documented under security/policies, and removed after they mature.
@@ -28,4 +33,3 @@ minimumReleaseAgeExclude:
 allowBuilds:
   'nx@23.2.1': true
   '@parcel/watcher@2.6.0': true
-  'unrs-resolver@1.12.2': true

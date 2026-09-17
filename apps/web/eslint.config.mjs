@@ -1,12 +1,27 @@
-import { defineConfig, globalIgnores } from 'eslint/config';
-import nextVitals from 'eslint-config-next/core-web-vitals';
-import nextTypeScript from 'eslint-config-next/typescript';
+import nextPlugin from '@next/eslint-plugin-next';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 import baseConfig from '../../eslint.config.mjs';
 
-export default defineConfig([
+const webFiles = ['src/**/*.{js,jsx,ts,tsx}'];
+
+export default [
   ...baseConfig,
-  ...nextVitals,
-  ...nextTypeScript,
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
-]);
+  {
+    files: webFiles,
+    plugins: {
+      '@next/next': nextPlugin,
+      'react-hooks': reactHooks,
+    },
+    settings: {
+      next: {
+        rootDir: 'apps/web/',
+      },
+    },
+    rules: {
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs['core-web-vitals'].rules,
+      ...reactHooks.configs.flat.recommended.rules,
+    },
+  },
+];

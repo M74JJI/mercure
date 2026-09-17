@@ -22,12 +22,6 @@ A package may be allowlisted only when its install-time behavior has been review
 - Script: `install` invokes `scripts/build-from-source.js`.
 - Decision: approved for the exact resolved version. The package is a native C++ watcher and its install path prepares the native addon when necessary.
 
-### `unrs-resolver@1.12.2`
-
-- Purpose: native module resolution used transitively by lint/import-resolution tooling.
-- Script: `postinstall` invokes its binary setup helper.
-- Decision: approved for the exact resolved version because the package's native binding setup is required for reliable runtime resolution.
-
 ## Review procedure
 
 When pnpm reports `ERR_PNPM_IGNORED_BUILDS`:
