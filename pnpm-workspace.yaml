@@ -1,0 +1,11 @@
+packages:
+  - apps/*
+  - libs/**
+  - tools/*
+
+preferWorkspacePackages: true
+linkWorkspacePackages: true
+
+# Supply-chain guardrail: newly published dependency versions are quarantined
+# for seven days by default. Emergency security exceptions must be explicit.
+minimumReleaseAge: 10080
