@@ -29,8 +29,11 @@ minimumReleaseAgeExclude:
   - 'fastify@5.12.4'
 
 # Dependency lifecycle scripts are denied unless an exact reviewed package
-# version is explicitly permitted here. Do not broaden these matchers.
+# version is explicitly permitted here. Explicit false entries record reviewed
+# scripts that Mercure intentionally refuses to execute.
 allowBuilds:
   'nx@23.2.1': true
   '@parcel/watcher@2.6.0': true
   'unrs-resolver@1.12.2': true
+  '@scarf/scarf@1.4.0': false
+  'esbuild@0.28.2': false
