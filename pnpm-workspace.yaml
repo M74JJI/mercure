@@ -3,8 +3,14 @@ packages:
   - libs/**
   - tools/*
 
+# Reproducibility and dependency correctness.
+engineStrict: true
+saveExact: true
+strictPeerDependencies: true
+autoInstallPeers: false
+sharedWorkspaceLockfile: true
 preferWorkspacePackages: true
-linkWorkspacePackages: true
+verifyStoreIntegrity: true
 
 # Supply-chain guardrail: newly published dependency versions are quarantined
 # for seven days by default. Security exceptions are exact-version scoped,
@@ -16,3 +22,10 @@ minimumReleaseAgeExclude:
   - '@nestjs/platform-fastify@11.2.5'
   - '@fastify/middie@9.3.4'
   - 'fastify@5.12.4'
+
+# Dependency lifecycle scripts are denied unless an exact reviewed package
+# version is explicitly permitted here. Do not broaden these matchers.
+allowBuilds:
+  'nx@23.2.1': true
+  '@parcel/watcher@2.6.0': true
+  'unrs-resolver@1.12.2': true
