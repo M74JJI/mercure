@@ -15,7 +15,7 @@ export default [
     },
     settings: {
       next: {
-        rootDir: 'apps/web/',
+        rootDir: '.',
       },
     },
     rules: {
