@@ -44,7 +44,7 @@ jobs:
         run: pnpm format
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm exec nx run-many -t lint --verbose
 
       - name: Typecheck
         run: pnpm typecheck
