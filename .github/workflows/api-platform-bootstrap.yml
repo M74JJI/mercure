@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/api-platform-bootstrap.yml
       - scripts/ci/bootstrap-api-platform.py
+      - scripts/ci/normalize-api-platform.py
       - package.json
       - pnpm-workspace.yaml
 
@@ -41,102 +42,9 @@ jobs:
           node-version-file: .node-version
 
       - name: Materialize platform foundation
-        run: python3 scripts/ci/bootstrap-api-platform.py
-
-      - name: Normalize generated source
-        shell: bash
         run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-
-          config = Path('libs/platform/backend/config/src/lib/platform-config.module.ts')
-          text = config.read_text()
-          text = text.replace(
-              "import { ConfigModule, ConfigService } from '@nestjs/config';",
-              "import { ConfigModule, type ConfigService } from '@nestjs/config';",
-          )
-          config.write_text(text)
-
-          problem = Path('libs/platform/backend/presentation/src/lib/problem-details.filter.ts')
-          text = problem.read_text()
-          text = text.replace(
-              "import {\n  ArgumentsHost,\n  Catch,\n  ExceptionFilter,\n  HttpException,",
-              "import {\n  Catch,\n  HttpException,",
-          )
-          text = text.replace(
-              "} from '@nestjs/common';\n",
-              "} from '@nestjs/common';\nimport type { ArgumentsHost, ExceptionFilter } from '@nestjs/common';\n",
-              1,
-          )
-          text = text.replace(
-              "import { ZodValidationException } from 'nestjs-zod';",
-              "import { ZodValidationException } from 'nestjs-zod';\nimport { ZodError } from 'zod';",
-          )
-          text = text.replace(
-              "const details = exception.getZodError().issues.map((issue) => ({\n        path: issue.path.map(String).join('.'),\n        code: issue.code,\n        message: issue.message,\n      }));",
-              "const zodError = exception.getZodError();\n      const details =\n        zodError instanceof ZodError\n          ? zodError.issues.map((issue) => ({\n              path: issue.path.map(String).join('.'),\n              code: issue.code,\n              message: issue.message,\n            }))\n          : [];",
-          )
-          problem.write_text(text)
-
-          http = Path('libs/platform/backend/http/src/lib/api-http.ts')
-          text = http.read_text()
-          old = """  await app.register(helmet, {
-    strictTransportSecurity: config.nodeEnvironment === 'production' ? undefined : false,
-    contentSecurityPolicy: config.openApiEnabled
-      ? {
-          directives: {
-            defaultSrc: [\"'self'\"],
-            styleSrc: [\"'self'\", \"'unsafe-inline'\"],
-            scriptSrc: [\"'self'\", \"'unsafe-inline'\"],
-            imgSrc: [\"'self'\", 'data:'],
-          },
-        }
-      : undefined,
-  });"""
-          new = """  const transportSecurity =
-    config.nodeEnvironment === 'production' ? {} : { strictTransportSecurity: false };
-
-  if (config.openApiEnabled) {
-    await app.register(helmet, {
-      ...transportSecurity,
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: [\"'self'\"],
-          styleSrc: [\"'self'\", \"'unsafe-inline'\"],
-          scriptSrc: [\"'self'\", \"'unsafe-inline'\"],
-          imgSrc: [\"'self'\", 'data:'],
-        },
-      },
-    });
-  } else {
-    await app.register(helmet, transportSecurity);
-  }"""
-          if old not in text:
-              raise SystemExit('Expected Helmet block was not found.')
-          http.write_text(text.replace(old, new))
-
-          for manifest_path in [
-              'libs/platform/backend/http/package.json',
-              'libs/platform/backend/presentation/package.json',
-          ]:
-              manifest = Path(manifest_path)
-              data = json.loads(manifest.read_text())
-              if 'fastify' in data.get('dependencies', {}):
-                  data['dependencies']['fastify'] = '5.12.5'
-              if manifest_path.endswith('/presentation/package.json'):
-                  data['dependencies']['zod'] = '4.5.4'
-              manifest.write_text(json.dumps(data, indent=2) + '\n')
-
-          webpack = Path('apps/api/webpack.config.cjs')
-          text = webpack.read_text()
-          text = text.replace(
-              "const { join } = require('node:path');\nconst { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');",
-              "// CommonJS is required by the isolated Nx Webpack configuration loader.\n// eslint-disable-next-line @typescript-eslint/no-require-imports\nconst { join } = require('node:path');\n// eslint-disable-next-line @typescript-eslint/no-require-imports\nconst { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');",
-          )
-          webpack.write_text(text)
-          PY
+          python3 scripts/ci/bootstrap-api-platform.py
+          python3 scripts/ci/normalize-api-platform.py
 
       - name: Resolve lockfile
         run: pnpm install --lockfile-only
