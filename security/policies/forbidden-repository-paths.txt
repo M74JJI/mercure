@@ -1,0 +1,15 @@
+.ai/
+.ai-config/
+.agent/
+.agents/
+.codex/
+.claude/
+.cursor/
+.windsurf/
+.continue/
+.aider/
+.roo/
+.copilot/
+AGENTS.md
+CLAUDE.md
+.github/copilot-instructions.md

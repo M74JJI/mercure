@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+scripts/ci/validate-repository-hygiene.sh
+
+# Keep the local gate fast. Full validation runs in GitHub Actions.
+if command -v pnpm >/dev/null 2>&1 && [[ -f package.json ]]; then
+  pnpm exec nx affected -t lint,typecheck,test --base=origin/main --head=HEAD
+fi
