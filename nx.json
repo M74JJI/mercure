@@ -3,6 +3,12 @@
   "defaultBase": "main",
   "plugins": [
     {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    },
+    {
       "plugin": "@nx/next/plugin",
       "include": ["apps/web/**/*"],
       "options": {
@@ -26,7 +32,8 @@
       "{workspaceRoot}/package.json",
       "{workspaceRoot}/pnpm-lock.yaml",
       "{workspaceRoot}/tsconfig.base.json",
-      "{workspaceRoot}/nx.json"
+      "{workspaceRoot}/nx.json",
+      "{workspaceRoot}/eslint.config.mjs"
     ]
   },
   "targetDefaults": {

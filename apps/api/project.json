@@ -3,7 +3,7 @@
   "name": "api",
   "projectType": "application",
   "sourceRoot": "apps/api/src",
-  "tags": ["scope:platform", "side:backend", "type:app"],
+  "tags": ["scope:composition", "side:backend", "type:app"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",

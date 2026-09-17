@@ -3,7 +3,7 @@
   "name": "web",
   "projectType": "application",
   "sourceRoot": "apps/web/src",
-  "tags": ["scope:platform", "side:frontend", "type:app"],
+  "tags": ["scope:composition", "side:frontend", "type:app"],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
