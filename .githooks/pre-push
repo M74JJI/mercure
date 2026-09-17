@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
 scripts/ci/validate-repository-hygiene.sh
+
+branch="$(git branch --show-current)"
+if [[ -n "$branch" ]]; then
+  bash scripts/ci/validate-git-metadata.sh branch "$branch"
+fi
 
 # Keep the local gate fast. Full validation runs in GitHub Actions.
 if command -v pnpm >/dev/null 2>&1 && [[ -f package.json ]]; then
