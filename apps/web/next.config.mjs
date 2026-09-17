@@ -1,9 +1,8 @@
-import { composePlugins, withNx } from '@nx/next';
-
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
   reactStrictMode: true,
 };
 
-export default composePlugins(withNx)(nextConfig);
+export default nextConfig;
