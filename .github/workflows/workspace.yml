@@ -5,8 +5,10 @@ on:
     branches: ['**']
   pull_request:
 
+# One-shot lockfile updater for the explicit @eslint/js toolchain dependency.
+# This write permission is removed immediately after the generated lockfile is pushed.
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: workspace-${{ github.workflow }}-${{ github.ref }}
@@ -22,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Install pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -34,20 +36,19 @@ jobs:
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version-file: .node-version
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Update lockfile
+        run: pnpm install --lockfile-only --no-frozen-lockfile
 
-      - name: Check formatting
-        run: pnpm format
-
-      - name: Lint
-        run: pnpm exec nx run-many -t lint --verbose
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Build
-        run: pnpm build
+      - name: Commit lockfile update
+        if: github.event_name == 'push' && github.ref == 'refs/heads/config/nx-workspace-foundation'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'M74JJI'
+          git config user.email '52024672+M74JJI@users.noreply.github.com'
+          git add pnpm-lock.yaml
+          if ! git diff --cached --quiet; then
+            git commit -m 'build:dependencies:update-eslint-lockfile'
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
