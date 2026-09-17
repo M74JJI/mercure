@@ -4,9 +4,11 @@
 - Date: 2026-09-17
 
 ## Context
+
 Mercure will contain many product modules while deploying only one Next.js frontend and one NestJS backend. Folder conventions alone are insufficient because they decay as a repository grows. The workspace therefore needs machine-enforced dependency rules.
 
 ## Decision
+
 Every Nx project carries three independent tag dimensions:
 
 - `scope:*` identifies ownership or bounded context, for example `scope:rules`, `scope:platform`, `scope:shared`, and the deployable-only `scope:composition`.
@@ -42,4 +44,5 @@ The deployable applications use `scope:composition`; they are not platform libra
 Nx's `@nx/enforce-module-boundaries` rule is blocking in lint and CI. The boundary model is a security and maintainability invariant, not guidance.
 
 ## Consequences
+
 Illegal dependencies fail before merge. New module scaffolding must apply the tag taxonomy automatically. An exception that changes dependency direction requires an ADR rather than an ESLint disable.
