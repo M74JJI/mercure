@@ -1,26 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-COMMIT_PATTERN='^(feature|fix|security|config|refactor|test|docs|build|ci|perf|chore|revert):([a-z0-9]+(-[a-z0-9]+)*):([a-z0-9]+(-[a-z0-9]+)*)$'
-AI_ATTRIBUTION_PATTERN='(Co-authored-by:.*(ChatGPT|Claude|Codex|OpenAI|Anthropic)|Generated-by:.*(ChatGPT|Claude|Codex|OpenAI|Anthropic)|AI-assisted:)'
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "$script_dir/git-policy.sh"
 
 validate_commit() {
   local sha="$1"
   local subject
   local body
+
   subject="$(git show -s --format=%s "$sha")"
   body="$(git show -s --format=%B "$sha")"
 
-  if [[ ! "$subject" =~ $COMMIT_PATTERN ]]; then
-    echo "Invalid commit subject: $subject" >&2
-    echo "Expected: <type>:<scope>:<kebab-case-description>" >&2
-    exit 1
-  fi
-
-  if printf '%s\n' "$body" | grep -Eiq "$AI_ATTRIBUTION_PATTERN"; then
-    echo "Forbidden AI/tool attribution metadata found in commit $sha" >&2
-    exit 1
-  fi
+  validate_subject "$subject" "Commit $sha"
+  validate_attribution "$body"
 }
 
 if [[ $# -eq 1 ]]; then
