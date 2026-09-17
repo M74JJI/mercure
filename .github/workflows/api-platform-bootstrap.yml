@@ -48,6 +48,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
+          import json
           from pathlib import Path
 
           config = Path('libs/platform/backend/config/src/lib/platform-config.module.ts')
@@ -69,7 +70,27 @@ jobs:
               "} from '@nestjs/common';\nimport type { ArgumentsHost, ExceptionFilter } from '@nestjs/common';\n",
               1,
           )
+          text = text.replace(
+              "import { ZodValidationException } from 'nestjs-zod';",
+              "import { ZodValidationException } from 'nestjs-zod';\nimport { ZodError } from 'zod';",
+          )
+          text = text.replace(
+              "const details = exception.getZodError().issues.map((issue) => ({\n        path: issue.path.map(String).join('.'),\n        code: issue.code,\n        message: issue.message,\n      }));",
+              "const zodError = exception.getZodError();\n      const details =\n        zodError instanceof ZodError\n          ? zodError.issues.map((issue) => ({\n              path: issue.path.map(String).join('.'),\n              code: issue.code,\n              message: issue.message,\n            }))\n          : [];",
+          )
           problem.write_text(text)
+
+          for manifest_path in [
+              'libs/platform/backend/http/package.json',
+              'libs/platform/backend/presentation/package.json',
+          ]:
+              manifest = Path(manifest_path)
+              data = json.loads(manifest.read_text())
+              if 'fastify' in data.get('dependencies', {}):
+                  data['dependencies']['fastify'] = '5.12.5'
+              if manifest_path.endswith('/presentation/package.json'):
+                  data['dependencies']['zod'] = '4.5.4'
+              manifest.write_text(json.dumps(data, indent=2) + '\n')
 
           webpack = Path('apps/api/webpack.config.cjs')
           text = webpack.read_text()
