@@ -80,6 +80,43 @@ jobs:
           )
           problem.write_text(text)
 
+          http = Path('libs/platform/backend/http/src/lib/api-http.ts')
+          text = http.read_text()
+          old = """  await app.register(helmet, {
+    strictTransportSecurity: config.nodeEnvironment === 'production' ? undefined : false,
+    contentSecurityPolicy: config.openApiEnabled
+      ? {
+          directives: {
+            defaultSrc: [\"'self'\"],
+            styleSrc: [\"'self'\", \"'unsafe-inline'\"],
+            scriptSrc: [\"'self'\", \"'unsafe-inline'\"],
+            imgSrc: [\"'self'\", 'data:'],
+          },
+        }
+      : undefined,
+  });"""
+          new = """  const transportSecurity =
+    config.nodeEnvironment === 'production' ? {} : { strictTransportSecurity: false };
+
+  if (config.openApiEnabled) {
+    await app.register(helmet, {
+      ...transportSecurity,
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: [\"'self'\"],
+          styleSrc: [\"'self'\", \"'unsafe-inline'\"],
+          scriptSrc: [\"'self'\", \"'unsafe-inline'\"],
+          imgSrc: [\"'self'\", 'data:'],
+        },
+      },
+    });
+  } else {
+    await app.register(helmet, transportSecurity);
+  }"""
+          if old not in text:
+              raise SystemExit('Expected Helmet block was not found.')
+          http.write_text(text.replace(old, new))
+
           for manifest_path in [
               'libs/platform/backend/http/package.json',
               'libs/platform/backend/presentation/package.json',
