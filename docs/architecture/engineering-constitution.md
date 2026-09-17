@@ -9,8 +9,8 @@ Mercure is a modular security platform. Engineering decisions optimize for corre
 1. The repository is a single Nx monorepo.
 2. `apps/web` is the single Next.js frontend deployable and remains a thin composition root.
 3. `apps/api` is the single NestJS backend deployable and remains a thin composition root.
-4. Product capabilities live under `libs/modules/<module>/` and may expose `frontend/` and `backend/` libraries.
-5. Product modules are peers. `rules` is the first module, not the architectural center of the platform.
+4. Product capabilities live under `libs/features/<feature>/` and may expose `frontend/` and `backend/` libraries.
+5. Product features are peers. `rules` is the first feature, not the architectural center of the platform.
 6. All server-side business logic, persistence access, filesystem/archive processing, and external-service integration execute behind NestJS.
 7. PostgreSQL is canonical persistence unless an ADR explicitly approves another persistence technology for a bounded purpose.
 8. Database access is restricted to backend infrastructure libraries.
