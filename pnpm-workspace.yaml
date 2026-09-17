@@ -1,0 +1,36 @@
+packages:
+  - apps/*
+  - libs/**
+  - tools/*
+
+# Reproducibility and dependency correctness.
+engineStrict: true
+saveExact: true
+strictPeerDependencies: true
+autoInstallPeers: false
+sharedWorkspaceLockfile: true
+preferWorkspacePackages: true
+verifyStoreIntegrity: true
+
+# Do not install optional build systems we do not use. @nx/react is pulled by
+# @nx/next and declares @nx/vite as optional; Mercure uses Next.js, not Vite.
+ignoredOptionalDependencies:
+  - '@nx/vite'
+
+# Supply-chain guardrail: newly published dependency versions are quarantined
+# for seven days by default. Security exceptions are exact-version scoped,
+# documented under security/policies, and removed after they mature.
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - '@nestjs/common@11.2.5'
+  - '@nestjs/core@11.2.5'
+  - '@nestjs/platform-fastify@11.2.5'
+  - '@fastify/middie@9.3.4'
+  - 'fastify@5.12.4'
+
+# Dependency lifecycle scripts are denied unless an exact reviewed package
+# version is explicitly permitted here. Do not broaden these matchers.
+allowBuilds:
+  'nx@23.2.1': true
+  '@parcel/watcher@2.6.0': true
+  'unrs-resolver@1.12.2': true

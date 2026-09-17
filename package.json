@@ -1,0 +1,53 @@
+{
+  "name": "mercure",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Mercure modular security platform",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@12.4.2",
+  "engines": {
+    "node": ">=24.21.0 <25",
+    "pnpm": ">=12.4.2 <13"
+  },
+  "scripts": {
+    "repo:setup": "git config core.hooksPath .githooks",
+    "nx": "nx",
+    "graph": "nx graph",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "lint": "nx run-many -t lint",
+    "typecheck": "nx run-many -t typecheck",
+    "test": "nx run-many -t test",
+    "build": "nx run-many -t build"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.2.5",
+    "@nestjs/core": "11.2.5",
+    "@nestjs/platform-fastify": "11.2.5",
+    "next": "16.3.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@next/eslint-plugin-next": "16.3.3",
+    "@nx/eslint": "23.2.1",
+    "@nx/eslint-plugin": "23.2.1",
+    "@nx/js": "23.2.1",
+    "@nx/nest": "23.2.1",
+    "@nx/next": "23.2.1",
+    "@nx/workspace": "23.2.1",
+    "@types/node": "24.13.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "10.10.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "nx": "23.2.1",
+    "prettier": "3.9.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.0",
+    "webpack": "5.110.3"
+  }
+}

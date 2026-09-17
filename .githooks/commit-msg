@@ -1,17 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+repo_root="$(git rev-parse --show-toplevel)"
+# shellcheck source=/dev/null
+source "$repo_root/scripts/ci/git-policy.sh"
+
 message_file="${1:?commit message file is required}"
 subject="$(head -n 1 "$message_file")"
-pattern='^(feature|fix|security|config|refactor|test|docs|build|ci|perf|chore|revert):([a-z0-9]+(-[a-z0-9]+)*):([a-z0-9]+(-[a-z0-9]+)*)$'
+message="$(cat "$message_file")"
 
-if [[ ! "$subject" =~ $pattern ]]; then
-  echo "Commit rejected: '$subject'" >&2
-  echo "Expected: <type>:<scope>:<kebab-case-description>" >&2
-  exit 1
-fi
-
-if grep -Eiq '(Co-authored-by:.*(ChatGPT|Claude|Codex|OpenAI|Anthropic)|Generated-by:.*(ChatGPT|Claude|Codex|OpenAI|Anthropic)|AI-assisted:)' "$message_file"; then
-  echo "Commit rejected: AI/tool attribution metadata is not allowed." >&2
-  exit 1
-fi
+validate_subject "$subject" 'Commit'
+validate_attribution "$message"
