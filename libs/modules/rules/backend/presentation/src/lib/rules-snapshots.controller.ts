@@ -141,7 +141,7 @@ export class RulesSnapshotsController {
   @ApiOkResponse({ type: RulesSnapshotRulePageDocument })
   @ApiNotFoundResponse({ description: 'Rules snapshot not found.' })
   @ZodSerializerDto(RulesSnapshotRulePageDocument)
-  listRules(@Param() params: RulesSnapshotParamsDto, @ZodQuery(RulesSnapshotRulesQueryDto) query: RulesSnapshotRulesQueryDto) {
+  listRules(@ZodParam(RulesSnapshotParamsDto) params: RulesSnapshotParamsDto, @ZodQuery(RulesSnapshotRulesQueryDto) query: RulesSnapshotRulesQueryDto) {
     return translateRulesHttpErrors(() =>
       this.queries.listRules(params.snapshotId, ruleQueryFromDto(query)),
     );
@@ -153,7 +153,7 @@ export class RulesSnapshotsController {
   @ApiNotFoundResponse({ description: 'Rules snapshot not found.' })
   @ZodSerializerDto(RulesSnapshotDecoderPageDocument)
   listDecoders(
-    @Param() params: RulesSnapshotParamsDto,
+    @ZodParam(RulesSnapshotParamsDto) params: RulesSnapshotParamsDto,
     @ZodQuery(RulesSnapshotDecodersQueryDto) query: RulesSnapshotDecodersQueryDto,
   ) {
     return translateRulesHttpErrors(() =>
@@ -166,7 +166,7 @@ export class RulesSnapshotsController {
   @ApiOkResponse({ type: RulesSnapshotIssuePageDocument })
   @ApiNotFoundResponse({ description: 'Rules snapshot not found.' })
   @ZodSerializerDto(RulesSnapshotIssuePageDocument)
-  listIssues(@Param() params: RulesSnapshotParamsDto, @ZodQuery(RulesSnapshotIssuesQueryDto) query: RulesSnapshotIssuesQueryDto) {
+  listIssues(@ZodParam(RulesSnapshotParamsDto) params: RulesSnapshotParamsDto, @ZodQuery(RulesSnapshotIssuesQueryDto) query: RulesSnapshotIssuesQueryDto) {
     return translateRulesHttpErrors(() =>
       this.queries.listIssues(params.snapshotId, issueQueryFromDto(query)),
     );
