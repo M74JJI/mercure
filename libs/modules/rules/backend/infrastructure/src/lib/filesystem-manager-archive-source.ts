@@ -102,19 +102,15 @@ function runTar(args: readonly string[], maxStdoutBytes: number): Promise<Buffer
 async function listXmlEntries(
   archivePath: string,
   maxFiles: number,
-): Promise<{ readonly entries: readonly string[]; readonly rejected: number }> {
+): Promise<readonly string[]> {
   const output = await runTar(['-tzf', archivePath], TAR_LIST_OUTPUT_LIMIT_BYTES);
   const seen = new Set<string>();
   const entries: string[] = [];
-  let rejected = 0;
 
   for (const rawEntry of output.toString('utf8').split(/\r?\n/)) {
     if (!rawEntry.trim()) continue;
     const entry = normalizeArchiveEntry(rawEntry);
-    if (!entry) {
-      rejected += 1;
-      continue;
-    }
+    if (!entry) continue;
     if (seen.has(entry)) {
       throw new Error(`duplicate archive member is not allowed: ${entry}`);
     }
@@ -128,7 +124,7 @@ async function listXmlEntries(
   }
 
   entries.sort((left, right) => left.localeCompare(right));
-  return { entries, rejected };
+  return entries;
 }
 
 async function readArchiveEntry(
@@ -205,16 +201,10 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
 
       try {
         const archiveStat = await stat(archivePath);
-        const { entries, rejected } = await listXmlEntries(
+        const entries = await listXmlEntries(
           archivePath,
           this.options.maxFiles - totalXmlFiles,
         );
-
-        if (rejected > 0) {
-          errors.push(
-            `${archiveName}: ignored ${rejected} archive members outside the accepted rules/decoders XML paths`,
-          );
-        }
 
         totalXmlFiles += entries.length;
         if (totalXmlFiles > this.options.maxFiles) {
