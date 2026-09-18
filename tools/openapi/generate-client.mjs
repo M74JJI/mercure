@@ -10,10 +10,7 @@ import { format, resolveConfig } from 'prettier';
 
 const CHECK_MODE = process.argv.includes('--check');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const OUTPUT = path.join(
-  ROOT,
-  'libs/platform/frontend/api-client/src/generated/mercure-api.ts',
-);
+const OUTPUT = path.join(ROOT, 'libs/platform/frontend/api-client/src/generated/mercure-api.ts');
 
 function pnpmExecutable() {
   return process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';

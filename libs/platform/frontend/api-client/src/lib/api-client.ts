@@ -12,8 +12,7 @@ export interface MercureApiClientOptions {
 export function resolveApiBaseUrl(explicitBaseUrl?: string): string {
   const configured = explicitBaseUrl ?? process.env.NEXT_PUBLIC_API_BASE_URL;
   const candidate =
-    configured?.trim() ||
-    (process.env.NODE_ENV === 'production' ? undefined : LOCAL_API_ORIGIN);
+    configured?.trim() || (process.env.NODE_ENV === 'production' ? undefined : LOCAL_API_ORIGIN);
 
   if (!candidate) {
     throw new Error('NEXT_PUBLIC_API_BASE_URL is required in production.');

@@ -52,7 +52,9 @@ export class HealthController {
   @Get('ready')
   @ApiOperation({ summary: 'Service readiness probe' })
   @ApiOkResponse({ type: ReadinessResponseDocument })
-  @ApiServiceUnavailableResponse({ description: 'One or more readiness dependencies are unavailable.' })
+  @ApiServiceUnavailableResponse({
+    description: 'One or more readiness dependencies are unavailable.',
+  })
   async ready(): Promise<ReadinessResponse> {
     const readiness = await this.readinessService.check();
 
