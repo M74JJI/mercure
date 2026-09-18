@@ -346,6 +346,9 @@ importers:
 
   libs/modules/rules/backend/feature:
     dependencies:
+      '@mercure/platform-backend-config':
+        specifier: workspace:*
+        version: link:../../../../platform/backend/config
       '@mercure/rules-backend-application':
         specifier: workspace:*
         version: link:../application
