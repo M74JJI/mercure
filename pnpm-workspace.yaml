@@ -41,4 +41,4 @@ allowBuilds:
   '@parcel/watcher@2.6.0': true
   'unrs-resolver@1.12.2': true
   '@scarf/scarf@1.4.0': false
-  'esbuild@0.28.2': false
+  'esbuild@0.28.2': true
