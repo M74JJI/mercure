@@ -18,14 +18,14 @@
         "generatePackageJson": false,
         "thirdParty": false,
         "sourcemap": true,
-        "target": "node24",
-        "outputFileName": "main.js"
+        "target": "node24"
       }
     },
     "serve": {
       "executor": "@nx/js:node",
       "options": {
-        "buildTarget": "api:build"
+        "buildTarget": "api:build",
+        "watch": false
       }
     },
     "typecheck": {
