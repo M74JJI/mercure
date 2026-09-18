@@ -6,8 +6,10 @@ model RulesetSnapshot {
   loadedAt           DateTime @map("loaded_at") @db.Timestamptz(6)
   createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  archiveCount       Int @map("archive_count")
-  fileCount          Int @map("file_count")
+  complete           Boolean @default(true)
+  sourceErrorCount   Int     @map("source_error_count")
+  archiveCount       Int     @map("archive_count")
+  fileCount          Int     @map("file_count")
   ruleCount          Int @map("rule_count")
   decoderCount       Int @map("decoder_count")
   useCaseCount       Int @map("use_case_count")
@@ -19,10 +21,11 @@ model RulesetSnapshot {
   missingUseCaseCount Int @map("missing_use_case_count")
   brokenDependencyCount Int @map("broken_dependency_count")
 
-  archives RulesetSnapshotArchive[]
-  files    RulesetSnapshotFile[]
-  useCases RulesetSnapshotUseCase[]
-  issues   RulesetSnapshotIssue[]
+  archives     RulesetSnapshotArchive[]
+  files        RulesetSnapshotFile[]
+  sourceErrors RulesetSnapshotSourceError[]
+  useCases     RulesetSnapshotUseCase[]
+  issues       RulesetSnapshotIssue[]
 
   @@index([createdAt])
   @@index([sourceFingerprint])
@@ -276,4 +279,16 @@ model RulesetSnapshotUseCase {
   @@id([snapshotId, position])
   @@unique([snapshotId, useCaseId])
   @@map("ruleset_snapshot_use_cases")
+}
+
+
+model RulesetSnapshotSourceError {
+  snapshotId String @map("snapshot_id") @db.Uuid
+  position   Int
+  detail     String @db.Text
+
+  snapshot RulesetSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  @@id([snapshotId, position])
+  @@map("ruleset_snapshot_source_errors")
 }
