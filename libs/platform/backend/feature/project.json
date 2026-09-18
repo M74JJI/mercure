@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "name": "platform-backend-feature",
+  "projectType": "library",
+  "sourceRoot": "libs/platform/backend/feature/src",
+  "tags": ["scope:platform", "side:backend", "type:feature"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/platform/backend/feature/tsconfig.lib.json"
+      }
+    }
+  }
+}
