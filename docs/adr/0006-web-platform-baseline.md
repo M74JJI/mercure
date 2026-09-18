@@ -58,6 +58,8 @@ Mercure uses:
 - `openapi-typescript@7.13.0` to generate TypeScript path/component types from the NestJS OpenAPI document.
 - `openapi-fetch@0.17.0` as the thin runtime client over native `fetch`.
 
+The generator executes from the isolated `tools/openapi` workspace with TypeScript 5.9.3 because `openapi-typescript@7.13.0` declares TypeScript 5 as its supported peer range. Mercure product source remains on TypeScript 6.0.3; strict peer enforcement is not weakened to bridge the tooling compatibility gap.
+
 The generated TypeScript contract is committed because it is a deterministic reviewable interface consumed by frontend source. It is generated only from the running NestJS OpenAPI document and must never be edited manually.
 
 CI regenerates the client contract and fails on drift. This makes backend/OpenAPI changes that forget to update the frontend contract merge-blocking.
