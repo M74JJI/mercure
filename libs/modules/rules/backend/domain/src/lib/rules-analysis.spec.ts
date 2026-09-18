@@ -23,12 +23,7 @@ const emptyStats = {
   brokenDependencies: 0,
 } as const;
 
-function file(
-  name: string,
-  tenant: string,
-  sha256: string,
-  content = '',
-): RulesetSourceFile {
+function file(name: string, tenant: string, sha256: string, content = ''): RulesetSourceFile {
   return {
     name,
     tenant,
@@ -142,9 +137,7 @@ describe('diffRulesets', () => {
 
     expect(diff.summary.rulesChanged).toBe(1);
     expect(diff.summary.useCaseChanged).toBe(0);
-    expect(diff.rules.changed[0]?.changes).toContain(
-      'use case confidence inferred → confirmed',
-    );
+    expect(diff.rules.changed[0]?.changes).toContain('use case confidence inferred â confirmed');
   });
 
   it('isolates tenants and preserves duplicate rule occurrences', () => {
@@ -259,8 +252,7 @@ describe('analyzeXmlRoundtrip', () => {
             { type: 'if_group', value: 'active_group' },
             { type: 'if_group', value: 'shared_group' },
           ],
-          rawXml:
-            '<rule id="110001" level="5"><description>Needs metadata</description></rule>',
+          rawXml: '<rule id="110001" level="5"><description>Needs metadata</description></rule>',
         }),
         rule('990001', 'manager-a', 'manager-a/rules.xml', {
           sourceSection: '1100-detections.xml',
@@ -287,8 +279,7 @@ describe('analyzeXmlRoundtrip', () => {
     });
 
     const managerASection = analysis.sourceSections.find(
-      (section) =>
-        section.tenant === 'manager-a' && section.sourceFile === '1100-detections.xml',
+      (section) => section.tenant === 'manager-a' && section.sourceFile === '1100-detections.xml',
     );
     expect(managerASection).toMatchObject({
       ruleCount: 2,
@@ -342,8 +333,7 @@ describe('analyzeXmlRoundtrip', () => {
     );
 
     const splitFile = analysis.splitFiles.find(
-      (item) =>
-        item.tenant === 'manager-a' && item.sourceSection === '1100-detections.xml',
+      (item) => item.tenant === 'manager-a' && item.sourceSection === '1100-detections.xml',
     );
     expect(splitFile?.fileName).toBe('manager-a__1100-detections.xml');
     expect(splitFile?.xml).toContain('Tenant: manager-a');
