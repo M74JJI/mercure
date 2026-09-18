@@ -32,11 +32,16 @@ interface ArchiveWorkItem extends RulesetArchiveInfo {
 }
 
 function errorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error && error.message.trim() ? error.message : fallback;
+  return error instanceof Error && error.message.trim()
+    ? error.message
+    : fallback;
 }
 
 function normalizeArchiveEntry(entry: string): string | null {
-  const normalized = entry.replaceAll('\\', '/').replace(/^(\.\/)+/, '').trim();
+  const normalized = entry
+    .replaceAll('\\', '/')
+    .replace(/^(\.\/)+/, '')
+    .trim();
 
   if (
     !normalized ||
@@ -76,7 +81,11 @@ function runTar(args: readonly string[], maxStdoutBytes: number): Promise<Buffer
     child.stdout.on('data', (chunk: Buffer) => {
       stdoutBytes += chunk.length;
       if (stdoutBytes > maxStdoutBytes) {
-        fail(new Error(`tar output exceeded the configured ${maxStdoutBytes}-byte limit`));
+        fail(
+          new Error(
+            `tar output exceeded the configured ${maxStdoutBytes}-byte limit`,
+          ),
+        );
         return;
       }
       stdout.push(chunk);
@@ -126,11 +135,15 @@ async function listXmlEntries(
     entries.push({ archiveMember, sourcePath });
 
     if (entries.length > maxFiles) {
-      throw new Error(`archive contains more than the configured ${maxFiles} XML-file limit`);
+      throw new Error(
+        `archive contains more than the configured ${maxFiles} XML-file limit`,
+      );
     }
   }
 
-  entries.sort((left, right) => left.sourcePath.localeCompare(right.sourcePath));
+  entries.sort((left, right) =>
+    left.sourcePath.localeCompare(right.sourcePath),
+  );
   return entries;
 }
 
@@ -139,7 +152,10 @@ async function readArchiveEntry(
   entry: string,
   maxEntryBytes: number,
 ): Promise<string> {
-  const output = await runTar(['-xOzf', archivePath, '--', entry], maxEntryBytes);
+  const output = await runTar(
+    ['-xOzf', archivePath, '--', entry],
+    maxEntryBytes,
+  );
   return output.toString('utf8');
 }
 
@@ -176,10 +192,9 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
     try {
       const root = await stat(this.options.rootPath);
       if (!root.isDirectory()) {
-        return this.emptySnapshot(
-          loadedAt,
-          [`${this.options.rootPath} is not a directory.`],
-        );
+        return this.emptySnapshot(loadedAt, [
+          `${this.options.rootPath} is not a directory.`,
+        ]);
       }
     } catch (error) {
       return this.emptySnapshot(loadedAt, [
@@ -189,7 +204,9 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
 
     let directoryEntries;
     try {
-      directoryEntries = await readdir(this.options.rootPath, { withFileTypes: true });
+      directoryEntries = await readdir(this.options.rootPath, {
+        withFileTypes: true,
+      });
     } catch (error) {
       return this.emptySnapshot(loadedAt, [
         errorMessage(error, `Cannot list ${this.options.rootPath}.`),
@@ -279,7 +296,10 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
           });
         } catch (error) {
           errors.push(
-            `${archive.name}/${entry.sourcePath}: ${errorMessage(error, 'failed to read archive member')}`,
+            `${archive.name}/${entry.sourcePath}: ${errorMessage(
+              error,
+              'failed to read archive member',
+            )}`,
           );
         }
       }
