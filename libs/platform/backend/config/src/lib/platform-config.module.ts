@@ -101,6 +101,20 @@ const platformEnvironmentSchema = z.object({
   DATABASE_CONNECTION_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(5_000),
   DATABASE_IDLE_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(600_000).default(10_000),
   DATABASE_HEALTH_TIMEOUT_MS: z.coerce.number().int().min(100).max(30_000).default(2_000),
+  RULES_MANAGER_ARCHIVE_DIR: z.string().trim().min(1).default('/opt/mercure/siem-managers'),
+  RULES_ARCHIVE_MAX_FILES: z.coerce.number().int().min(1).max(50_000).default(10_000),
+  RULES_ARCHIVE_MAX_ENTRY_BYTES: z.coerce
+    .number()
+    .int()
+    .min(1_024)
+    .max(50 * 1024 * 1024)
+    .default(5 * 1024 * 1024),
+  RULES_ARCHIVE_MAX_TOTAL_BYTES: z.coerce
+    .number()
+    .int()
+    .min(1_024)
+    .max(1024 * 1024 * 1024)
+    .default(256 * 1024 * 1024),
 });
 
 export type PlatformEnvironment = z.infer<typeof platformEnvironmentSchema>;
@@ -167,6 +181,22 @@ export class PlatformConfig {
 
   get databaseHealthTimeoutMs(): number {
     return this.config.getOrThrow('DATABASE_HEALTH_TIMEOUT_MS', { infer: true });
+  }
+
+  get rulesManagerArchiveDir(): string {
+    return this.config.getOrThrow('RULES_MANAGER_ARCHIVE_DIR', { infer: true });
+  }
+
+  get rulesArchiveMaxFiles(): number {
+    return this.config.getOrThrow('RULES_ARCHIVE_MAX_FILES', { infer: true });
+  }
+
+  get rulesArchiveMaxEntryBytes(): number {
+    return this.config.getOrThrow('RULES_ARCHIVE_MAX_ENTRY_BYTES', { infer: true });
+  }
+
+  get rulesArchiveMaxTotalBytes(): number {
+    return this.config.getOrThrow('RULES_ARCHIVE_MAX_TOTAL_BYTES', { infer: true });
   }
 }
 
