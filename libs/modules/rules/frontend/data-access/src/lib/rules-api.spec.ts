@@ -84,7 +84,7 @@ describe('RulesDataAccess', () => {
       status: 'production',
       useCaseId: 'uc_admin_config',
       ruleId: '110001',
-      jiraVisible: true,
+      jiraVisible: 'true',
     });
     await api.listDecoders(snapshotId, {
       offset: 0,
