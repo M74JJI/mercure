@@ -69,6 +69,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          git restore -- apps/web/next-env.d.ts
           git add .env.example apps/api libs/platform/backend pnpm-lock.yaml
           if git diff --cached --quiet; then
             echo 'Platform foundation is already current.'
