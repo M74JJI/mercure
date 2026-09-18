@@ -17,9 +17,7 @@ function parseDate(value: string, label: string): Date {
   return parsed;
 }
 
-function contentFingerprint(
-  files: ImportArchivedRulesetResult['analysis']['files'],
-): string {
+function contentFingerprint(files: ImportArchivedRulesetResult['analysis']['files']): string {
   const canonical = [...files]
     .sort((left, right) => left.name.localeCompare(right.name))
     .map((file) => [file.name, file.tenant, file.type, file.size, file.sha256]);
@@ -73,9 +71,7 @@ export class PrismaRulesetSnapshotStore implements RulesetSnapshotStore {
     const rules = imported.analysis.rules.map((rule, position) => {
       const sourceFilePosition = filePositions.get(rule.sourceFile);
       if (sourceFilePosition === undefined) {
-        throw new Error(
-          `Rule ${rule.id} references an unknown source file: ${rule.sourceFile}`,
-        );
+        throw new Error(`Rule ${rule.id} references an unknown source file: ${rule.sourceFile}`);
       }
 
       return {
