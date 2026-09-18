@@ -7,13 +7,7 @@ const paginationShape = {
   limit: z.coerce.number().int().min(1).max(200).default(50),
 };
 
-const ruleSeveritySchema = z.enum([
-  'informational',
-  'low',
-  'medium',
-  'high',
-  'critical',
-]);
+const ruleSeveritySchema = z.enum(['informational', 'low', 'medium', 'high', 'critical']);
 const validationSeveritySchema = z.enum(['error', 'warning', 'info']);
 const useCaseConfidenceSchema = z.enum(['confirmed', 'inferred', 'unassigned']);
 const dependencyTypeSchema = z.enum([
@@ -113,9 +107,7 @@ const issueSchema = z
   })
   .strict();
 
-const booleanQuerySchema = z
-  .enum(['true', 'false'])
-  .transform((value) => value === 'true');
+const booleanQuerySchema = z.enum(['true', 'false']).transform((value) => value === 'true');
 
 export class RulesSnapshotParamsDto extends createZodDto(
   z
@@ -125,9 +117,7 @@ export class RulesSnapshotParamsDto extends createZodDto(
     .strict(),
 ) {}
 
-export class RulesSnapshotListQueryDto extends createZodDto(
-  z.object(paginationShape).strict(),
-) {}
+export class RulesSnapshotListQueryDto extends createZodDto(z.object(paginationShape).strict()) {}
 
 export class RulesSnapshotRulesQueryDto extends createZodDto(
   z
