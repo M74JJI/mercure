@@ -1,5 +1,7 @@
 name: Rules lockfile bootstrap
 
+# Temporary one-shot lockfile refresh; removed before pull request.
+
 on:
   push:
     branches:
