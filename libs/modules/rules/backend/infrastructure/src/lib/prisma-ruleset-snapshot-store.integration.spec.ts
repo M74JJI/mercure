@@ -36,7 +36,7 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
             '    <group>production,uc_snapshot,</group>',
             '    <mitre><id>T1059.001</id></mitre>',
             '    <field name="srcip" type="ip">.+</field>',
-            '    <option>no_full_log</option>',
+            '    <options>no_full_log</options>',
             '  </rule>',
             '</group>',
           ].join('\n'),
