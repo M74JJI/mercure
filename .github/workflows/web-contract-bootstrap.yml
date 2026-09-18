@@ -1,5 +1,7 @@
 name: Web contract bootstrap
 
+# Temporary one-shot generator; removed before pull request.
+
 on:
   push:
     branches:
