@@ -118,6 +118,35 @@ function ruleset(input: {
 }
 
 describe('diffRulesets', () => {
+  it('does not count confidence-only changes as use-case assignment changes', () => {
+    const before = ruleset({
+      files: [file('manager-a/rules.xml', 'manager-a', 'a'.repeat(64))],
+      rules: [
+        rule('300', 'manager-a', 'manager-a/rules.xml', {
+          useCaseId: 'uc_same',
+          useCaseConfidence: 'inferred',
+        }),
+      ],
+    });
+    const after = ruleset({
+      files: [file('manager-a/rules.xml', 'manager-a', 'a'.repeat(64))],
+      rules: [
+        rule('300', 'manager-a', 'manager-a/rules.xml', {
+          useCaseId: 'uc_same',
+          useCaseConfidence: 'confirmed',
+        }),
+      ],
+    });
+
+    const diff = diffRulesets(before, after);
+
+    expect(diff.summary.rulesChanged).toBe(1);
+    expect(diff.summary.useCaseChanged).toBe(0);
+    expect(diff.rules.changed[0]?.changes).toContain(
+      'use case confidence inferred → confirmed',
+    );
+  });
+
   it('isolates tenants and preserves duplicate rule occurrences', () => {
     const before = ruleset({
       files: [
