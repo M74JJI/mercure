@@ -1,5 +1,5 @@
 {
-  "name": "@mercure/platform-backend-presentation",
+  "name": "@mercure/platform-backend-database",
   "version": "0.0.0",
   "private": true,
   "type": "commonjs",
@@ -7,12 +7,11 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@mercure/platform-backend-config": "workspace:*",
     "@mercure/platform-backend-health": "workspace:*",
     "@nestjs/common": "11.2.5",
-    "@nestjs/core": "11.2.5",
-    "@nestjs/swagger": "11.4.7",
-    "fastify": "5.12.4",
-    "nestjs-zod": "5.5.0",
-    "zod": "4.5.4"
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "pg": "8.23.0"
   }
 }

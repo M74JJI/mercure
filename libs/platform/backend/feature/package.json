@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "@mercure/platform-backend-config": "workspace:*",
+    "@mercure/platform-backend-database": "workspace:*",
+    "@mercure/platform-backend-health": "workspace:*",
     "@mercure/platform-backend-http": "workspace:*",
     "@mercure/platform-backend-logging": "workspace:*",
     "@mercure/platform-backend-presentation": "workspace:*",

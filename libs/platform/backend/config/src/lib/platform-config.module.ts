@@ -61,6 +61,27 @@ const corsOrigins = z
     return [...normalized];
   });
 
+const postgresUrl = z
+  .string()
+  .trim()
+  .min(1)
+  .superRefine((value, context) => {
+    try {
+      const url = new URL(value);
+      if (url.protocol !== 'postgresql:' && url.protocol !== 'postgres:') {
+        context.addIssue({
+          code: 'custom',
+          message: 'DATABASE_URL must use the postgresql:// or postgres:// protocol.',
+        });
+      }
+    } catch {
+      context.addIssue({
+        code: 'custom',
+        message: 'DATABASE_URL must be a valid PostgreSQL connection URL.',
+      });
+    }
+  });
+
 const platformEnvironmentSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   SERVICE_NAME: z.string().trim().min(1).default('mercure-api'),
@@ -75,6 +96,11 @@ const platformEnvironmentSchema = z.object({
     .default(1024 * 1024),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   OPENAPI_ENABLED: booleanFromEnvironment.default(false),
+  DATABASE_URL: postgresUrl,
+  DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
+  DATABASE_CONNECTION_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(5_000),
+  DATABASE_IDLE_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(600_000).default(10_000),
+  DATABASE_HEALTH_TIMEOUT_MS: z.coerce.number().int().min(100).max(30_000).default(2_000),
 });
 
 export type PlatformEnvironment = z.infer<typeof platformEnvironmentSchema>;
@@ -121,6 +147,26 @@ export class PlatformConfig {
 
   get openApiEnabled(): boolean {
     return this.config.getOrThrow('OPENAPI_ENABLED', { infer: true });
+  }
+
+  get databaseUrl(): string {
+    return this.config.getOrThrow('DATABASE_URL', { infer: true });
+  }
+
+  get databasePoolMax(): number {
+    return this.config.getOrThrow('DATABASE_POOL_MAX', { infer: true });
+  }
+
+  get databaseConnectionTimeoutMs(): number {
+    return this.config.getOrThrow('DATABASE_CONNECTION_TIMEOUT_MS', { infer: true });
+  }
+
+  get databaseIdleTimeoutMs(): number {
+    return this.config.getOrThrow('DATABASE_IDLE_TIMEOUT_MS', { infer: true });
+  }
+
+  get databaseHealthTimeoutMs(): number {
+    return this.config.getOrThrow('DATABASE_HEALTH_TIMEOUT_MS', { infer: true });
   }
 }
 
