@@ -36,7 +36,10 @@ function errorMessage(error: unknown, fallback: string): string {
 }
 
 function normalizeArchiveEntry(entry: string): string | null {
-  const normalized = entry.replaceAll('\\', '/').replace(/^(\.\/)+/, '').trim();
+  const normalized = entry
+    .replaceAll('\\', '/')
+    .replace(/^(\.\/)+/, '')
+    .trim();
 
   if (
     !normalized ||
