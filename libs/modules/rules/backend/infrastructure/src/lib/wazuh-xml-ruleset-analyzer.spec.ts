@@ -157,6 +157,91 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     );
   });
 
+  it('preserves correlation dependencies, explicit use cases, XML entities, and decoder patterns', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-c/rules/1300-regression_rules.xml',
+          content: [
+            '<group name="regression">',
+            '  <rule id="130001" level="5">',
+            '    <description>Base rule</description>',
+            '    <group>production,base_group,</group>',
+            '  </rule>',
+            '  <rule id="130002" level="11">',
+            '    <if_matched_sid>130001</if_matched_sid>',
+            '    <if_matched_group>base_group</if_matched_group>',
+            '    <decoded_as>entity_decoder</decoded_as>',
+            '    <description>Admin &amp; configuration &lt;changed&gt;</description>',
+            '    <group>production,</group>',
+            '    <field name="event.message">changed &amp; approved</field>',
+            '    <info type="text">use_case:uc_admin_config</info>',
+            '    <mitre><id>T1562.001</id></mitre>',
+            '  </rule>',
+            '</group>',
+          ].join('\n'),
+        },
+        {
+          name: 'manager-c/decoders/1300-regression_decoders.xml',
+          content: [
+            '<decoder name="entity_decoder">',
+            '  <prematch>admin &amp; change</prematch>',
+            '  <regex>user=([A-Za-z]+)&amp;action=([A-Za-z_]+)</regex>',
+            '  <order>user.name, event.action</order>',
+            '</decoder>',
+          ].join('\n'),
+        },
+      ],
+      useCases: [adminConfigUseCase],
+    });
+
+    const correlated = result.rules.find((rule) => rule.id === '130002');
+    expect(correlated).toMatchObject({
+      description: 'Admin & configuration <changed>',
+      role: 'correlation',
+      status: 'production',
+      severity: 'high',
+      jiraVisible: true,
+      tenant: 'manager-c',
+      useCaseId: 'uc_admin_config',
+      useCaseConfidence: 'confirmed',
+      mitre: ['T1562.001'],
+      decodedAs: ['entity_decoder'],
+    });
+    expect(correlated?.dependencies).toEqual([
+      { type: 'if_matched_sid', value: '130001' },
+      { type: 'if_matched_group', value: 'base_group' },
+      { type: 'decoded_as', value: 'entity_decoder' },
+    ]);
+    expect(correlated?.fields).toContainEqual({
+      name: 'event.message',
+      value: 'changed & approved',
+    });
+
+    expect(result.decoders).toContainEqual(
+      expect.objectContaining({
+        name: 'entity_decoder',
+        prematch: ['admin & change'],
+        regex: ['user=([A-Za-z]+)&action=([A-Za-z_]+)'],
+        orderFields: ['user.name', 'event.action'],
+        tenant: 'manager-c',
+      }),
+    );
+
+    const correlatedIssueTypes = result.issues
+      .filter((issue) => issue.ruleId === '130002')
+      .map((issue) => issue.type);
+    expect(correlatedIssueTypes).not.toEqual(
+      expect.arrayContaining([
+        'external_or_missing_sid',
+        'missing_group_dependency',
+        'missing_decoder',
+        'unknown_use_case_registry',
+      ]),
+    );
+  });
+
   it('uses SHA-256 source fingerprints and deterministic source classification', async () => {
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const source = await fixture('baseline/manager-a/rules/1000-sample_rules.xml');
