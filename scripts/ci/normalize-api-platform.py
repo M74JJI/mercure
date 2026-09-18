@@ -1,14 +1,6 @@
 import json
 from pathlib import Path
 
-config = Path('libs/platform/backend/config/src/lib/platform-config.module.ts')
-text = config.read_text(encoding='utf-8')
-text = text.replace(
-    "import { ConfigModule, ConfigService } from '@nestjs/config';",
-    "import { ConfigModule, type ConfigService } from '@nestjs/config';",
-)
-config.write_text(text, encoding='utf-8')
-
 problem = Path('libs/platform/backend/presentation/src/lib/problem-details.filter.ts')
 text = problem.read_text(encoding='utf-8')
 text = text.replace(
