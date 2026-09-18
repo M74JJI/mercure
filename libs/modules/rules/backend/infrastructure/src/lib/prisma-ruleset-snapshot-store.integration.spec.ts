@@ -167,9 +167,7 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         'production',
         'uc_snapshot',
       ]);
-      expect(ruleFile?.rules[0]?.mitreIds.map((mitre) => mitre.value)).toEqual([
-        'T1059.001',
-      ]);
+      expect(ruleFile?.rules[0]?.mitreIds.map((mitre) => mitre.value)).toEqual(['T1059.001']);
       expect(ruleFile?.rules[0]?.fields[0]).toMatchObject({
         name: 'srcip',
         fieldType: 'ip',
@@ -178,9 +176,7 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
       expect(ruleFile?.rules[0]?.decodedAs.map((decoded) => decoded.value)).toEqual([
         'snapshot_decoder',
       ]);
-      expect(ruleFile?.rules[0]?.options.map((option) => option.value)).toEqual([
-        'no_full_log',
-      ]);
+      expect(ruleFile?.rules[0]?.options.map((option) => option.value)).toEqual(['no_full_log']);
 
       const decoderFile = stored?.files.find((file) => file.sourceType === 'decoders');
       expect(decoderFile?.decoders).toHaveLength(1);
@@ -188,15 +184,15 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         name: 'snapshot_decoder',
         tenant: 'manager-x',
       });
-      expect(
-        decoderFile?.decoders[0]?.prematches.map((prematch) => prematch.value),
-      ).toEqual(['snapshot']);
+      expect(decoderFile?.decoders[0]?.prematches.map((prematch) => prematch.value)).toEqual([
+        'snapshot',
+      ]);
       expect(decoderFile?.decoders[0]?.regexValues.map((regex) => regex.value)).toEqual([
         'src=(\\S+)',
       ]);
-      expect(
-        decoderFile?.decoders[0]?.orderFields.map((orderField) => orderField.value),
-      ).toEqual(['srcip']);
+      expect(decoderFile?.decoders[0]?.orderFields.map((orderField) => orderField.value)).toEqual([
+        'srcip',
+      ]);
 
       expect(stored?.useCases[0]).toMatchObject({
         useCaseId: 'uc_snapshot',
