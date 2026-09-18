@@ -82,8 +82,8 @@ describe('FilesystemManagerArchiveSource', () => {
         }),
       ]);
       expect(snapshot.files.map((file) => file.name)).toEqual([
-        'manager-a.tar.gz/./decoders/1000-test_decoders.xml',
-        'manager-a.tar.gz/./rules/1000-test_rules.xml',
+        'manager-a.tar.gz/decoders/1000-test_decoders.xml',
+        'manager-a.tar.gz/rules/1000-test_rules.xml',
       ]);
       expect(snapshot.errors).toEqual([]);
       expect(snapshot.fingerprint).toMatch(/^[a-f0-9]{64}$/);
@@ -99,7 +99,7 @@ describe('FilesystemManagerArchiveSource', () => {
       expect(imported.analysis.rules[0]).toMatchObject({
         id: '210001',
         tenant: 'manager-a',
-        sourceFile: 'manager-a.tar.gz/./rules/1000-test_rules.xml',
+        sourceFile: 'manager-a.tar.gz/rules/1000-test_rules.xml',
       });
       expect(imported.source.archives).toHaveLength(1);
       expect('files' in imported.source).toBe(false);
@@ -139,7 +139,7 @@ describe('FilesystemManagerArchiveSource', () => {
       const snapshot = await source.readSnapshot();
 
       expect(snapshot.files).toHaveLength(1);
-      expect(snapshot.files[0]?.name).toBe('manager-b.tgz/./rules/accepted.xml');
+      expect(snapshot.files[0]?.name).toBe('manager-b.tgz/rules/accepted.xml');
       expect(snapshot.errors).toEqual([]);
     });
   });
