@@ -112,7 +112,7 @@ export class ProblemDetailsFilter implements ExceptionFilter {
         requestId,
         details,
       };
-      reply.status(problem.status).send(problem);
+      reply.type('application/problem+json').status(problem.status).send(problem);
       return;
     }
 
@@ -142,6 +142,6 @@ export class ProblemDetailsFilter implements ExceptionFilter {
       requestId,
     };
 
-    reply.status(status).send(problem);
+    reply.type('application/problem+json').status(status).send(problem);
   }
 }
