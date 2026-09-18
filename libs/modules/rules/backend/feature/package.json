@@ -11,6 +11,7 @@
     "@mercure/rules-backend-application": "workspace:*",
     "@mercure/rules-backend-infrastructure": "workspace:*",
     "@nestjs/common": "11.2.5",
-    "@mercure/platform-backend-database": "workspace:*"
+    "@mercure/platform-backend-database": "workspace:*",
+    "@mercure/rules-backend-presentation": "workspace:*"
   }
 }
