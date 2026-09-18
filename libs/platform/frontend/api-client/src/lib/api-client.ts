@@ -6,13 +6,13 @@ const LOCAL_API_ORIGIN = 'http://localhost:3001';
 
 export interface MercureApiClientOptions {
   readonly baseUrl?: string;
-  readonly fetch?: typeof globalThis.fetch;
+  readonly fetch?: (request: Request) => Promise<Response>;
 }
 
 export function resolveApiBaseUrl(explicitBaseUrl?: string): string {
-  const configured = explicitBaseUrl ?? process.env.NEXT_PUBLIC_API_BASE_URL;
+  const configured = explicitBaseUrl ?? process.env['NEXT_PUBLIC_API_BASE_URL'];
   const candidate =
-    configured?.trim() || (process.env.NODE_ENV === 'production' ? undefined : LOCAL_API_ORIGIN);
+    configured?.trim() || (process.env['NODE_ENV'] === 'production' ? undefined : LOCAL_API_ORIGIN);
 
   if (!candidate) {
     throw new Error('NEXT_PUBLIC_API_BASE_URL is required in production.');
@@ -36,10 +36,16 @@ export function resolveApiBaseUrl(explicitBaseUrl?: string): string {
 }
 
 export function createMercureApiClient(options: MercureApiClientOptions = {}) {
-  return createClient<paths>({
-    baseUrl: resolveApiBaseUrl(options.baseUrl),
-    fetch: options.fetch,
-  });
+  const baseUrl = resolveApiBaseUrl(options.baseUrl);
+
+  if (options.fetch) {
+    return createClient<paths>({
+      baseUrl,
+      fetch: options.fetch,
+    });
+  }
+
+  return createClient<paths>({ baseUrl });
 }
 
 export type MercureApiClient = ReturnType<typeof createMercureApiClient>;
