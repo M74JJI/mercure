@@ -46,14 +46,14 @@ Golden tests must prove at least:
 Completed:
 
 1. M5 — parser/domain/application foundation;
-2. M6 — manager archive source adapter and import orchestration.
+2. M6 — manager archive source adapter and import orchestration;
+3. M7 — immutable configuration snapshots and normalized PostgreSQL persistence.
 
 Next:
 
-1. immutable configuration snapshots and normalized PostgreSQL persistence;
-2. Nest Rules query/import endpoints plus regenerated frontend contract;
-3. Rules frontend feature/data-access/UI libraries;
-4. diff and XML round-trip;
-5. use-case catalog backed by PostgreSQL;
-6. graph, field intelligence and quality scoring;
-7. only then consider any AI-assisted feature through a separate product/security decision.
+1. Nest Rules query/import endpoints plus regenerated frontend contract;
+2. Rules frontend feature/data-access/UI libraries;
+3. diff and XML round-trip;
+4. use-case catalog backed by PostgreSQL;
+5. graph, field intelligence and quality scoring;
+6. only then consider any AI-assisted feature through a separate product/security decision.
