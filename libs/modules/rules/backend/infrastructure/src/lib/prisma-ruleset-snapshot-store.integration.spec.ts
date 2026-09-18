@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createPrismaClient } from '@mercure/platform-backend-database/client';
 import type { ImportArchivedRulesetResult } from '@mercure/rules-backend-application';
 
+import { PrismaRulesetSnapshotQueryStore } from './prisma-ruleset-snapshot-query-store';
 import { PrismaRulesetSnapshotStore } from './prisma-ruleset-snapshot-store';
 import { WazuhXmlRulesetAnalyzer } from './wazuh-xml-ruleset-analyzer';
 
@@ -23,6 +24,7 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
     });
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const store = new PrismaRulesetSnapshotStore(database);
+    const queryStore = new PrismaRulesetSnapshotQueryStore(database);
 
     const analysis = await analyzer.analyze({
       files: [
@@ -33,6 +35,7 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
             '  <rule id="310001" level="12" frequency="4" timeframe="60">',
             '    <decoded_as>snapshot_decoder</decoded_as>',
             '    <description>Snapshot persistence rule</description>',
+            '    <if_sid>999999</if_sid>',
             '    <group>production,uc_snapshot,</group>',
             '    <mitre><id>T1059.001</id></mitre>',
             '    <field name="srcip" type="ip">.+</field>',
@@ -102,6 +105,70 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         loadedAt: '2026-09-18T12:01:00.000Z',
       });
       expect(saved.contentFingerprint).toMatch(/^[a-f0-9]{64}$/);
+
+      const snapshotPage = await queryStore.listSnapshots({ offset: 0, limit: 10 });
+      expect(snapshotPage.total).toBeGreaterThanOrEqual(1);
+      expect(snapshotPage.items.some((snapshot) => snapshot.id === saved.id)).toBe(true);
+
+      const queriedSnapshot = await queryStore.getSnapshot(saved.id);
+      expect(queriedSnapshot).toMatchObject({
+        id: saved.id,
+        complete: false,
+        sourceErrorCount: 1,
+        ruleCount: 1,
+        decoderCount: 1,
+      });
+      expect(queriedSnapshot && 'sourceRoot' in queriedSnapshot).toBe(false);
+
+      const queriedRules = await queryStore.listRules(saved.id, {
+        offset: 0,
+        limit: 10,
+        tenant: 'manager-x',
+        severity: 'critical',
+        ruleId: '310001',
+        jiraVisible: true,
+      });
+      expect(queriedRules.total).toBe(1);
+      expect(queriedRules.items[0]).toMatchObject({
+        id: '310001',
+        tenant: 'manager-x',
+        severity: 'critical',
+        jiraVisible: true,
+        sourceFile: 'manager-x.tar.gz/rules/1000-snapshot_rules.xml',
+      });
+      expect(queriedRules.items[0]?.dependencies).toContainEqual({
+        type: 'if_sid',
+        value: '999999',
+      });
+      expect(queriedRules.items[0] && 'rawXml' in queriedRules.items[0]).toBe(false);
+
+      const queriedDecoders = await queryStore.listDecoders(saved.id, {
+        offset: 0,
+        limit: 10,
+        tenant: 'manager-x',
+        name: 'snapshot_decoder',
+      });
+      expect(queriedDecoders.total).toBe(1);
+      expect(queriedDecoders.items[0]).toMatchObject({
+        name: 'snapshot_decoder',
+        tenant: 'manager-x',
+        sourceFile: 'manager-x.tar.gz/decoders/1000-snapshot_decoders.xml',
+      });
+      expect(queriedDecoders.items[0] && 'rawXml' in queriedDecoders.items[0]).toBe(false);
+
+      const queriedIssues = await queryStore.listIssues(saved.id, {
+        offset: 0,
+        limit: 10,
+        severity: 'warning',
+        type: 'external_or_missing_sid',
+      });
+      expect(queriedIssues.total).toBe(1);
+      expect(queriedIssues.items[0]).toMatchObject({
+        severity: 'warning',
+        type: 'external_or_missing_sid',
+        ruleId: '310001',
+        tenant: 'manager-x',
+      });
 
       const stored = await database.rulesetSnapshot.findUnique({
         where: { id: saved.id },
