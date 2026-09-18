@@ -59,6 +59,86 @@ describe('RulesDataAccess', () => {
     );
   });
 
+  it('serializes snapshot child filters through the generated contract', async () => {
+    const requests: Request[] = [];
+    const api = new RulesDataAccess({
+      baseUrl: 'https://api.mercure.test',
+      fetch: async (request) => {
+        requests.push(request);
+        return jsonResponse({
+          offset: 0,
+          limit: 10,
+          total: 0,
+          items: [],
+        });
+      },
+    });
+
+    const snapshotId = '00000000-0000-4000-8000-000000000001';
+
+    await api.listRules(snapshotId, {
+      offset: 0,
+      limit: 10,
+      tenant: 'manager-a',
+      severity: 'high',
+      status: 'production',
+      useCaseId: 'uc_admin_config',
+      ruleId: '110001',
+      jiraVisible: true,
+    });
+    await api.listDecoders(snapshotId, {
+      offset: 0,
+      limit: 10,
+      tenant: 'manager-a',
+      name: 'fortigate',
+    });
+    await api.listIssues(snapshotId, {
+      offset: 0,
+      limit: 10,
+      severity: 'warning',
+      type: 'missing_decoder',
+    });
+
+    expect(requests).toHaveLength(3);
+
+    const rulesUrl = new URL(requests[0]?.url ?? '');
+    expect(rulesUrl.pathname).toBe(
+      '/api/v1/rules/snapshots/00000000-0000-4000-8000-000000000001/rules',
+    );
+    expect(Object.fromEntries(rulesUrl.searchParams)).toMatchObject({
+      offset: '0',
+      limit: '10',
+      tenant: 'manager-a',
+      severity: 'high',
+      status: 'production',
+      useCaseId: 'uc_admin_config',
+      ruleId: '110001',
+      jiraVisible: 'true',
+    });
+
+    const decodersUrl = new URL(requests[1]?.url ?? '');
+    expect(decodersUrl.pathname).toBe(
+      '/api/v1/rules/snapshots/00000000-0000-4000-8000-000000000001/decoders',
+    );
+    expect(Object.fromEntries(decodersUrl.searchParams)).toMatchObject({
+      offset: '0',
+      limit: '10',
+      tenant: 'manager-a',
+      name: 'fortigate',
+    });
+
+    const issuesUrl = new URL(requests[2]?.url ?? '');
+    expect(issuesUrl.pathname).toBe(
+      '/api/v1/rules/snapshots/00000000-0000-4000-8000-000000000001/issues',
+    );
+    expect(Object.fromEntries(issuesUrl.searchParams)).toMatchObject({
+      offset: '0',
+      limit: '10',
+      severity: 'warning',
+      type: 'missing_decoder',
+    });
+  });
+
   it('returns null when a snapshot does not exist', async () => {
     const api = new RulesDataAccess({
       baseUrl: 'https://api.mercure.test',
