@@ -79,7 +79,7 @@ Behavioral changes require explicit tests and a documented reason rather than si
 
 ### Testing
 
-Vitest 5.0.0 is the unit/integration test baseline for M5. Version 5.0.1 is not adopted because it is still inside the workspace's seven-day dependency quarantine.
+Vitest 5.0.0 is the unit/integration test baseline for M5. Version 5.0.1 is not adopted because it is still inside the workspace's seven-day dependency quarantine. Vite 8.3.0 is pinned explicitly as Vitest's supported peer; Mercure keeps `autoInstallPeers: false` and strict peer enforcement.
 
 Golden fixtures live under `tests/fixtures/rules/` and represent Wazuh XML behavior, not implementation details.
 
