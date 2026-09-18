@@ -84,11 +84,6 @@ import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
       inject: [RULESET_SNAPSHOT_QUERY_STORE],
     },
   ],
-  exports: [
-    AnalyzeRuleset,
-    ImportArchivedRuleset,
-    PersistImportedRuleset,
-    QueryRulesetSnapshots,
-  ],
+  exports: [AnalyzeRuleset, ImportArchivedRuleset, PersistImportedRuleset, QueryRulesetSnapshots],
 })
 export class RulesBackendModule {}
