@@ -4,7 +4,8 @@
   "private": true,
   "type": "commonjs",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./client": "./src/lib/prisma-client.ts"
   },
   "dependencies": {
     "@mercure/platform-backend-config": "workspace:*",
