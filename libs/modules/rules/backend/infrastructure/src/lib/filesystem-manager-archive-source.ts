@@ -205,10 +205,7 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
 
       try {
         const archiveStat = await stat(archivePath);
-        const entries = await listXmlEntries(
-          archivePath,
-          this.options.maxFiles - totalXmlFiles,
-        );
+        const entries = await listXmlEntries(archivePath, this.options.maxFiles - totalXmlFiles);
 
         totalXmlFiles += entries.length;
         if (totalXmlFiles > this.options.maxFiles) {
@@ -291,10 +288,7 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
     };
   }
 
-  private emptySnapshot(
-    loadedAt: string,
-    errors: readonly string[],
-  ): RulesetArchiveSnapshot {
+  private emptySnapshot(loadedAt: string, errors: readonly string[]): RulesetArchiveSnapshot {
     return {
       sourceRoot: this.options.rootPath,
       configured: true,
