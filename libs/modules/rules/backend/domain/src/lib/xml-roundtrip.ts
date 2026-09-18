@@ -87,7 +87,7 @@ function normalizeSection(rule: RuleRecord): string {
 }
 
 function sanitizeCommentValue(value: string): string {
-  return value.replaceAll('--', '—').trim();
+  return value.replaceAll('--', 'â').trim();
 }
 
 function sanitizeFileName(value: string): string {
@@ -371,7 +371,8 @@ export function analyzeXmlRoundtrip(data: ParsedRuleset): XmlRoundtripAnalysis {
         (file) => (file.content.match(/Source file:/gi) ?? []).length > 1,
       ).length,
       commentedRules: commentedRules.length,
-      idRangeWarnings: sourceSections.filter((section) => section.idRangeStatus === 'warning').length,
+      idRangeWarnings: sourceSections.filter((section) => section.idRangeStatus === 'warning')
+        .length,
       orphanGroups: groupFlows.filter((flow) => flow.status === 'orphan_producer').length,
       missingGroupProducers: groupFlows.filter((flow) => flow.status === 'missing_producer').length,
       missingUseCaseSuggestions: missingUseCaseSuggestions.length,
