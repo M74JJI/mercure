@@ -13,6 +13,7 @@ export default [
       '**/.nx/**',
       '**/node_modules/**',
       '**/next-env.d.ts',
+      '**/src/generated/**',
     ],
   },
   ...nx.configs['flat/base'],

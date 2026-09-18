@@ -10,6 +10,7 @@ coverage/
 .next/
 out/
 *.tsbuildinfo
+**/src/generated/prisma/
 
 # Runtime configuration and secrets
 .env

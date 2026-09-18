@@ -37,6 +37,8 @@ function statusTitle(status: number): string {
       return 'Unprocessable Entity';
     case HttpStatus.TOO_MANY_REQUESTS:
       return 'Too Many Requests';
+    case HttpStatus.SERVICE_UNAVAILABLE:
+      return 'Service Unavailable';
     default:
       return status >= 500 ? 'Internal Server Error' : 'Request Failed';
   }
@@ -58,6 +60,8 @@ function statusCode(status: number): string {
       return 'UNPROCESSABLE_ENTITY';
     case HttpStatus.TOO_MANY_REQUESTS:
       return 'TOO_MANY_REQUESTS';
+    case HttpStatus.SERVICE_UNAVAILABLE:
+      return 'SERVICE_UNAVAILABLE';
     default:
       return status >= 500 ? 'INTERNAL_ERROR' : 'REQUEST_FAILED';
   }

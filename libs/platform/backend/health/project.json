@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "name": "platform-backend-health",
+  "projectType": "library",
+  "sourceRoot": "libs/platform/backend/health/src",
+  "tags": ["scope:platform", "side:backend", "type:application"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/platform/backend/health/tsconfig.lib.json"
+      }
+    }
+  }
+}

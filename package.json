@@ -16,14 +16,15 @@
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "nx run-many -t lint",
-    "typecheck": "nx run-many -t typecheck",
+    "typecheck": "pnpm db:generate && nx run-many -t typecheck",
     "test": "nx run-many -t test",
-    "build": "nx run-many -t build",
+    "build": "pnpm db:generate && nx run-many -t build",
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
     "db:format": "prisma format",
     "db:migrate:dev": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy"
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:status": "prisma migrate status"
   },
   "dependencies": {
     "@fastify/cors": "11.3.0",
@@ -63,6 +64,7 @@
     "@types/pg": "8.23.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "dotenv": "17.4.2",
     "esbuild": "0.28.2",
     "eslint": "10.10.0",
     "eslint-plugin-react-hooks": "7.1.1",
