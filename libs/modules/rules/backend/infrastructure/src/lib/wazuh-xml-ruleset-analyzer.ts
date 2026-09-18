@@ -312,7 +312,8 @@ function validateRuleset(
         severity: 'warning',
         type: 'unknown_use_case_registry',
         title: `Rule ${rule.id} uses unknown use case ${rule.useCaseId}`,
-        detail: 'The use_case info tag resolves to an ID that is not registered in the use-case catalog.',
+        detail:
+          'The use_case info tag resolves to an ID that is not registered in the use-case catalog.',
         ruleId: rule.id,
         fileName: rule.sourceFile,
         tenant: rule.tenant,
@@ -361,7 +362,8 @@ function validateRuleset(
           severity: 'warning',
           type: 'external_or_missing_sid',
           title: `Rule ${rule.id} references SID ${dependency.value}`,
-          detail: 'The SID was not found in uploaded rule files. It may be a stock Wazuh rule or a missing file.',
+          detail:
+            'The SID was not found in uploaded rule files. It may be a stock Wazuh rule or a missing file.',
           ruleId: rule.id,
           tenant: rule.tenant,
         });

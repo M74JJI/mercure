@@ -4,11 +4,7 @@ export type UseCaseConfidence = 'confirmed' | 'inferred' | 'unassigned';
 export type ValidationSeverity = 'error' | 'warning' | 'info';
 
 export type RuleDependencyType =
-  | 'if_sid'
-  | 'if_group'
-  | 'if_matched_sid'
-  | 'if_matched_group'
-  | 'decoded_as';
+  'if_sid' | 'if_group' | 'if_matched_sid' | 'if_matched_group' | 'decoded_as';
 
 export interface RulesetSourceFile {
   readonly name: string;
