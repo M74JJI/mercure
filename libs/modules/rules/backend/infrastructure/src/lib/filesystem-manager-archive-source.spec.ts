@@ -50,11 +50,9 @@ describe('FilesystemManagerArchiveSource', () => {
       );
       await writeFile(
         path.join(sourceRoot, 'decoders', '1000-test_decoders.xml'),
-        [
-          '<decoder name="archive_decoder">',
-          '  <prematch>archive</prematch>',
-          '</decoder>',
-        ].join('\n'),
+        ['<decoder name="archive_decoder">', '  <prematch>archive</prematch>', '</decoder>'].join(
+          '\n',
+        ),
       );
       await writeFile(path.join(sourceRoot, 'other', 'ignore.txt'), 'ignored');
 
