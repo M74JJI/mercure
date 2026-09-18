@@ -28,13 +28,7 @@ function formatDate(value: string): string {
   return dateFormatter.format(new Date(value));
 }
 
-function Metric({
-  label,
-  value,
-}: {
-  readonly label: string;
-  readonly value: string | number;
-}) {
+function Metric({ label, value }: { readonly label: string; readonly value: string | number }) {
   return (
     <Panel tone="muted" className={styles.metric}>
       <strong>{value}</strong>

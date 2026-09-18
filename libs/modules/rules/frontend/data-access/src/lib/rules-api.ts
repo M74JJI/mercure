@@ -57,11 +57,7 @@ async function safelyRequest<T>(operation: string, request: () => Promise<T>): P
   }
 }
 
-function requireData<T>(
-  operation: string,
-  data: T | undefined,
-  response: Response,
-): T {
+function requireData<T>(operation: string, data: T | undefined, response: Response): T {
   if (data !== undefined) {
     return data;
   }

@@ -14,9 +14,7 @@ interface RulesSnapshotPageProps {
   }>;
 }
 
-export default async function RulesSnapshotPage({
-  params,
-}: RulesSnapshotPageProps) {
+export default async function RulesSnapshotPage({ params }: RulesSnapshotPageProps) {
   const { snapshotId } = await params;
 
   return <RulesSnapshotFeature snapshotId={snapshotId} />;

@@ -65,9 +65,7 @@ describe('RulesDataAccess', () => {
       fetch: async () => new Response(null, { status: 404 }),
     });
 
-    await expect(
-      api.getSnapshot('00000000-0000-4000-8000-000000000099'),
-    ).resolves.toBeNull();
+    await expect(api.getSnapshot('00000000-0000-4000-8000-000000000099')).resolves.toBeNull();
   });
 
   it('normalizes network failures', async () => {

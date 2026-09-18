@@ -1,7 +1,4 @@
-import {
-  RulesDataAccess,
-  RulesFrontendApiError,
-} from '@mercure/rules-frontend-data-access';
+import { RulesDataAccess, RulesFrontendApiError } from '@mercure/rules-frontend-data-access';
 import {
   RulesSnapshotDetail,
   RulesSnapshotNotFoundState,
@@ -12,9 +9,7 @@ export interface RulesSnapshotFeatureProps {
   readonly snapshotId: string;
 }
 
-export async function RulesSnapshotFeature({
-  snapshotId,
-}: RulesSnapshotFeatureProps) {
+export async function RulesSnapshotFeature({ snapshotId }: RulesSnapshotFeatureProps) {
   const api = new RulesDataAccess();
 
   try {

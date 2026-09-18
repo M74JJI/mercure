@@ -38,11 +38,7 @@ export function RulesSnapshotHistory({ snapshots, total }: RulesSnapshotHistoryP
       ) : (
         <section className={styles.snapshotList} aria-label="Rules snapshot history">
           {snapshots.map((snapshot) => (
-            <a
-              className={styles.snapshotLink}
-              href={`/rules/${snapshot.id}`}
-              key={snapshot.id}
-            >
+            <a className={styles.snapshotLink} href={`/rules/${snapshot.id}`} key={snapshot.id}>
               <Panel tone="raised" className={styles.snapshotCard}>
                 <div className={styles.snapshotHeading}>
                   <div>
