@@ -20,12 +20,12 @@ interface ReadinessResponse {
 
 class LivenessResponseDocument {
   @ApiProperty({ enum: ['up'] })
-  readonly status: 'up' = 'up';
+  readonly status = 'up' as const;
 }
 
 class ReadinessResponseDocument {
   @ApiProperty({ enum: ['ready'] })
-  readonly status: 'ready' = 'ready';
+  readonly status = 'ready' as const;
 
   @ApiProperty({
     type: 'object',
