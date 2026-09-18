@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "name": "rules-frontend-ui",
+  "projectType": "library",
+  "sourceRoot": "libs/modules/rules/frontend/ui/src",
+  "tags": ["scope:rules", "side:frontend", "type:ui"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/modules/rules/frontend/ui/tsconfig.lib.json"
+      }
+    }
+  }
+}

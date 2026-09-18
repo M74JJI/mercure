@@ -48,12 +48,12 @@ Completed:
 1. M5 — parser/domain/application foundation;
 2. M6 — manager archive source adapter and import orchestration;
 3. M7 — immutable configuration snapshots and normalized PostgreSQL persistence;
-4. M8 — Nest Rules snapshot import/query endpoints and regenerated frontend API contract.
+4. M8 — Nest Rules snapshot import/query endpoints and regenerated frontend API contract;
+5. M9 — Rules frontend data-access, UI, feature composition, and read-only routes.
 
 Next:
 
-1. Rules frontend feature/data-access/UI libraries;
-2. diff and XML round-trip;
-3. use-case catalog backed by PostgreSQL;
-4. graph, field intelligence and quality scoring;
-5. only then consider any AI-assisted feature through a separate product/security decision.
+1. diff and XML round-trip;
+2. use-case catalog backed by PostgreSQL;
+3. graph, field intelligence and quality scoring;
+4. only then consider any AI-assisted feature through a separate product/security decision.

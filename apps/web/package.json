@@ -6,6 +6,7 @@
   "dependencies": {
     "@mercure/platform-frontend-shell": "workspace:*",
     "next": "16.3.3",
-    "react": "19.3.0"
+    "react": "19.3.0",
+    "@mercure/rules-frontend-feature": "workspace:*"
   }
 }

@@ -1,0 +1,14 @@
+{
+  "name": "@mercure/rules-frontend-feature",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mercure/rules-frontend-data-access": "workspace:*",
+    "@mercure/rules-frontend-ui": "workspace:*",
+    "react": "19.3.0"
+  }
+}

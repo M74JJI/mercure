@@ -24,6 +24,14 @@ function NavigationIcon({ icon }: { readonly icon: PlatformNavigationIcon }) {
     );
   }
 
+  if (icon === 'rules') {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 24 24" className={styles.navIcon}>
+        <path d="M6.25 3.5h11.5A2.25 2.25 0 0 1 20 5.75v12.5a2.25 2.25 0 0 1-2.25 2.25H6.25A2.25 2.25 0 0 1 4 18.25V5.75A2.25 2.25 0 0 1 6.25 3.5m1.5 4a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5zm0 4a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5zm0 4a.75.75 0 0 0 0 1.5h5.5a.75.75 0 0 0 0-1.5z" />
+      </svg>
+    );
+  }
+
   return null;
 }
 
