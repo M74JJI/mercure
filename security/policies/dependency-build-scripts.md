@@ -30,6 +30,18 @@ An explicit `false` entry records a reviewed dependency whose lifecycle script i
 - Script: `postinstall` invokes `node postinstall.js`, which uses the package's native-binding preparation path so the platform-specific resolver binding is available at runtime.
 - Decision: approved only for the exact resolved version. The install script is required for reliable native binding resolution in package-manager environments that block dependency lifecycle scripts by default; changing this version requires a fresh source/release and lockfile review.
 
+### `esbuild@0.28.2`
+
+- Purpose: production bundler for the NestJS API through the Nx esbuild executor.
+- Script: `postinstall` prepares and verifies the platform-specific esbuild executable.
+- Decision: approved only for the exact pinned version because esbuild is an intentional production build dependency. Upgrades require renewed review before the allowlist version changes.
+
+## Explicitly denied builds
+
+### `@scarf/scarf@1.4.0`
+
+- Purpose: transitive package whose install lifecycle can report dependency-usage analytics.
+- Decision: denied. Mercure does not require install-time analytics for build or runtime correctness, so the lifecycle script has no justified execution path in CI or developer installs.
 
 ## Review procedure
 
