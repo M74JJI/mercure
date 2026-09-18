@@ -1,5 +1,8 @@
-import type { ImportArchivedRulesetRequest, ImportArchivedRulesetResult } from './analyze-ruleset';
-import { ImportArchivedRuleset } from './analyze-ruleset';
+import type {
+  ImportArchivedRuleset,
+  ImportArchivedRulesetRequest,
+  ImportArchivedRulesetResult,
+} from './analyze-ruleset';
 
 export const RULESET_SNAPSHOT_STORE = Symbol('mercure.rules.ruleset-snapshot-store');
 
