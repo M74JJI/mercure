@@ -3,11 +3,7 @@
   "name": "rules-backend-presentation",
   "projectType": "library",
   "sourceRoot": "libs/modules/rules/backend/presentation/src",
-  "tags": [
-    "scope:rules",
-    "side:backend",
-    "type:presentation"
-  ],
+  "tags": ["scope:rules", "side:backend", "type:presentation"],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
