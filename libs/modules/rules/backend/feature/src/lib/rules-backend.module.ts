@@ -4,19 +4,24 @@ import { PlatformConfig } from '@mercure/platform-backend-config';
 import { PlatformDatabaseModule, PrismaService } from '@mercure/platform-backend-database';
 import {
   AnalyzeRuleset,
+  AnalyzeRulesetSnapshotRoundtrip,
+  CompareRulesetSnapshots,
   ImportArchivedRuleset,
   PersistImportedRuleset,
   QueryRulesetSnapshots,
   RULESET_ANALYZER,
   RULESET_ARCHIVE_SOURCE,
+  RULESET_SNAPSHOT_ANALYSIS_SOURCE,
   RULESET_SNAPSHOT_QUERY_STORE,
   RULESET_SNAPSHOT_STORE,
   type RulesetArchiveSource,
+  type RulesetSnapshotAnalysisSource,
   type RulesetSnapshotQueryStore,
   type RulesetSnapshotStore,
 } from '@mercure/rules-backend-application';
 import {
   FilesystemManagerArchiveSource,
+  PrismaRulesetSnapshotAnalysisSource,
   PrismaRulesetSnapshotQueryStore,
   PrismaRulesetSnapshotStore,
   WazuhXmlRulesetAnalyzer,
@@ -83,7 +88,34 @@ import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
       useFactory: (store: RulesetSnapshotQueryStore) => new QueryRulesetSnapshots(store),
       inject: [RULESET_SNAPSHOT_QUERY_STORE],
     },
+    {
+      provide: PrismaRulesetSnapshotAnalysisSource,
+      useFactory: (database: PrismaService) => new PrismaRulesetSnapshotAnalysisSource(database),
+      inject: [PrismaService],
+    },
+    {
+      provide: RULESET_SNAPSHOT_ANALYSIS_SOURCE,
+      useExisting: PrismaRulesetSnapshotAnalysisSource,
+    },
+    {
+      provide: CompareRulesetSnapshots,
+      useFactory: (source: RulesetSnapshotAnalysisSource) => new CompareRulesetSnapshots(source),
+      inject: [RULESET_SNAPSHOT_ANALYSIS_SOURCE],
+    },
+    {
+      provide: AnalyzeRulesetSnapshotRoundtrip,
+      useFactory: (source: RulesetSnapshotAnalysisSource) =>
+        new AnalyzeRulesetSnapshotRoundtrip(source),
+      inject: [RULESET_SNAPSHOT_ANALYSIS_SOURCE],
+    },
   ],
-  exports: [AnalyzeRuleset, ImportArchivedRuleset, PersistImportedRuleset, QueryRulesetSnapshots],
+  exports: [
+    AnalyzeRuleset,
+    ImportArchivedRuleset,
+    PersistImportedRuleset,
+    QueryRulesetSnapshots,
+    CompareRulesetSnapshots,
+    AnalyzeRulesetSnapshotRoundtrip,
+  ],
 })
 export class RulesBackendModule {}
