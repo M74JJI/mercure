@@ -1,7 +1,4 @@
-import type {
-  ImportArchivedRulesetRequest,
-  ImportArchivedRulesetResult,
-} from './analyze-ruleset';
+import type { ImportArchivedRulesetRequest, ImportArchivedRulesetResult } from './analyze-ruleset';
 import { ImportArchivedRuleset } from './analyze-ruleset';
 
 export const RULESET_SNAPSHOT_STORE = Symbol('mercure.rules.ruleset-snapshot-store');
@@ -30,9 +27,7 @@ export class PersistImportedRuleset {
     private readonly store: RulesetSnapshotStore,
   ) {}
 
-  async execute(
-    request: ImportArchivedRulesetRequest = {},
-  ): Promise<PersistImportedRulesetResult> {
+  async execute(request: ImportArchivedRulesetRequest = {}): Promise<PersistImportedRulesetResult> {
     const imported = await this.importer.execute(request);
     if (imported.analysis.files.length === 0) {
       throw new Error('Cannot persist a Rules snapshot without imported source files.');
