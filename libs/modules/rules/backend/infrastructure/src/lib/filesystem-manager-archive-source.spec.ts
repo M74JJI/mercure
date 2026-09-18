@@ -6,14 +6,19 @@ import { promisify } from 'node:util';
 
 import { describe, expect, it } from 'vitest';
 
-import { AnalyzeRuleset, ImportArchivedRuleset } from '@mercure/rules-backend-application';
+import {
+  AnalyzeRuleset,
+  ImportArchivedRuleset,
+} from '@mercure/rules-backend-application';
 
 import { FilesystemManagerArchiveSource } from './filesystem-manager-archive-source';
 import { WazuhXmlRulesetAnalyzer } from './wazuh-xml-ruleset-analyzer';
 
 const execFileAsync = promisify(execFile);
 
-async function withTempDirectory<T>(run: (root: string) => Promise<T>): Promise<T> {
+async function withTempDirectory<T>(
+  run: (root: string) => Promise<T>,
+): Promise<T> {
   const root = await mkdtemp(path.join(os.tmpdir(), 'mercure-rules-archive-'));
 
   try {
@@ -106,92 +111,108 @@ describe('FilesystemManagerArchiveSource', () => {
     });
   });
 
-  it('does not extract archive members outside accepted rules and decoder XML paths', async () => {
-    await withTempDirectory(async (root) => {
-      const archiveRoot = path.join(root, 'archives');
-      const sourceRoot = path.join(root, 'source');
-      await mkdir(archiveRoot, { recursive: true });
-      await mkdir(path.join(sourceRoot, 'rules', 'nested'), { recursive: true });
-      await mkdir(path.join(sourceRoot, 'misc'), { recursive: true });
+  it(
+    'does not extract archive members outside accepted rules and decoder XML paths',
+    async () => {
+      await withTempDirectory(async (root) => {
+        const archiveRoot = path.join(root, 'archives');
+        const sourceRoot = path.join(root, 'source');
+        await mkdir(archiveRoot, { recursive: true });
+        await mkdir(path.join(sourceRoot, 'rules', 'nested'), {
+          recursive: true,
+        });
+        await mkdir(path.join(sourceRoot, 'misc'), { recursive: true });
 
-      await writeFile(
-        path.join(sourceRoot, 'rules', 'accepted.xml'),
-        '<rule id="220001" level="1"><description>Accepted</description></rule>',
-      );
-      await writeFile(
-        path.join(sourceRoot, 'rules', 'nested', 'rejected.xml'),
-        '<rule id="220002" level="1"><description>Nested</description></rule>',
-      );
-      await writeFile(
-        path.join(sourceRoot, 'misc', 'rejected.xml'),
-        '<rule id="220003" level="1"><description>Misc</description></rule>',
-      );
+        await writeFile(
+          path.join(sourceRoot, 'rules', 'accepted.xml'),
+          '<rule id="220001" level="1"><description>Accepted</description></rule>',
+        );
+        await writeFile(
+          path.join(sourceRoot, 'rules', 'nested', 'rejected.xml'),
+          '<rule id="220002" level="1"><description>Nested</description></rule>',
+        );
+        await writeFile(
+          path.join(sourceRoot, 'misc', 'rejected.xml'),
+          '<rule id="220003" level="1"><description>Misc</description></rule>',
+        );
 
-      await createArchive(path.join(archiveRoot, 'manager-b.tgz'), sourceRoot);
+        await createArchive(path.join(archiveRoot, 'manager-b.tgz'), sourceRoot);
 
-      const source = new FilesystemManagerArchiveSource({
-        rootPath: archiveRoot,
-        maxFiles: 10,
-        maxEntryBytes: 1024 * 1024,
-        maxTotalBytes: 2 * 1024 * 1024,
+        const source = new FilesystemManagerArchiveSource({
+          rootPath: archiveRoot,
+          maxFiles: 10,
+          maxEntryBytes: 1024 * 1024,
+          maxTotalBytes: 2 * 1024 * 1024,
+        });
+
+        const snapshot = await source.readSnapshot();
+
+        expect(snapshot.files).toHaveLength(1);
+        expect(snapshot.files[0]?.name).toBe(
+          'manager-b.tgz/rules/accepted.xml',
+        );
+        expect(snapshot.errors).toEqual([]);
       });
+    },
+  );
 
-      const snapshot = await source.readSnapshot();
+  it(
+    'enforces per-entry and total XML byte limits without extracting to disk',
+    async () => {
+      await withTempDirectory(async (root) => {
+        const archiveRoot = path.join(root, 'archives');
+        const sourceRoot = path.join(root, 'source');
+        await mkdir(archiveRoot, { recursive: true });
+        await mkdir(path.join(sourceRoot, 'rules'), { recursive: true });
 
-      expect(snapshot.files).toHaveLength(1);
-      expect(snapshot.files[0]?.name).toBe('manager-b.tgz/rules/accepted.xml');
-      expect(snapshot.errors).toEqual([]);
-    });
-  });
+        await writeFile(
+          path.join(sourceRoot, 'rules', 'large.xml'),
+          `<rule id="230001" level="1"><description>${'x'.repeat(4096)}</description></rule>`,
+        );
+        await createArchive(
+          path.join(archiveRoot, 'manager-c.tar.gz'),
+          sourceRoot,
+        );
 
-  it('enforces per-entry and total XML byte limits without extracting to disk', async () => {
-    await withTempDirectory(async (root) => {
-      const archiveRoot = path.join(root, 'archives');
-      const sourceRoot = path.join(root, 'source');
-      await mkdir(archiveRoot, { recursive: true });
-      await mkdir(path.join(sourceRoot, 'rules'), { recursive: true });
+        const source = new FilesystemManagerArchiveSource({
+          rootPath: archiveRoot,
+          maxFiles: 10,
+          maxEntryBytes: 1024,
+          maxTotalBytes: 2048,
+        });
 
-      await writeFile(
-        path.join(sourceRoot, 'rules', 'large.xml'),
-        `<rule id="230001" level="1"><description>${'x'.repeat(4096)}</description></rule>`,
-      );
-      await createArchive(path.join(archiveRoot, 'manager-c.tar.gz'), sourceRoot);
+        const snapshot = await source.readSnapshot();
 
-      const source = new FilesystemManagerArchiveSource({
-        rootPath: archiveRoot,
-        maxFiles: 10,
-        maxEntryBytes: 1024,
-        maxTotalBytes: 2048,
+        expect(snapshot.files).toEqual([]);
+        expect(snapshot.errors).toHaveLength(1);
+        expect(snapshot.errors[0]).toContain('1024-byte limit');
       });
+    },
+  );
 
-      const snapshot = await source.readSnapshot();
+  it(
+    'returns a non-fatal empty snapshot when the configured root is unavailable',
+    async () => {
+      await withTempDirectory(async (root) => {
+        const missingRoot = path.join(root, 'missing');
+        const source = new FilesystemManagerArchiveSource({
+          rootPath: missingRoot,
+          maxFiles: 10,
+          maxEntryBytes: 1024 * 1024,
+          maxTotalBytes: 2 * 1024 * 1024,
+        });
 
-      expect(snapshot.files).toEqual([]);
-      expect(snapshot.errors).toHaveLength(1);
-      expect(snapshot.errors[0]).toContain('1024-byte limit');
-    });
-  });
+        const snapshot = await source.readSnapshot();
 
-  it('returns a non-fatal empty snapshot when the configured root is unavailable', async () => {
-    await withTempDirectory(async (root) => {
-      const missingRoot = path.join(root, 'missing');
-      const source = new FilesystemManagerArchiveSource({
-        rootPath: missingRoot,
-        maxFiles: 10,
-        maxEntryBytes: 1024 * 1024,
-        maxTotalBytes: 2 * 1024 * 1024,
+        expect(snapshot).toMatchObject({
+          sourceRoot: missingRoot,
+          configured: true,
+          archives: [],
+          files: [],
+          fingerprint: '',
+        });
+        expect(snapshot.errors).toHaveLength(1);
       });
-
-      const snapshot = await source.readSnapshot();
-
-      expect(snapshot).toMatchObject({
-        sourceRoot: missingRoot,
-        configured: true,
-        archives: [],
-        files: [],
-        fingerprint: '',
-      });
-      expect(snapshot.errors).toHaveLength(1);
-    });
-  });
+    },
+  );
 });
