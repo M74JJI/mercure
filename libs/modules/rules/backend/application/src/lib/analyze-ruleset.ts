@@ -71,7 +71,15 @@ export class ImportArchivedRuleset {
       ...(request.useCases ? { useCases: request.useCases } : {}),
     });
 
-    const { files: _files, ...source } = snapshot;
+    const source: Omit<RulesetArchiveSnapshot, 'files'> = {
+      sourceRoot: snapshot.sourceRoot,
+      configured: snapshot.configured,
+      archives: snapshot.archives,
+      fingerprint: snapshot.fingerprint,
+      loadedAt: snapshot.loadedAt,
+      errors: snapshot.errors,
+    };
+
     return { source, analysis };
   }
 }
