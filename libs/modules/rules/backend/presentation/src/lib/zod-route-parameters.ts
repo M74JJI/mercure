@@ -3,10 +3,7 @@ import 'reflect-metadata';
 import { Param, Query } from '@nestjs/common';
 import type { ZodDto } from 'nestjs-zod';
 
-function withZodDesignType(
-  decorator: ParameterDecorator,
-  dto: ZodDto,
-): ParameterDecorator {
+function withZodDesignType(decorator: ParameterDecorator, dto: ZodDto): ParameterDecorator {
   return (target, propertyKey, parameterIndex) => {
     if (propertyKey === undefined) {
       throw new Error('Zod route parameters can only decorate controller methods.');
@@ -16,8 +13,7 @@ function withZodDesignType(
 
     const current =
       (Reflect.getOwnMetadata('design:paramtypes', target, propertyKey) as
-        | readonly unknown[]
-        | undefined) ?? [];
+        readonly unknown[] | undefined) ?? [];
     const paramTypes = [...current];
     paramTypes[parameterIndex] = dto;
     Reflect.defineMetadata('design:paramtypes', paramTypes, target, propertyKey);
