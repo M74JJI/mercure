@@ -36,7 +36,19 @@ An explicit `false` entry records a reviewed dependency whose lifecycle script i
 - Script: `postinstall` prepares and verifies the platform-specific esbuild executable.
 - Decision: approved only for the exact pinned version because esbuild is an intentional production build dependency. Upgrades require renewed review before the allowlist version changes.
 
+### `@prisma/engines@7.10.0`
+
+- Purpose: Prisma schema-engine tooling used by Prisma Migrate and related CLI operations.
+- Script: `postinstall` downloads the platform-specific Prisma engines selected by Prisma's pinned engines-version package.
+- Decision: approved only for the exact Prisma 7.10.0 engine package because migration/schema tooling requires the engine artifact. Upgrades require renewed review.
+
 ## Explicitly denied builds
+
+### `prisma@7.10.0`
+
+- Purpose: Prisma CLI.
+- Script: `preinstall` runs Prisma's packaged environment/runtime preflight.
+- Decision: denied. Mercure already enforces its supported Node.js range through `engineStrict`, the pinned runtime, and CI. The CLI itself remains available without granting this redundant install-time hook.
 
 ### `@scarf/scarf@1.4.0`
 
