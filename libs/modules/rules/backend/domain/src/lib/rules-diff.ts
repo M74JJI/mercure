@@ -350,7 +350,10 @@ export function diffRulesets(before: ParsedRuleset, after: ParsedRuleset): Rules
         item.changes?.includes('MITRE mapping changed'),
       ).length,
       useCaseChanged: rules.changed.filter((item) =>
-        item.changes?.some((change) => change.startsWith('use case ')),
+        item.changes?.some(
+          (change) =>
+            change.startsWith('use case ') && !change.startsWith('use case confidence '),
+        ),
       ).length,
     },
     rules,
