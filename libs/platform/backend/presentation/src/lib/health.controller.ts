@@ -15,9 +15,7 @@ interface ReadinessResponse {
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
-  constructor(
-    @Inject(READINESS_SERVICE) private readonly readinessService: ReadinessService,
-  ) {}
+  constructor(@Inject(READINESS_SERVICE) private readonly readinessService: ReadinessService) {}
 
   @Get('live')
   @ApiOperation({ summary: 'Process liveness probe' })
