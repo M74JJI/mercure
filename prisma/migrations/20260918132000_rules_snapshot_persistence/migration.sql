@@ -5,6 +5,8 @@ CREATE TABLE "ruleset_snapshots" (
     "content_fingerprint" CHAR(64) NOT NULL,
     "loaded_at" TIMESTAMPTZ(6) NOT NULL,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "complete" BOOLEAN NOT NULL DEFAULT TRUE,
+    "source_error_count" INTEGER NOT NULL,
     "archive_count" INTEGER NOT NULL,
     "file_count" INTEGER NOT NULL,
     "rule_count" INTEGER NOT NULL,
@@ -19,6 +21,14 @@ CREATE TABLE "ruleset_snapshots" (
     "broken_dependency_count" INTEGER NOT NULL,
 
     CONSTRAINT "ruleset_snapshots_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "ruleset_snapshot_source_errors" (
+    "snapshot_id" UUID NOT NULL,
+    "position" INTEGER NOT NULL,
+    "detail" TEXT NOT NULL,
+
+    CONSTRAINT "ruleset_snapshot_source_errors_pkey" PRIMARY KEY ("snapshot_id", "position")
 );
 
 CREATE TABLE "ruleset_snapshot_archives" (
@@ -239,6 +249,10 @@ CREATE INDEX "ruleset_snapshot_issues_snapshot_id_type_idx"
 
 CREATE UNIQUE INDEX "ruleset_snapshot_use_cases_snapshot_id_use_case_id_key"
     ON "ruleset_snapshot_use_cases"("snapshot_id", "use_case_id");
+
+ALTER TABLE "ruleset_snapshot_source_errors"
+    ADD CONSTRAINT "ruleset_snapshot_source_errors_snapshot_id_fkey"
+    FOREIGN KEY ("snapshot_id") REFERENCES "ruleset_snapshots"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE "ruleset_snapshot_archives"
     ADD CONSTRAINT "ruleset_snapshot_archives_snapshot_id_fkey"
