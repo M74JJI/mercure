@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { PrismaService } from '@mercure/platform-backend-database';
+import { createPrismaClient } from '@mercure/platform-backend-database/client';
 import type { ImportArchivedRulesetResult } from '@mercure/rules-backend-application';
 
 import { PrismaRulesetSnapshotStore } from './prisma-ruleset-snapshot-store';
@@ -15,15 +15,12 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
       throw new Error('DATABASE_URL is required for Rules persistence integration tests.');
     }
 
-    const config = {
-      databaseUrl,
-      databasePoolMax: 5,
-      databaseConnectionTimeoutMs: 2_000,
-      databaseIdleTimeoutMs: 5_000,
-      databaseHealthTimeoutMs: 1_500,
-    } as unknown as ConstructorParameters<typeof PrismaService>[0];
-
-    const database = new PrismaService(config);
+    const database = createPrismaClient({
+      connectionString: databaseUrl,
+      max: 5,
+      connectionTimeoutMillis: 2_000,
+      idleTimeoutMillis: 5_000,
+    });
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const store = new PrismaRulesetSnapshotStore(database);
 
@@ -214,7 +211,7 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         });
         expect(remainingFiles).toBe(0);
       }
-      await database.onModuleDestroy();
+      await database.$disconnect();
     }
   });
 });
