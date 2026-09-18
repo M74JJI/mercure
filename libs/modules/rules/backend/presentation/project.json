@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "name": "rules-backend-presentation",
+  "projectType": "library",
+  "sourceRoot": "libs/modules/rules/backend/presentation/src",
+  "tags": ["scope:rules", "side:backend", "type:presentation"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/modules/rules/backend/presentation/tsconfig.lib.json"
+      }
+    }
+  }
+}

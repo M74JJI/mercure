@@ -24,6 +24,13 @@ export interface PersistImportedRulesetResult extends ImportArchivedRulesetResul
   readonly snapshot: RulesetSnapshotIdentity;
 }
 
+export class RulesetImportUnavailableError extends Error {
+  constructor() {
+    super('No Rules source files are currently available to import.');
+    this.name = 'RulesetImportUnavailableError';
+  }
+}
+
 export class PersistImportedRuleset {
   constructor(
     private readonly importer: ImportArchivedRuleset,
@@ -33,7 +40,7 @@ export class PersistImportedRuleset {
   async execute(request: ImportArchivedRulesetRequest = {}): Promise<PersistImportedRulesetResult> {
     const imported = await this.importer.execute(request);
     if (imported.analysis.files.length === 0) {
-      throw new Error('Cannot persist a Rules snapshot without imported source files.');
+      throw new RulesetImportUnavailableError();
     }
 
     const snapshot = await this.store.persist(imported);
