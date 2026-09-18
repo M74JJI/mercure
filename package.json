@@ -24,7 +24,9 @@
     "db:format": "prisma format",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
-    "db:status": "prisma migrate status"
+    "db:status": "prisma migrate status",
+    "api:client:generate": "pnpm db:generate && node tools/openapi/generate-client.mjs",
+    "api:client:check": "pnpm db:generate && node tools/openapi/generate-client.mjs --check"
   },
   "dependencies": {
     "@fastify/cors": "11.3.0",
@@ -41,6 +43,7 @@
     "nestjs-pino": "5.1.0",
     "nestjs-zod": "5.5.0",
     "next": "16.3.3",
+    "openapi-fetch": "0.17.0",
     "pg": "8.23.0",
     "pino": "10.3.1",
     "pino-http": "11.0.0",

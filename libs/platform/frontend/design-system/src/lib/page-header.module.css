@@ -1,0 +1,46 @@
+.root {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mc-space-6);
+}
+
+.copy {
+  max-width: 52rem;
+}
+
+.eyebrow {
+  margin: 0 0 var(--mc-space-2);
+  color: var(--mc-text-accent);
+  font-size: var(--mc-font-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--mc-text-primary);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-weight: 720;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+}
+
+.description {
+  max-width: 46rem;
+  margin: var(--mc-space-4) 0 0;
+  color: var(--mc-text-secondary);
+  font-size: var(--mc-font-md);
+  line-height: 1.7;
+}
+
+.actions {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 48rem) {
+  .root {
+    flex-direction: column;
+  }
+}

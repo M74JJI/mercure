@@ -1,0 +1,20 @@
+.panel {
+  border: 1px solid var(--mc-border-subtle);
+  border-radius: var(--mc-radius-xl);
+  background: var(--mc-surface-primary);
+  box-shadow: var(--mc-shadow-sm);
+}
+
+.default {
+  background: var(--mc-surface-primary);
+}
+
+.muted {
+  background: var(--mc-surface-muted);
+}
+
+.raised {
+  border-color: var(--mc-border-strong);
+  background: var(--mc-surface-raised);
+  box-shadow: var(--mc-shadow-lg);
+}

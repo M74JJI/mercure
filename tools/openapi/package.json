@@ -1,0 +1,11 @@
+{
+  "name": "@mercure/openapi-tooling",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "openapi-typescript": "7.13.0",
+    "prettier": "3.9.0",
+    "typescript": "5.9.3"
+  }
+}

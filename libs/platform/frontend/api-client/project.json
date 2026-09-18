@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "name": "platform-frontend-api-client",
+  "projectType": "library",
+  "sourceRoot": "libs/platform/frontend/api-client/src",
+  "tags": ["scope:platform", "side:frontend", "type:data-access"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/platform/frontend/api-client/tsconfig.lib.json"
+      }
+    }
+  }
+}

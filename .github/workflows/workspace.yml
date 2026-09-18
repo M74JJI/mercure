@@ -46,6 +46,9 @@ jobs:
       - name: Lint
         run: pnpm exec nx run-many -t lint --verbose
 
+      - name: Check generated API client contract
+        run: pnpm api:client:check
+
       - name: Typecheck
         run: pnpm typecheck
 

@@ -1,0 +1,116 @@
+.viewport {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: var(--mc-space-6);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(50, 197, 255, 0.08), transparent 28rem),
+    var(--mc-bg-canvas);
+}
+
+.state {
+  width: min(42rem, 100%);
+  padding: clamp(1.5rem, 5vw, 2.75rem);
+}
+
+.eyebrow {
+  margin: 0 0 var(--mc-space-3);
+  color: var(--mc-text-accent);
+  font-size: var(--mc-font-xs);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.state h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+}
+
+.state p:not(.eyebrow) {
+  margin: var(--mc-space-5) 0 0;
+  color: var(--mc-text-secondary);
+  line-height: 1.7;
+}
+
+.action {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--mc-space-6);
+  border: 1px solid rgba(50, 197, 255, 0.32);
+  border-radius: var(--mc-radius-md);
+  padding: 0 var(--mc-space-5);
+  background: rgba(50, 197, 255, 0.1);
+  color: var(--mc-text-primary);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.action:hover {
+  background: rgba(50, 197, 255, 0.16);
+}
+
+.action:focus-visible {
+  outline: none;
+  box-shadow: var(--mc-focus-ring);
+}
+
+.loading {
+  display: grid;
+  width: min(42rem, 100%);
+  gap: var(--mc-space-4);
+  padding: var(--mc-space-8);
+}
+
+.loadingBar,
+.loadingBarShort {
+  display: block;
+  height: 1rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--mc-surface-muted),
+    var(--mc-surface-raised),
+    var(--mc-surface-muted)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.loadingBarShort {
+  width: 62%;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingBar,
+  .loadingBarShort {
+    animation: none;
+  }
+}
