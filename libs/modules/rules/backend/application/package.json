@@ -1,0 +1,12 @@
+{
+  "name": "@mercure/rules-backend-application",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mercure/rules-backend-domain": "workspace:*"
+  }
+}

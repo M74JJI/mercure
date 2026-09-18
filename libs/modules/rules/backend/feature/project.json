@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "name": "rules-backend-feature",
+  "projectType": "library",
+  "sourceRoot": "libs/modules/rules/backend/feature/src",
+  "tags": ["scope:rules", "side:backend", "type:feature"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/modules/rules/backend/feature/tsconfig.lib.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@mercure/rules-backend-feature",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mercure/rules-backend-application": "workspace:*",
+    "@mercure/rules-backend-infrastructure": "workspace:*",
+    "@nestjs/common": "11.2.5"
+  }
+}

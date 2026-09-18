@@ -4,6 +4,7 @@
   "private": true,
   "type": "commonjs",
   "dependencies": {
-    "@mercure/platform-backend-feature": "workspace:*"
+    "@mercure/platform-backend-feature": "workspace:*",
+    "@mercure/rules-backend-feature": "workspace:*"
   }
 }
