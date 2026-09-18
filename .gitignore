@@ -6,9 +6,10 @@ node_modules/
 dist/
 build/
 coverage/
-.nx/cache/
+.nx/
 .next/
 out/
+*.tsbuildinfo
 
 # Runtime configuration and secrets
 .env

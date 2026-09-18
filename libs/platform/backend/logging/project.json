@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "name": "platform-backend-logging",
+  "projectType": "library",
+  "sourceRoot": "libs/platform/backend/logging/src",
+  "tags": ["scope:platform", "side:backend", "type:infrastructure"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/platform/backend/logging/tsconfig.lib.json"
+      }
+    }
+  }
+}

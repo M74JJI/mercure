@@ -1,0 +1,9 @@
+{
+  "name": "@mercure/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs",
+  "dependencies": {
+    "@mercure/platform-backend-feature": "workspace:*"
+  }
+}

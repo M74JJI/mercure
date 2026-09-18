@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "name": "platform-backend-http",
+  "projectType": "library",
+  "sourceRoot": "libs/platform/backend/http/src",
+  "tags": ["scope:platform", "side:backend", "type:infrastructure"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/platform/backend/http/tsconfig.lib.json"
+      }
+    }
+  }
+}

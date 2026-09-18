@@ -1,0 +1,15 @@
+{
+  "name": "@mercure/platform-backend-logging",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mercure/platform-backend-config": "workspace:*",
+    "@nestjs/common": "11.2.5",
+    "nestjs-pino": "5.1.0",
+    "pino-http": "11.0.0"
+  }
+}
