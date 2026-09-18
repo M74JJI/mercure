@@ -5,12 +5,6 @@ import { LoggerModule, type Params } from 'nestjs-pino';
 
 import { PlatformConfig, PlatformConfigModule } from '@mercure/platform-backend-config';
 
-const REQUEST_ID_PATTERN = /^[A-Za-z0-9._:-]{1,128}$/;
-
-function headerValue(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
-}
-
 @Module({
   imports: [
     LoggerModule.forRootAsync({
@@ -25,10 +19,8 @@ function headerValue(value: string | string[] | undefined): string | undefined {
           },
           autoLogging: true,
           quietReqLogger: false,
-          genReqId: (request, response) => {
-            const incoming = headerValue(request.headers['x-request-id']);
-            const requestId =
-              incoming && REQUEST_ID_PATTERN.test(incoming) ? incoming : randomUUID();
+          genReqId: (_request, response) => {
+            const requestId = randomUUID();
             response.setHeader('x-request-id', requestId);
             return requestId;
           },
