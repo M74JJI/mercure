@@ -1,0 +1,11 @@
+{
+  "name": "@mercure/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@mercure/platform-frontend-shell": "workspace:*",
+    "next": "16.3.3",
+    "react": "19.3.0"
+  }
+}
