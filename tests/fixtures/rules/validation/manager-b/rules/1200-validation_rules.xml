@@ -1,0 +1,12 @@
+<group name="validation,">
+  <rule id="120001" level="16">
+    <if_sid>999999</if_sid>
+    <description>Validation duplicate one</description>
+    <group>experimental,</group>
+  </rule>
+
+  <rule id="120001" level="5">
+    <description>Validation duplicate two</description>
+    <group>testing,validation_group,</group>
+  </rule>
+</group>

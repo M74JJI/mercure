@@ -1,0 +1,11 @@
+<decoder name="sample_decoder">
+  <prematch>sample</prematch>
+  <regex>action=(\S+) user=(\S+)</regex>
+  <order>event.action,user.name</order>
+</decoder>
+
+<decoder name="sample_decoder_child">
+  <parent>sample_decoder</parent>
+  <regex>src=(\S+)</regex>
+  <order>source.ip</order>
+</decoder>

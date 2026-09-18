@@ -1,0 +1,15 @@
+<decoder name="duplicate_decoder">
+  <regex>a=(\S+)</regex>
+  <order>a</order>
+</decoder>
+
+<decoder name="duplicate_decoder">
+  <regex>b=(\S+)</regex>
+  <order>b</order>
+</decoder>
+
+<decoder name="external_child">
+  <parent>stock_parent</parent>
+  <regex>c=(\S+)</regex>
+  <order>c</order>
+</decoder>

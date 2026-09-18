@@ -1,0 +1,33 @@
+<group name="sample,">
+  <!-- Source file: 1000-base.xml -->
+  <rule id="100001" level="0">
+    <description>Base helper rule for sample events</description>
+    <group>testing,base_group,</group>
+    <mitre>
+      <id>T1059.001</id>
+    </mitre>
+  </rule>
+
+  <!-- Source file: 1100-detections.xml -->
+  <rule id="110001" level="12" frequency="5" timeframe="60">
+    <if_sid>100001</if_sid>
+    <decoded_as>sample_decoder</decoded_as>
+    <description>Suspicious admin configuration change detected</description>
+    <group>production,uc_admin_config,auth_group,</group>
+    <mitre>
+      <id>T1562.001</id>
+    </mitre>
+    <field name="event.action" type="pcre2">config_change</field>
+    <match>changed</match>
+    <same_field>user.name</same_field>
+    <different_field>source.ip</different_field>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="110002" level="11">
+    <if_group>missing_group</if_group>
+    <decoded_as>missing_decoder</decoded_as>
+    <description>High severity event without MITRE mapping</description>
+    <group>production,</group>
+  </rule>
+</group>
