@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@mercure/rules-backend-application": "workspace:*",
-    "@mercure/rules-backend-domain": "workspace:*"
+    "@mercure/rules-backend-domain": "workspace:*",
+    "@mercure/platform-backend-database": "workspace:*"
   }
 }
