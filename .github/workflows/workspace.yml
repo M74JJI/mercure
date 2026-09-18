@@ -74,6 +74,7 @@ jobs:
       API_PORT: 3001
       API_CORS_ORIGINS: http://localhost:3000
       OPENAPI_ENABLED: 'false'
+      RULES_MANAGER_ARCHIVE_DIR: /tmp/mercure-ci-missing-rules-source
 
     services:
       postgres:
@@ -140,13 +141,28 @@ jobs:
           api_pid=$!
           trap 'kill "$api_pid" 2>/dev/null || true; cat api-smoke.log' EXIT
 
+          ready=0
           for attempt in {1..30}; do
             if curl --fail --silent http://127.0.0.1:3001/api/v1/health/live >/dev/null &&
                curl --fail --silent http://127.0.0.1:3001/api/v1/health/ready >/dev/null; then
-              exit 0
+              ready=1
+              break
             fi
             sleep 1
           done
 
-          echo 'API readiness smoke test timed out.' >&2
-          exit 1
+          if [[ "$ready" != "1" ]]; then
+            echo 'API readiness smoke test timed out.' >&2
+            exit 1
+          fi
+
+          curl --fail --silent             'http://127.0.0.1:3001/api/v1/rules/snapshots?offset=0&limit=1' >/dev/null
+
+          invalid_uuid_status="$(curl --silent --output /dev/null --write-out '%{http_code}'             'http://127.0.0.1:3001/api/v1/rules/snapshots/not-a-uuid')"
+          [[ "$invalid_uuid_status" == "400" ]]
+
+          missing_snapshot_status="$(curl --silent --output /dev/null --write-out '%{http_code}'             'http://127.0.0.1:3001/api/v1/rules/snapshots/00000000-0000-4000-8000-000000000000')"
+          [[ "$missing_snapshot_status" == "404" ]]
+
+          unavailable_import_status="$(curl --silent --output /dev/null --write-out '%{http_code}'             --request POST             'http://127.0.0.1:3001/api/v1/rules/snapshots/import')"
+          [[ "$unavailable_import_status" == "503" ]]
