@@ -21,9 +21,14 @@ interface ManagerArchiveSourceOptions {
   readonly maxTotalBytes: number;
 }
 
+interface ArchiveXmlEntry {
+  readonly archiveMember: string;
+  readonly sourcePath: string;
+}
+
 interface ArchiveWorkItem extends RulesetArchiveInfo {
   readonly path: string;
-  readonly entries: readonly string[];
+  readonly entries: readonly ArchiveXmlEntry[];
 }
 
 function errorMessage(error: unknown, fallback: string): string {
@@ -102,28 +107,30 @@ function runTar(args: readonly string[], maxStdoutBytes: number): Promise<Buffer
 async function listXmlEntries(
   archivePath: string,
   maxFiles: number,
-): Promise<readonly string[]> {
+): Promise<readonly ArchiveXmlEntry[]> {
   const output = await runTar(['-tzf', archivePath], TAR_LIST_OUTPUT_LIMIT_BYTES);
   const seen = new Set<string>();
-  const entries: string[] = [];
+  const entries: ArchiveXmlEntry[] = [];
 
   for (const rawEntry of output.toString('utf8').split(/\r?\n/)) {
-    if (!rawEntry.trim()) continue;
-    const entry = normalizeArchiveEntry(rawEntry);
-    if (!entry) continue;
-    if (seen.has(entry)) {
-      throw new Error(`duplicate archive member is not allowed: ${entry}`);
+    const archiveMember = rawEntry.trim();
+    if (!archiveMember) continue;
+
+    const sourcePath = normalizeArchiveEntry(archiveMember);
+    if (!sourcePath) continue;
+    if (seen.has(sourcePath)) {
+      throw new Error(`duplicate archive member is not allowed: ${sourcePath}`);
     }
 
-    seen.add(entry);
-    entries.push(entry);
+    seen.add(sourcePath);
+    entries.push({ archiveMember, sourcePath });
 
     if (entries.length > maxFiles) {
       throw new Error(`archive contains more than the configured ${maxFiles} XML-file limit`);
     }
   }
 
-  entries.sort((left, right) => left.localeCompare(right));
+  entries.sort((left, right) => left.sourcePath.localeCompare(right.sourcePath));
   return entries;
 }
 
@@ -247,7 +254,7 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
         try {
           const content = await readArchiveEntry(
             archive.path,
-            entry,
+            entry.archiveMember,
             this.options.maxEntryBytes,
           );
           const size = Buffer.byteLength(content, 'utf8');
@@ -266,13 +273,13 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
 
           totalBytes += size;
           files.push({
-            name: `${archive.name}/${entry}`,
+            name: `${archive.name}/${entry.sourcePath}`,
             content,
             size,
           });
         } catch (error) {
           errors.push(
-            `${archive.name}/${entry}: ${errorMessage(error, 'failed to read archive member')}`,
+            `${archive.name}/${entry.sourcePath}: ${errorMessage(error, 'failed to read archive member')}`,
           );
         }
       }
