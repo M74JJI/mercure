@@ -70,6 +70,24 @@ describe('RulesDataAccess', () => {
     ).resolves.toBeNull();
   });
 
+  it('normalizes network failures', async () => {
+    const api = new RulesDataAccess({
+      baseUrl: 'https://api.mercure.test',
+      fetch: async () => {
+        throw new Error('socket path /private/runtime.sock');
+      },
+    });
+
+    const error = await api.listSnapshots().catch((failure: unknown) => failure);
+
+    expect(error).toBeInstanceOf(RulesFrontendApiError);
+    expect(error).toMatchObject({
+      operation: 'list snapshots',
+      status: 0,
+    });
+    expect(String(error)).not.toContain('/private/runtime.sock');
+  });
+
   it('normalizes API failures without exposing response content', async () => {
     const api = new RulesDataAccess({
       baseUrl: 'https://api.mercure.test',
