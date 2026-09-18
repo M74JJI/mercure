@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import { PrismaService } from '@mercure/platform-backend-database';
+import type { PrismaClient } from '@mercure/platform-backend-database/client';
 import type {
   ImportArchivedRulesetResult,
   RulesetSnapshotIdentity,
@@ -37,7 +37,7 @@ async function writeBatches<T>(
 }
 
 export class PrismaRulesetSnapshotStore implements RulesetSnapshotStore {
-  constructor(private readonly database: PrismaService) {}
+  constructor(private readonly database: PrismaClient) {}
 
   async persist(imported: ImportArchivedRulesetResult): Promise<RulesetSnapshotIdentity> {
     const loadedAt = parseDate(imported.source.loadedAt, 'snapshot loaded-at');
