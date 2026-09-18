@@ -181,9 +181,7 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
 
       const reconstructed = await analysisSource.load(saved.id);
       expect(reconstructed).not.toBeNull();
-      expect(reconstructed?.files[0]?.content).toContain(
-        '<!-- Source file: 3100-snapshot.xml -->',
-      );
+      expect(reconstructed?.files[0]?.content).toContain('<!-- Source file: 3100-snapshot.xml -->');
       expect(reconstructed?.rules[0]).toMatchObject({
         id: '310001',
         sourceSection: '3100-snapshot.xml',
@@ -197,9 +195,7 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         type: 'if_sid',
         value: '999999',
       });
-      expect(reconstructed?.decoders[0]?.rawXml).toContain(
-        '<decoder name="snapshot_decoder">',
-      );
+      expect(reconstructed?.decoders[0]?.rawXml).toContain('<decoder name="snapshot_decoder">');
       expect(reconstructed?.useCases[0]).toMatchObject({
         id: 'uc_snapshot',
         createdAt: '2026-09-18T12:00:00.000Z',
@@ -235,9 +231,7 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         sourceFile: '3100-snapshot.xml',
         idRangeStatus: 'pass',
       });
-      expect(roundtrip.analysis.splitFiles[0]?.fileName).toBe(
-        'manager-x__3100-snapshot.xml',
-      );
+      expect(roundtrip.analysis.splitFiles[0]?.fileName).toBe('manager-x__3100-snapshot.xml');
       expect(roundtrip.analysis.splitFiles[0]?.xml).toContain(
         '<rule id="310001" level="12" frequency="4" timeframe="60">',
       );
