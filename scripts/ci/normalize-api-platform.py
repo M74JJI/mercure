@@ -77,19 +77,30 @@ for manifest_path in [
     manifest = Path(manifest_path)
     data = json.loads(manifest.read_text(encoding='utf-8'))
     if 'fastify' in data.get('dependencies', {}):
-        data['dependencies']['fastify'] = '5.12.5'
+        data['dependencies']['fastify'] = '5.12.4'
     if manifest_path.endswith('/presentation/package.json'):
         data['dependencies']['zod'] = '4.5.4'
     manifest.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8')
 
+api_project = Path('apps/api/project.json')
+project_data = json.loads(api_project.read_text(encoding='utf-8'))
+project_data['targets']['build'] = {
+    'executor': '@nx/esbuild:esbuild',
+    'outputs': ['{workspaceRoot}/dist/apps/api'],
+    'options': {
+        'platform': 'node',
+        'outputPath': 'dist/apps/api',
+        'format': ['cjs'],
+        'bundle': True,
+        'main': 'apps/api/src/main.ts',
+        'tsConfig': 'apps/api/tsconfig.app.json',
+        'generatePackageJson': False,
+        'thirdParty': False,
+        'sourcemap': True,
+        'target': 'node24',
+    },
+}
+api_project.write_text(json.dumps(project_data, indent=2) + '\n', encoding='utf-8')
+
 webpack = Path('apps/api/webpack.config.cjs')
-text = webpack.read_text(encoding='utf-8')
-text = text.replace(
-    "const { join } = require('node:path');\nconst { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');",
-    "// CommonJS is required by the isolated Nx Webpack configuration loader.\n"
-    "// eslint-disable-next-line @typescript-eslint/no-require-imports\n"
-    "const { join } = require('node:path');\n"
-    "// eslint-disable-next-line @typescript-eslint/no-require-imports\n"
-    "const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');",
-)
-webpack.write_text(text, encoding='utf-8')
+webpack.unlink(missing_ok=True)
