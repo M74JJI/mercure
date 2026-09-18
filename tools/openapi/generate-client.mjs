@@ -1,11 +1,12 @@
 import { spawn, spawnSync } from 'node:child_process';
-import { readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import net from 'node:net';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 import openapiTS, { astToString } from 'openapi-typescript';
+import { format, resolveConfig } from 'prettier';
 
 const CHECK_MODE = process.argv.includes('--check');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -121,9 +122,14 @@ async function main() {
   try {
     const document = await waitForDocument(apiUrl, child, logs);
     const ast = await openapiTS(document);
-    const generated =
+    const rawGenerated =
       '// This file is generated from the Mercure NestJS OpenAPI contract. Do not edit manually.\n\n' +
       astToString(ast);
+    const prettierConfig = (await resolveConfig(OUTPUT)) ?? {};
+    const generated = await format(rawGenerated, {
+      ...prettierConfig,
+      parser: 'typescript',
+    });
 
     if (CHECK_MODE) {
       const existing = await readFile(OUTPUT, 'utf8').catch(() => '');
@@ -135,6 +141,7 @@ async function main() {
       return;
     }
 
+    await mkdir(path.dirname(OUTPUT), { recursive: true });
     await writeFile(OUTPUT, generated, 'utf8');
   } finally {
     terminateProcessTree(child);
