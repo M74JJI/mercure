@@ -246,9 +246,7 @@ export class PrismaRulesetSnapshotAnalysisSource implements RulesetSnapshotAnaly
         category: useCase.category,
         source: useCaseSource(useCase.source),
         createdBy: useCase.createdBy,
-        ...(useCase.originalCreatedAt === null
-          ? {}
-          : { createdAt: useCase.originalCreatedAt }),
+        ...(useCase.originalCreatedAt === null ? {} : { createdAt: useCase.originalCreatedAt }),
       })),
       issues: issues.map((issue) => ({
         severity: validationSeverity(issue.severity),
