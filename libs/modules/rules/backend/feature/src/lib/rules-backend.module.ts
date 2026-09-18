@@ -1,10 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { PlatformConfig } from '@mercure/platform-backend-config';
-import {
-  PlatformDatabaseModule,
-  PrismaService,
-} from '@mercure/platform-backend-database';
+import { PlatformDatabaseModule, PrismaService } from '@mercure/platform-backend-database';
 import {
   AnalyzeRuleset,
   ImportArchivedRuleset,
