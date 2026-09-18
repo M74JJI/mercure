@@ -1,0 +1,71 @@
+name: Web contract bootstrap
+
+on:
+  push:
+    branches:
+      - feature/web-platform-foundation
+    paths:
+      - .github/workflows/web-contract-bootstrap.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: web-contract-bootstrap-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: Resolve lockfile and generate API contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: 12.4.2
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version-file: .node-version
+
+      - name: Resolve lockfile
+        run: pnpm install --lockfile-only
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate API client contract
+        run: pnpm api:client:generate
+
+      - name: Commit generated artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git add pnpm-lock.yaml libs/platform/frontend/api-client/src/generated/mercure-api.ts
+
+          unexpected="$(git status --short --untracked-files=all | grep -vE '^(M | M|A |\?\?) (pnpm-lock\.yaml|libs/platform/frontend/api-client/src/generated/mercure-api\.ts)$' || true)"
+          if [[ -n "$unexpected" ]]; then
+            echo 'Unexpected repository changes during web contract bootstrap:' >&2
+            printf '%s\n' "$unexpected" >&2
+            exit 1
+          fi
+
+          if git diff --cached --quiet; then
+            echo 'Generated artifacts are already current.'
+            exit 0
+          fi
+
+          git config user.name 'M74JJI'
+          git config user.email '52024672+M74JJI@users.noreply.github.com'
+          git commit -m 'build:web:generate-api-client-contract'
+          git push origin HEAD:feature/web-platform-foundation
