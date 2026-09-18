@@ -1,0 +1,56 @@
+:root {
+  color-scheme: dark;
+
+  --mc-bg-canvas: #070a0f;
+  --mc-bg-deep: #05070b;
+  --mc-surface-primary: rgba(15, 21, 30, 0.94);
+  --mc-surface-muted: rgba(18, 25, 35, 0.72);
+  --mc-surface-raised: rgba(21, 29, 41, 0.98);
+
+  --mc-border-subtle: rgba(145, 166, 195, 0.14);
+  --mc-border-strong: rgba(145, 166, 195, 0.24);
+
+  --mc-text-primary: #f6f9fc;
+  --mc-text-secondary: #a9b6c8;
+  --mc-text-muted: #748399;
+  --mc-text-accent: #7bdcff;
+
+  --mc-accent: #32c5ff;
+  --mc-accent-strong: #0099d8;
+  --mc-positive: #38c793;
+  --mc-positive-bright: #7ce8bd;
+  --mc-danger: #ff6577;
+
+  --mc-space-1: 0.25rem;
+  --mc-space-2: 0.5rem;
+  --mc-space-3: 0.75rem;
+  --mc-space-4: 1rem;
+  --mc-space-5: 1.25rem;
+  --mc-space-6: 1.5rem;
+  --mc-space-8: 2rem;
+  --mc-space-10: 2.5rem;
+  --mc-space-12: 3rem;
+
+  --mc-radius-md: 0.75rem;
+  --mc-radius-lg: 1rem;
+  --mc-radius-xl: 1.25rem;
+
+  --mc-font-xs: 0.75rem;
+  --mc-font-sm: 0.875rem;
+  --mc-font-md: 1rem;
+  --mc-font-lg: 1.125rem;
+
+  --mc-shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.02);
+  --mc-shadow-lg: 0 1.5rem 4rem rgba(0, 0, 0, 0.28);
+
+  --mc-focus-ring: 0 0 0 3px rgba(50, 197, 255, 0.3);
+  --mc-motion-fast: 140ms;
+  --mc-motion-standard: 220ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mc-motion-fast: 0ms;
+    --mc-motion-standard: 0ms;
+  }
+}

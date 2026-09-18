@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "name": "platform-frontend-navigation",
+  "projectType": "library",
+  "sourceRoot": "libs/platform/frontend/navigation/src",
+  "tags": ["scope:platform", "side:frontend", "type:util"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/platform/frontend/navigation/tsconfig.lib.json"
+      }
+    }
+  }
+}
