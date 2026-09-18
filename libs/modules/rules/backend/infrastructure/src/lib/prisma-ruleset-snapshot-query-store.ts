@@ -160,8 +160,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
         sourceFile: row.sourceFile.name,
         ...(row.sourceSection === null ? {} : { sourceSection: row.sourceSection }),
         useCaseId: row.useCaseId,
-        useCaseConfidence:
-          row.useCaseConfidence as RulesetSnapshotRuleView['useCaseConfidence'],
+        useCaseConfidence: row.useCaseConfidence as RulesetSnapshotRuleView['useCaseConfidence'],
         mitre: row.mitreIds.map((mitre) => mitre.value),
         dependencies: row.dependencies.map((dependency) => ({
           type: dependency.type as RulesetSnapshotRuleView['dependencies'][number]['type'],
