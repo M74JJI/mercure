@@ -13,7 +13,7 @@ Legacy reference: `M74JJI/m-rules@21b1f5d9d4d91ecfd297ac211ce50ac5cd2e2028`.
 | Dependency validation                | `lib/parser.ts`                   | Migrate with parity tests              | Rules infrastructure                        |
 | Parser statistics                    | `lib/parser.ts`                   | Migrate with parity tests              | Rules infrastructure                        |
 | Browser File reading/hash            | `lib/parser.ts`                   | Do not copy                            | Future source adapter                       |
-| Manager archive discovery/extraction | `lib/manager-archive-source.ts`   | Defer                                  | Future Rules infrastructure source adapter  |
+| Manager archive discovery/import     | `lib/manager-archive-source.ts`   | Migrated with hardened direct-read adapter | Rules infrastructure source adapter         |
 | Archive streaming API                | Next `manager-files/stream` route | Redesign later                         | Nest presentation/application               |
 | Use-case filesystem JSON store       | `lib/use-case-store.ts`           | Do not copy                            | Future PostgreSQL repository                |
 | Use-case HTTP CRUD                   | Next `api/use-cases`              | Defer                                  | Future Nest presentation/application        |
@@ -41,15 +41,19 @@ Golden tests must prove at least:
 9. Level-zero helper rules carrying MITRE.
 10. Aggregate counts matching the normalized records.
 
-## Later migration sequence
+## Migration sequence
 
-After M5 parser parity:
+Completed:
 
-1. manager archive source adapter and import orchestration;
-2. immutable configuration snapshots and normalized PostgreSQL persistence;
-3. Nest Rules query/import endpoints plus regenerated frontend contract;
-4. Rules frontend feature/data-access/UI libraries;
-5. diff and XML round-trip;
-6. use-case catalog backed by PostgreSQL;
-7. graph, field intelligence and quality scoring;
-8. only then consider any AI-assisted feature through a separate product/security decision.
+1. M5 — parser/domain/application foundation;
+2. M6 — manager archive source adapter and import orchestration.
+
+Next:
+
+1. immutable configuration snapshots and normalized PostgreSQL persistence;
+2. Nest Rules query/import endpoints plus regenerated frontend contract;
+3. Rules frontend feature/data-access/UI libraries;
+4. diff and XML round-trip;
+5. use-case catalog backed by PostgreSQL;
+6. graph, field intelligence and quality scoring;
+7. only then consider any AI-assisted feature through a separate product/security decision.
