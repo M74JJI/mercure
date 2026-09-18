@@ -25,7 +25,7 @@ export function RulesSnapshotHistory({ snapshots, total }: RulesSnapshotHistoryP
         eyebrow="Rules"
         title="Configuration snapshots"
         description="Immutable views of normalized Wazuh rules, decoders, and validation findings imported from configured manager archives."
-        actions={<StatusBadge tone="accent">{total} snapshots</StatusBadge>}
+        actions={<StatusBadge tone="accent">{`${total} snapshots`}</StatusBadge>}
       />
 
       {snapshots.length === 0 ? (
