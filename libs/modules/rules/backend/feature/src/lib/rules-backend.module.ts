@@ -6,20 +6,26 @@ import {
   AnalyzeRuleset,
   ImportArchivedRuleset,
   PersistImportedRuleset,
+  QueryRulesetSnapshots,
   RULESET_ANALYZER,
   RULESET_ARCHIVE_SOURCE,
+  RULESET_SNAPSHOT_QUERY_STORE,
   RULESET_SNAPSHOT_STORE,
   type RulesetArchiveSource,
+  type RulesetSnapshotQueryStore,
   type RulesetSnapshotStore,
 } from '@mercure/rules-backend-application';
 import {
   FilesystemManagerArchiveSource,
+  PrismaRulesetSnapshotQueryStore,
   PrismaRulesetSnapshotStore,
   WazuhXmlRulesetAnalyzer,
 } from '@mercure/rules-backend-infrastructure';
+import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
 
 @Module({
   imports: [PlatformDatabaseModule],
+  controllers: [RulesSnapshotsController],
   providers: [
     WazuhXmlRulesetAnalyzer,
     {
@@ -63,7 +69,26 @@ import {
         new PersistImportedRuleset(importer, store),
       inject: [ImportArchivedRuleset, RULESET_SNAPSHOT_STORE],
     },
+    {
+      provide: PrismaRulesetSnapshotQueryStore,
+      useFactory: (database: PrismaService) => new PrismaRulesetSnapshotQueryStore(database),
+      inject: [PrismaService],
+    },
+    {
+      provide: RULESET_SNAPSHOT_QUERY_STORE,
+      useExisting: PrismaRulesetSnapshotQueryStore,
+    },
+    {
+      provide: QueryRulesetSnapshots,
+      useFactory: (store: RulesetSnapshotQueryStore) => new QueryRulesetSnapshots(store),
+      inject: [RULESET_SNAPSHOT_QUERY_STORE],
+    },
   ],
-  exports: [AnalyzeRuleset, ImportArchivedRuleset, PersistImportedRuleset],
+  exports: [
+    AnalyzeRuleset,
+    ImportArchivedRuleset,
+    PersistImportedRuleset,
+    QueryRulesetSnapshots,
+  ],
 })
 export class RulesBackendModule {}
