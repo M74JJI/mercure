@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Inject,
   NotFoundException,
   Param,
   Post,
@@ -9,6 +10,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
+  ApiExtraModels,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -22,6 +24,9 @@ import {
   QueryRulesetSnapshots,
   RulesetImportUnavailableError,
   RulesetSnapshotNotFoundError,
+  type RulesetSnapshotDecoderQuery,
+  type RulesetSnapshotIssueQuery,
+  type RulesetSnapshotRuleQuery,
 } from '@mercure/rules-backend-application';
 
 import {
@@ -53,11 +58,51 @@ async function translateRulesHttpErrors<T>(operation: () => Promise<T>): Promise
   }
 }
 
+function ruleQueryFromDto(query: RulesSnapshotRulesQueryDto): RulesetSnapshotRuleQuery {
+  return {
+    offset: query.offset,
+    limit: query.limit,
+    ...(query.tenant === undefined ? {} : { tenant: query.tenant }),
+    ...(query.severity === undefined ? {} : { severity: query.severity }),
+    ...(query.status === undefined ? {} : { status: query.status }),
+    ...(query.useCaseId === undefined ? {} : { useCaseId: query.useCaseId }),
+    ...(query.ruleId === undefined ? {} : { ruleId: query.ruleId }),
+    ...(query.jiraVisible === undefined ? {} : { jiraVisible: query.jiraVisible }),
+  };
+}
+
+function decoderQueryFromDto(query: RulesSnapshotDecodersQueryDto): RulesetSnapshotDecoderQuery {
+  return {
+    offset: query.offset,
+    limit: query.limit,
+    ...(query.tenant === undefined ? {} : { tenant: query.tenant }),
+    ...(query.name === undefined ? {} : { name: query.name }),
+  };
+}
+
+function issueQueryFromDto(query: RulesSnapshotIssuesQueryDto): RulesetSnapshotIssueQuery {
+  return {
+    offset: query.offset,
+    limit: query.limit,
+    ...(query.severity === undefined ? {} : { severity: query.severity }),
+    ...(query.type === undefined ? {} : { type: query.type }),
+  };
+}
+
 @ApiTags('rules')
+@ApiExtraModels(
+  RulesSnapshotParamsDto,
+  RulesSnapshotListQueryDto,
+  RulesSnapshotRulesQueryDto,
+  RulesSnapshotDecodersQueryDto,
+  RulesSnapshotIssuesQueryDto,
+)
 @Controller('rules/snapshots')
 export class RulesSnapshotsController {
   constructor(
+    @Inject(PersistImportedRuleset)
     private readonly persistImportedRuleset: PersistImportedRuleset,
+    @Inject(QueryRulesetSnapshots)
     private readonly queries: QueryRulesetSnapshots,
   ) {}
 
@@ -98,7 +143,9 @@ export class RulesSnapshotsController {
   @ApiNotFoundResponse({ description: 'Rules snapshot not found.' })
   @ZodSerializerDto(RulesSnapshotRulePageDocument)
   listRules(@Param() params: RulesSnapshotParamsDto, @Query() query: RulesSnapshotRulesQueryDto) {
-    return translateRulesHttpErrors(() => this.queries.listRules(params.snapshotId, query));
+    return translateRulesHttpErrors(() =>
+      this.queries.listRules(params.snapshotId, ruleQueryFromDto(query)),
+    );
   }
 
   @Get(':snapshotId/decoders')
@@ -110,7 +157,9 @@ export class RulesSnapshotsController {
     @Param() params: RulesSnapshotParamsDto,
     @Query() query: RulesSnapshotDecodersQueryDto,
   ) {
-    return translateRulesHttpErrors(() => this.queries.listDecoders(params.snapshotId, query));
+    return translateRulesHttpErrors(() =>
+      this.queries.listDecoders(params.snapshotId, decoderQueryFromDto(query)),
+    );
   }
 
   @Get(':snapshotId/issues')
@@ -119,6 +168,8 @@ export class RulesSnapshotsController {
   @ApiNotFoundResponse({ description: 'Rules snapshot not found.' })
   @ZodSerializerDto(RulesSnapshotIssuePageDocument)
   listIssues(@Param() params: RulesSnapshotParamsDto, @Query() query: RulesSnapshotIssuesQueryDto) {
-    return translateRulesHttpErrors(() => this.queries.listIssues(params.snapshotId, query));
+    return translateRulesHttpErrors(() =>
+      this.queries.listIssues(params.snapshotId, issueQueryFromDto(query)),
+    );
   }
 }
