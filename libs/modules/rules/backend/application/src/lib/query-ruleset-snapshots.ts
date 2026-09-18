@@ -6,9 +6,7 @@ import type {
   ValidationSeverity,
 } from '@mercure/rules-backend-domain';
 
-export const RULESET_SNAPSHOT_QUERY_STORE = Symbol(
-  'mercure.rules.ruleset-snapshot-query-store',
-);
+export const RULESET_SNAPSHOT_QUERY_STORE = Symbol('mercure.rules.ruleset-snapshot-query-store');
 
 export interface PageRequest {
   readonly offset: number;
