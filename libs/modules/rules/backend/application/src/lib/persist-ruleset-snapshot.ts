@@ -10,6 +10,8 @@ export interface RulesetSnapshotIdentity {
   readonly id: string;
   readonly sourceFingerprint: string;
   readonly contentFingerprint: string;
+  readonly complete: boolean;
+  readonly sourceErrorCount: number;
   readonly loadedAt: string;
   readonly createdAt: string;
 }
@@ -32,6 +34,10 @@ export class PersistImportedRuleset {
     request: ImportArchivedRulesetRequest = {},
   ): Promise<PersistImportedRulesetResult> {
     const imported = await this.importer.execute(request);
+    if (imported.analysis.files.length === 0) {
+      throw new Error('Cannot persist a Rules snapshot without imported source files.');
+    }
+
     const snapshot = await this.store.persist(imported);
 
     return {
