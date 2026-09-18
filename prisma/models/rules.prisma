@@ -1,0 +1,294 @@
+model RulesetSnapshot {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceRoot         String?  @map("source_root") @db.Text
+  sourceFingerprint  String   @map("source_fingerprint") @db.Char(64)
+  contentFingerprint String   @map("content_fingerprint") @db.Char(64)
+  loadedAt           DateTime @map("loaded_at") @db.Timestamptz(6)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  complete           Boolean @default(true)
+  sourceErrorCount   Int     @map("source_error_count")
+  archiveCount       Int     @map("archive_count")
+  fileCount          Int     @map("file_count")
+  ruleCount          Int @map("rule_count")
+  decoderCount       Int @map("decoder_count")
+  useCaseCount       Int @map("use_case_count")
+  jiraVisibleCount   Int @map("jira_visible_count")
+  testingCount       Int @map("testing_count")
+  productionCount    Int @map("production_count")
+  criticalCount      Int @map("critical_count")
+  mitreMappedCount   Int @map("mitre_mapped_count")
+  missingUseCaseCount Int @map("missing_use_case_count")
+  brokenDependencyCount Int @map("broken_dependency_count")
+
+  archives     RulesetSnapshotArchive[]
+  files        RulesetSnapshotFile[]
+  sourceErrors RulesetSnapshotSourceError[]
+  useCases     RulesetSnapshotUseCase[]
+  issues       RulesetSnapshotIssue[]
+
+  @@index([createdAt])
+  @@index([sourceFingerprint])
+  @@index([contentFingerprint])
+  @@map("ruleset_snapshots")
+}
+
+model RulesetSnapshotArchive {
+  snapshotId String   @map("snapshot_id") @db.Uuid
+  position   Int
+  name       String   @db.Text
+  size       BigInt
+  modifiedAt DateTime @map("modified_at") @db.Timestamptz(6)
+  xmlFiles   Int      @map("xml_files")
+
+  snapshot RulesetSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  @@id([snapshotId, position])
+  @@unique([snapshotId, name])
+  @@map("ruleset_snapshot_archives")
+}
+
+model RulesetSnapshotFile {
+  snapshotId String @map("snapshot_id") @db.Uuid
+  position   Int
+  name       String @db.Text
+  tenant     String @db.VarChar(255)
+  size       BigInt
+  sourceType String @map("source_type") @db.VarChar(32)
+  content    String @db.Text
+  sha256     String @db.Char(64)
+
+  snapshot RulesetSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  rules    RulesetSnapshotRule[]
+  decoders RulesetSnapshotDecoder[]
+
+  @@id([snapshotId, position])
+  @@unique([snapshotId, name])
+  @@index([snapshotId, tenant])
+  @@index([snapshotId, sourceType])
+  @@index([sha256])
+  @@map("ruleset_snapshot_files")
+}
+
+model RulesetSnapshotRule {
+  snapshotId         String @map("snapshot_id") @db.Uuid
+  position           Int
+  sourceFilePosition Int    @map("source_file_position")
+  ruleId             String @map("rule_id") @db.VarChar(64)
+  level              Int
+  description        String @db.Text
+  status             String @db.VarChar(64)
+  role               String @db.VarChar(64)
+  severity           String @db.VarChar(32)
+  jiraVisible        Boolean @map("jira_visible")
+  tenant             String @db.VarChar(255)
+  sourceSection      String? @map("source_section") @db.Text
+  useCaseId          String @map("use_case_id") @db.VarChar(255)
+  useCaseConfidence  String @map("use_case_confidence") @db.VarChar(32)
+  frequency          String? @db.Text
+  timeframe          String? @db.Text
+  rawXml             String @map("raw_xml") @db.Text
+
+  sourceFile   RulesetSnapshotFile       @relation(fields: [snapshotId, sourceFilePosition], references: [snapshotId, position], onDelete: Cascade)
+  groups       RulesetSnapshotRuleGroup[]
+  mitreIds     RulesetSnapshotRuleMitre[]
+  dependencies RulesetSnapshotRuleDependency[]
+  fields       RulesetSnapshotRuleField[]
+  decodedAs    RulesetSnapshotRuleDecodedAs[]
+  options      RulesetSnapshotRuleOption[]
+
+  @@id([snapshotId, position])
+  @@index([snapshotId, ruleId])
+  @@index([snapshotId, tenant])
+  @@index([snapshotId, severity])
+  @@index([snapshotId, status])
+  @@index([snapshotId, useCaseId])
+  @@map("ruleset_snapshot_rules")
+}
+
+model RulesetSnapshotRuleGroup {
+  snapshotId   String @map("snapshot_id") @db.Uuid
+  rulePosition Int    @map("rule_position")
+  position     Int
+  value        String @db.Text
+
+  rule RulesetSnapshotRule @relation(fields: [snapshotId, rulePosition], references: [snapshotId, position], onDelete: Cascade)
+
+  @@id([snapshotId, rulePosition, position])
+  @@map("ruleset_snapshot_rule_groups")
+}
+
+model RulesetSnapshotRuleMitre {
+  snapshotId   String @map("snapshot_id") @db.Uuid
+  rulePosition Int    @map("rule_position")
+  position     Int
+  value        String @db.VarChar(32)
+
+  rule RulesetSnapshotRule @relation(fields: [snapshotId, rulePosition], references: [snapshotId, position], onDelete: Cascade)
+
+  @@id([snapshotId, rulePosition, position])
+  @@index([snapshotId, value])
+  @@map("ruleset_snapshot_rule_mitre")
+}
+
+model RulesetSnapshotRuleDependency {
+  snapshotId   String @map("snapshot_id") @db.Uuid
+  rulePosition Int    @map("rule_position")
+  position     Int
+  type         String @db.VarChar(32)
+  value        String @db.Text
+
+  rule RulesetSnapshotRule @relation(fields: [snapshotId, rulePosition], references: [snapshotId, position], onDelete: Cascade)
+
+  @@id([snapshotId, rulePosition, position])
+  @@map("ruleset_snapshot_rule_dependencies")
+}
+
+model RulesetSnapshotRuleField {
+  snapshotId   String  @map("snapshot_id") @db.Uuid
+  rulePosition Int     @map("rule_position")
+  position     Int
+  name         String  @db.Text
+  fieldType    String? @map("field_type") @db.Text
+  value        String  @db.Text
+
+  rule RulesetSnapshotRule @relation(fields: [snapshotId, rulePosition], references: [snapshotId, position], onDelete: Cascade)
+
+  @@id([snapshotId, rulePosition, position])
+  @@map("ruleset_snapshot_rule_fields")
+}
+
+model RulesetSnapshotRuleDecodedAs {
+  snapshotId   String @map("snapshot_id") @db.Uuid
+  rulePosition Int    @map("rule_position")
+  position     Int
+  value        String @db.Text
+
+  rule RulesetSnapshotRule @relation(fields: [snapshotId, rulePosition], references: [snapshotId, position], onDelete: Cascade)
+
+  @@id([snapshotId, rulePosition, position])
+  @@map("ruleset_snapshot_rule_decoded_as")
+}
+
+model RulesetSnapshotRuleOption {
+  snapshotId   String @map("snapshot_id") @db.Uuid
+  rulePosition Int    @map("rule_position")
+  position     Int
+  value        String @db.Text
+
+  rule RulesetSnapshotRule @relation(fields: [snapshotId, rulePosition], references: [snapshotId, position], onDelete: Cascade)
+
+  @@id([snapshotId, rulePosition, position])
+  @@map("ruleset_snapshot_rule_options")
+}
+
+model RulesetSnapshotDecoder {
+  snapshotId         String  @map("snapshot_id") @db.Uuid
+  position           Int
+  sourceFilePosition Int     @map("source_file_position")
+  name               String  @db.Text
+  parent             String? @db.Text
+  tenant             String  @db.VarChar(255)
+  rawXml             String  @map("raw_xml") @db.Text
+
+  sourceFile  RulesetSnapshotFile           @relation(fields: [snapshotId, sourceFilePosition], references: [snapshotId, position], onDelete: Cascade)
+  prematches  RulesetSnapshotDecoderPrematch[]
+  regexValues RulesetSnapshotDecoderRegex[]
+  orderFields RulesetSnapshotDecoderOrderField[]
+
+  @@id([snapshotId, position])
+  @@index([snapshotId, name])
+  @@index([snapshotId, tenant])
+  @@map("ruleset_snapshot_decoders")
+}
+
+model RulesetSnapshotDecoderPrematch {
+  snapshotId      String @map("snapshot_id") @db.Uuid
+  decoderPosition Int    @map("decoder_position")
+  position        Int
+  value           String @db.Text
+
+  decoder RulesetSnapshotDecoder @relation(fields: [snapshotId, decoderPosition], references: [snapshotId, position], onDelete: Cascade)
+
+  @@id([snapshotId, decoderPosition, position])
+  @@map("ruleset_snapshot_decoder_prematches")
+}
+
+model RulesetSnapshotDecoderRegex {
+  snapshotId      String @map("snapshot_id") @db.Uuid
+  decoderPosition Int    @map("decoder_position")
+  position        Int
+  value           String @db.Text
+
+  decoder RulesetSnapshotDecoder @relation(fields: [snapshotId, decoderPosition], references: [snapshotId, position], onDelete: Cascade)
+
+  @@id([snapshotId, decoderPosition, position])
+  @@map("ruleset_snapshot_decoder_regex")
+}
+
+model RulesetSnapshotDecoderOrderField {
+  snapshotId      String @map("snapshot_id") @db.Uuid
+  decoderPosition Int    @map("decoder_position")
+  position        Int
+  value           String @db.Text
+
+  decoder RulesetSnapshotDecoder @relation(fields: [snapshotId, decoderPosition], references: [snapshotId, position], onDelete: Cascade)
+
+  @@id([snapshotId, decoderPosition, position])
+  @@map("ruleset_snapshot_decoder_order_fields")
+}
+
+model RulesetSnapshotIssue {
+  snapshotId  String  @map("snapshot_id") @db.Uuid
+  position    Int
+  severity    String  @db.VarChar(32)
+  type        String  @db.VarChar(128)
+  title       String  @db.Text
+  detail      String  @db.Text
+  ruleId      String? @map("rule_id") @db.VarChar(64)
+  decoderName String? @map("decoder_name") @db.Text
+  fileName    String? @map("file_name") @db.Text
+  tenant      String? @db.VarChar(255)
+
+  snapshot RulesetSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  @@id([snapshotId, position])
+  @@index([snapshotId, severity])
+  @@index([snapshotId, type])
+  @@map("ruleset_snapshot_issues")
+}
+
+model RulesetSnapshotUseCase {
+  snapshotId        String  @map("snapshot_id") @db.Uuid
+  position          Int
+  useCaseId         String  @map("use_case_id") @db.VarChar(255)
+  name              String  @db.Text
+  shortName         String  @map("short_name") @db.Text
+  description       String  @db.Text
+  component         String  @db.Text
+  vendor            String  @db.Text
+  product           String  @db.Text
+  domain            String  @db.Text
+  category          String  @db.Text
+  source            String  @db.VarChar(32)
+  createdBy         String  @map("created_by") @db.Text
+  originalCreatedAt String? @map("original_created_at") @db.Text
+
+  snapshot RulesetSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  @@id([snapshotId, position])
+  @@unique([snapshotId, useCaseId])
+  @@map("ruleset_snapshot_use_cases")
+}
+
+
+model RulesetSnapshotSourceError {
+  snapshotId String @map("snapshot_id") @db.Uuid
+  position   Int
+  detail     String @db.Text
+
+  snapshot RulesetSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  @@id([snapshotId, position])
+  @@map("ruleset_snapshot_source_errors")
+}

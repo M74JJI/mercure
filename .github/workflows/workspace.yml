@@ -121,6 +121,14 @@ jobs:
       - name: Apply migration history
         run: pnpm db:migrate:deploy
 
+      - name: Verify Rules snapshot persistence
+        env:
+          RULES_PERSISTENCE_INTEGRATION: '1'
+        run: >-
+          pnpm exec vitest run
+          libs/modules/rules/backend/infrastructure/src/lib/prisma-ruleset-snapshot-store.integration.spec.ts
+          --config libs/modules/rules/backend/infrastructure/vitest.config.ts
+
       - name: Build API
         run: pnpm exec nx build api
 

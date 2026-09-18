@@ -349,6 +349,9 @@ importers:
       '@mercure/platform-backend-config':
         specifier: workspace:*
         version: link:../../../../platform/backend/config
+      '@mercure/platform-backend-database':
+        specifier: workspace:*
+        version: link:../../../../platform/backend/database
       '@mercure/rules-backend-application':
         specifier: workspace:*
         version: link:../application
@@ -361,6 +364,9 @@ importers:
 
   libs/modules/rules/backend/infrastructure:
     dependencies:
+      '@mercure/platform-backend-database':
+        specifier: workspace:*
+        version: link:../../../../platform/backend/database
       '@mercure/rules-backend-application':
         specifier: workspace:*
         version: link:../application
