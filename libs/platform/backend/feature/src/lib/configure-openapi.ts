@@ -10,11 +10,11 @@ export function configureOpenApi(app: NestFastifyApplication): void {
     .build();
   const document = cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
 
-  SwaggerModule.setup('docs', app, document, {
-    useGlobalPrefix: true,
+  SwaggerModule.setup('api/docs', app, document, {
+    useGlobalPrefix: false,
     raw: ['json'],
     ui: true,
-    jsonDocumentUrl: 'openapi.json',
+    jsonDocumentUrl: 'api/openapi.json',
     customSiteTitle: 'Mercure API',
   });
 }
