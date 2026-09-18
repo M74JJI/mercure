@@ -148,7 +148,7 @@ export default baseConfig;
   type PlatformEnvironment,
 } from './lib/platform-config.module';
 """,
-    "libs/platform/backend/config/src/lib/platform-config.module.ts": """import { Global, Injectable, Module } from '@nestjs/common';
+    "libs/platform/backend/config/src/lib/platform-config.module.ts": """import { Global, Inject, Injectable, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { z } from 'zod';
 
@@ -230,7 +230,7 @@ export function parsePlatformEnvironment(environment: Record<string, unknown>): 
 
 @Injectable()
 export class PlatformConfig {
-  constructor(private readonly config: ConfigService<PlatformEnvironment, true>) {}
+  constructor(@Inject(ConfigService) private readonly config: ConfigService<PlatformEnvironment, true>) {}
 
   get nodeEnvironment(): PlatformEnvironment['NODE_ENV'] {
     return this.config.getOrThrow('NODE_ENV', { infer: true });
