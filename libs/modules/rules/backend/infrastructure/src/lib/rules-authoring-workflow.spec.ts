@@ -126,19 +126,22 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
 
   async update(input: UpdateRulesAuthoringDraftInput): Promise<RulesAuthoringDraft> {
     if (!this.draft) throw new Error('test draft missing');
+    const current = this.draft;
     this.draft = {
-      ...this.draft,
+      id: current.id,
+      sourceSnapshotId: current.sourceSnapshotId,
+      sourceFilePosition: current.sourceFilePosition,
+      fileName: current.fileName,
+      tenant: current.tenant,
+      sourceType: current.sourceType,
       content: input.content,
       sha256: sha256(input.content),
-      revision: this.draft.revision + 1,
+      revision: current.revision + 1,
       state: 'draft',
+      createdBy: current.createdBy,
       updatedBy: input.actorSubject,
+      createdAt: current.createdAt,
       updatedAt: '2026-09-20T00:01:00.000Z',
-      validation: undefined,
-      approvedRevision: undefined,
-      approvedSha256: undefined,
-      approvedBy: undefined,
-      approvedAt: undefined,
     };
     return this.draft;
   }
