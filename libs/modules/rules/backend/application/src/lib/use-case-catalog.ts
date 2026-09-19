@@ -86,7 +86,10 @@ function useCaseId(value: string): string {
     );
   }
   if (normalized.length > 255) {
-    throw new RulesUseCaseCatalogValidationError('id', 'Use-case ID must be 255 characters or fewer.');
+    throw new RulesUseCaseCatalogValidationError(
+      'id',
+      'Use-case ID must be 255 characters or fewer.',
+    );
   }
   return normalized;
 }
@@ -148,7 +151,7 @@ export class GetRulesUseCase {
 export class CreateCustomRulesUseCase {
   constructor(private readonly catalog: RulesUseCaseCatalog) {}
 
-  execute(input: CreateCustomRulesUseCaseInput): Promise<RulesUseCase> {
+  async execute(input: CreateCustomRulesUseCaseInput): Promise<RulesUseCase> {
     return this.catalog.createCustom(normalizedCreateInput(input));
   }
 }
@@ -156,7 +159,7 @@ export class CreateCustomRulesUseCase {
 export class UpdateCustomRulesUseCase {
   constructor(private readonly catalog: RulesUseCaseCatalog) {}
 
-  execute(input: UpdateCustomRulesUseCaseInput): Promise<RulesUseCase> {
+  async execute(input: UpdateCustomRulesUseCaseInput): Promise<RulesUseCase> {
     return this.catalog.updateCustom(normalizedUpdateInput(input));
   }
 }
