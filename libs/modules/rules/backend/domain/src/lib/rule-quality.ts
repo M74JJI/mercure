@@ -89,7 +89,7 @@ function gradeOf(score: number): QualityGrade {
 }
 
 function normalizeField(value: string): string {
-  return value.trim().replace(/^.+|.+$/g, '').toLowerCase();
+  return value.trim().toLowerCase();
 }
 
 function ruleFields(rule: RuleRecord): readonly string[] {
