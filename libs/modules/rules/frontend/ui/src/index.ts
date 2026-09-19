@@ -24,3 +24,12 @@ export {
   type RulesUseCaseCatalogProps,
 } from './lib/rules-use-case-catalog';
 export type { RulesUseCasePreviewView } from './lib/models';
+
+export {
+  RulesSnapshotComparison,
+  type RulesSnapshotComparisonProps,
+} from './lib/rules-snapshot-comparison';
+export type {
+  RulesComparisonSnapshotOptionView,
+  RulesSnapshotComparisonView,
+} from './lib/models';
