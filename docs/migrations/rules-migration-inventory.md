@@ -17,8 +17,8 @@ Legacy reference: `M74JJI/m-rules@21b1f5d9d4d91ecfd297ac211ce50ac5cd2e2028`.
 | Archive streaming API            | Next `manager-files/stream` route | Redesign later                             | Nest presentation/application               |
 | Use-case filesystem JSON store   | `lib/use-case-store.ts`           | Do not copy                                | Future PostgreSQL repository                |
 | Use-case HTTP CRUD               | Next `api/use-cases`              | Defer                                      | Future Nest presentation/application        |
-| Collection diff                  | `lib/diff.ts`                     | Migrated with tenant-safe regressions       | Rules domain/application                    |
-| XML round-trip/reporting         | `lib/xml-roundtrip.ts`            | Migrated as internal read-only analysis     | Rules domain/application/infrastructure     |
+| Collection diff                  | `lib/diff.ts`                     | Migrated with tenant-safe regressions      | Rules domain/application                    |
+| XML round-trip/reporting         | `lib/xml-roundtrip.ts`            | Migrated as internal read-only analysis    | Rules domain/application/infrastructure     |
 | Rule quality scoring             | `lib/rule-quality.ts`             | Defer                                      | Rules domain/application                    |
 | Field intelligence               | `lib/field-intelligence.ts`       | Defer                                      | Rules domain/application                    |
 | Dependency/field graph           | `lib/graph-engine.ts`             | Defer                                      | Rules application/frontend                  |
