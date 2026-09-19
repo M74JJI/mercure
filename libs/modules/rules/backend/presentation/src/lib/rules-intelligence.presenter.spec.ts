@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  presentGraph,
   presentRoundtrip,
   presentSnapshotComparison,
 } from './rules-intelligence.presenter';
@@ -158,5 +159,58 @@ describe('Rules intelligence public projection', () => {
     expect(serialized).not.toContain('insertLine');
     expect(serialized).not.toContain('suggestedXml');
     expect(serialized).not.toContain('splitFiles');
+  });
+  it('caps public graph nodes and drops edges outside the bounded node set', () => {
+    const result = {
+      snapshotId: '00000000-0000-4000-8000-000000000001',
+      graph: {
+        nodes: [
+          { id: 'rule:a', type: 'rule', label: 'a', weight: 10 },
+          { id: 'decoder:b', type: 'decoder', label: 'b', weight: 9 },
+          { id: 'field:c', type: 'field', label: 'c', weight: 8 },
+        ],
+        edges: [
+          {
+            id: 'a-b',
+            source: 'rule:a',
+            target: 'decoder:b',
+            type: 'decoded_as',
+            label: 'decoded as',
+            weight: 1,
+          },
+          {
+            id: 'a-c',
+            source: 'rule:a',
+            target: 'field:c',
+            type: 'field_uses',
+            label: 'uses',
+            weight: 1,
+          },
+        ],
+        stats: {
+          nodes: 3,
+          edges: 2,
+          rules: 1,
+          decoders: 1,
+          fields: 1,
+          groups: 0,
+          useCases: 0,
+          mitre: 0,
+          external: 0,
+        },
+      },
+    } as const;
+
+    const projected = presentGraph(result, 2);
+
+    expect(projected.graph.nodes.map((node) => node.id)).toEqual(['rule:a', 'decoder:b']);
+    expect(projected.graph.edges.map((edge) => edge.id)).toEqual(['a-b']);
+    expect(projected.graph.stats).toMatchObject({
+      nodes: 2,
+      edges: 1,
+      rules: 1,
+      decoders: 1,
+      fields: 0,
+    });
   });
 });
