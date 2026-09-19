@@ -7,6 +7,14 @@ export function configureOpenApi(app: NestFastifyApplication): void {
     .setTitle('Mercure API')
     .setDescription('Mercure security platform API')
     .setVersion('1.0.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'keycloak',
+    )
     .build();
   const document = cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
 
