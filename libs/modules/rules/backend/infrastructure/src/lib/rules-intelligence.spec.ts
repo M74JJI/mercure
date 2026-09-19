@@ -34,11 +34,7 @@ function sourceFile(name: string, tenant: string): RulesetSourceFile {
   };
 }
 
-function rule(
-  id: string,
-  tenant: string,
-  overrides: Partial<RuleRecord> = {},
-): RuleRecord {
+function rule(id: string, tenant: string, overrides: Partial<RuleRecord> = {}): RuleRecord {
   return {
     id,
     level: 10,
@@ -202,10 +198,7 @@ describe('Rules intelligence', () => {
     expect(managerA?.dimensions.noiseControl).toBeLessThanOrEqual(100);
 
     expect(quality.useCases).toHaveLength(2);
-    expect(quality.useCases.map((item) => item.tenant).sort()).toEqual([
-      'manager-a',
-      'manager-b',
-    ]);
+    expect(quality.useCases.map((item) => item.tenant).sort()).toEqual(['manager-a', 'manager-b']);
   });
 
   it('builds a layout-free semantic graph without cross-tenant dependency links', () => {
@@ -215,14 +208,9 @@ describe('Rules intelligence', () => {
       limit: 100,
     });
 
-    const ruleNodes = graph.nodes.filter(
-      (node) => node.type === 'rule' && node.entityId === '100',
-    );
+    const ruleNodes = graph.nodes.filter((node) => node.type === 'rule' && node.entityId === '100');
     expect(ruleNodes).toHaveLength(2);
-    expect(ruleNodes.map((node) => node.tenant).sort()).toEqual([
-      'manager-a',
-      'manager-b',
-    ]);
+    expect(ruleNodes.map((node) => node.tenant).sort()).toEqual(['manager-a', 'manager-b']);
 
     const decoderNodes = graph.nodes.filter(
       (node) => node.type === 'decoder' && node.entityId === 'shared_decoder',
@@ -231,16 +219,10 @@ describe('Rules intelligence', () => {
 
     const managerARule = ruleNodes.find((node) => node.tenant === 'manager-a');
     const managerBParent = graph.nodes.find(
-      (node) =>
-        node.type === 'rule' &&
-        node.tenant === 'manager-b' &&
-        node.entityId === '999',
+      (node) => node.type === 'rule' && node.tenant === 'manager-b' && node.entityId === '999',
     );
     const missingSidExternal = graph.nodes.find(
-      (node) =>
-        node.type === 'external' &&
-        node.tenant === 'manager-a' &&
-        node.entityId === '999',
+      (node) => node.type === 'external' && node.tenant === 'manager-a' && node.entityId === '999',
     );
 
     expect(managerARule).toBeDefined();
