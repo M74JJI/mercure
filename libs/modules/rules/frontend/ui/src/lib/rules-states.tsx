@@ -48,3 +48,21 @@ export function RulesIntelligenceUnavailableState() {
     </Panel>
   );
 }
+
+export function RulesUseCaseNotFoundState() {
+  return (
+    <div className={styles.page}>
+      <PageHeader
+        eyebrow="Rules use case"
+        title="Use case not found"
+        description="This canonical Rules use-case entry does not exist or is no longer available."
+        actions={<StatusBadge>Not found</StatusBadge>}
+      />
+      <Panel tone="muted" className={styles.statePanel}>
+        <a className={styles.backLink} href="/rules/use-cases">
+          ← Return to use-case catalog
+        </a>
+      </Panel>
+    </div>
+  );
+}
