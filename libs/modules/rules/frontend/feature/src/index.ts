@@ -7,3 +7,8 @@ export {
   RulesComparisonFeature,
   type RulesComparisonFeatureProps,
 } from './lib/rules-comparison-feature';
+
+export {
+  RulesFieldIntelligenceFeature,
+  type RulesFieldIntelligenceFeatureProps,
+} from './lib/rules-field-intelligence-feature';
