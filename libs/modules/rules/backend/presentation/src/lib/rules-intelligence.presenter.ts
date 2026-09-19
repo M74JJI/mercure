@@ -142,10 +142,33 @@ export function presentQuality(
   };
 }
 
-export function presentGraph(result: BuildRulesetSnapshotGraphResult) {
+export function presentGraph(result: BuildRulesetSnapshotGraphResult, nodeLimit: number) {
+  const nodes = result.graph.nodes.slice(0, nodeLimit);
+  const allowedNodeIds = new Set(nodes.map((node) => node.id));
+  const edgeLimit = Math.min(nodeLimit * 4, 2_000);
+  const edges = result.graph.edges
+    .filter(
+      (edge) => allowedNodeIds.has(edge.source) && allowedNodeIds.has(edge.target),
+    )
+    .slice(0, edgeLimit);
+
   return {
     snapshotId: result.snapshotId,
-    graph: result.graph,
+    graph: {
+      nodes,
+      edges,
+      stats: {
+        nodes: nodes.length,
+        edges: edges.length,
+        rules: nodes.filter((node) => node.type === 'rule').length,
+        decoders: nodes.filter((node) => node.type === 'decoder').length,
+        fields: nodes.filter((node) => node.type === 'field').length,
+        groups: nodes.filter((node) => node.type === 'group').length,
+        useCases: nodes.filter((node) => node.type === 'use_case').length,
+        mitre: nodes.filter((node) => node.type === 'mitre').length,
+        external: nodes.filter((node) => node.type === 'external').length,
+      },
+    },
   };
 }
 
