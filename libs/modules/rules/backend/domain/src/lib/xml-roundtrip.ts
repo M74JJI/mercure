@@ -87,7 +87,7 @@ function normalizeSection(rule: RuleRecord): string {
 }
 
 function sanitizeCommentValue(value: string): string {
-  return value.replaceAll('--', 'â').trim();
+  return value.replaceAll('--', '- -').trim();
 }
 
 function sanitizeFileName(value: string): string {
@@ -204,18 +204,14 @@ function buildSplitXml(tenant: string, section: string, rules: readonly RuleReco
 function buildPatchSuggestion(rule: RuleRecord): RoundtripPatchSuggestion {
   const useCaseId = rule.useCaseId === 'unassigned' ? 'uc_todo_assign' : rule.useCaseId;
   const insertLine = `<info type="text">use_case:${useCaseId}</info>`;
-  let suggestedXml = rule.rawXml;
-
-  if (/<info\b[^>]*>\s*use_case:/i.test(rule.rawXml)) {
-    suggestedXml = rule.rawXml;
-  } else if (/<description>[\s\S]*?<\/description>/i.test(rule.rawXml)) {
-    suggestedXml = rule.rawXml.replace(
-      /(<description>[\s\S]*?<\/description>)/i,
-      `$1\n  ${insertLine}`,
-    );
-  } else {
-    suggestedXml = rule.rawXml.replace(/(<rule\b[^>]*>)/i, `$1\n  ${insertLine}`);
-  }
+  const suggestedXml = /<info\b[^>]*>\s*use_case:/i.test(rule.rawXml)
+    ? rule.rawXml
+    : /<description>[\s\S]*?<\/description>/i.test(rule.rawXml)
+      ? rule.rawXml.replace(
+          /(<description>[\s\S]*?<\/description>)/i,
+          `$1\n  ${insertLine}`,
+        )
+      : rule.rawXml.replace(/(<rule\b[^>]*>)/i, `$1\n  ${insertLine}`);
 
   return {
     tenant: rule.tenant,
