@@ -103,6 +103,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/rules/snapshots/{snapshotId}/rules/{position}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get one normalized rule record from a snapshot */
+    get: operations['RulesSnapshotsController_getRule'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/rules/snapshots/{snapshotId}/decoders': {
     parameters: {
       query?: never;
@@ -112,6 +129,23 @@ export interface paths {
     };
     /** List normalized decoders in a snapshot */
     get: operations['RulesSnapshotsController_listDecoders'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/rules/snapshots/{snapshotId}/decoders/{position}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get one normalized decoder record from a snapshot */
+    get: operations['RulesSnapshotsController_getDecoder'];
     put?: never;
     post?: never;
     delete?: never;
@@ -136,7 +170,25 @@ export interface paths {
     head?: never;
     patch?: never;
     trace?: never;
-  };  '/api/v1/rules/intelligence/snapshots/{snapshotId}/fields': {
+  };
+  '/api/v1/rules/snapshots/{snapshotId}/issues/{position}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get one validation finding from a snapshot */
+    get: operations['RulesSnapshotsController_getIssue'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/rules/intelligence/snapshots/{snapshotId}/fields': {
     parameters: {
       query?: never;
       header?: never;
@@ -278,6 +330,11 @@ export interface components {
       /** Format: uuid */
       snapshotId: string;
     };
+    RulesSnapshotRecordParamsDto: {
+      /** Format: uuid */
+      snapshotId: string;
+      position: number;
+    };
     RulesSnapshotListQueryDto: {
       /** @default 0 */
       offset: number;
@@ -364,11 +421,67 @@ export interface components {
         brokenDependencyCount: number;
       }[];
     };
+    RulesSnapshotRuleDocument: {
+      position: number;
+      id: string;
+      level: number;
+      description: string;
+      groups: string[];
+      status: string;
+      role: string;
+      /** @enum {string} */
+      severity: 'informational' | 'low' | 'medium' | 'high' | 'critical';
+      jiraVisible: boolean;
+      tenant: string;
+      sourceFile: string;
+      sourceSection?: string;
+      useCaseId: string;
+      /** @enum {string} */
+      useCaseConfidence: 'confirmed' | 'inferred' | 'unassigned';
+      mitre: string[];
+      dependencies: {
+        /** @enum {string} */
+        type: 'if_sid' | 'if_group' | 'if_matched_sid' | 'if_matched_group' | 'decoded_as';
+        value: string;
+      }[];
+      fields: {
+        name: string;
+        type?: string;
+        value: string;
+      }[];
+      frequency?: string;
+      timeframe?: string;
+      decodedAs: string[];
+      options: string[];
+    };
+    RulesSnapshotDecoderDocument: {
+      position: number;
+      name: string;
+      parent?: string;
+      prematch: string[];
+      regex: string[];
+      orderFields: string[];
+      tenant: string;
+      sourceFile: string;
+    };
+    RulesSnapshotIssueDocument: {
+      position: number;
+      /** @enum {string} */
+      severity: 'error' | 'warning' | 'info';
+      type: string;
+      title: string;
+      detail: string;
+      ruleId?: string;
+      decoderName?: string;
+      fileName?: string;
+      tenant?: string;
+    };
     RulesSnapshotRulePageDocument: {
       offset: number;
       limit: number;
       total: number;
       items: {
+        position: number;
         id: string;
         level: number;
         description: string;
@@ -406,6 +519,7 @@ export interface components {
       limit: number;
       total: number;
       items: {
+        position: number;
         name: string;
         parent?: string;
         prematch: string[];
@@ -420,6 +534,7 @@ export interface components {
       limit: number;
       total: number;
       items: {
+        position: number;
         /** @enum {string} */
         severity: 'error' | 'warning' | 'info';
         type: string;
@@ -1019,6 +1134,35 @@ export interface operations {
       };
     };
   };
+  RulesSnapshotsController_getRule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        snapshotId: string;
+        position: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesSnapshotRuleDocument'];
+        };
+      };
+      /** @description Rules snapshot or rule record not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   RulesSnapshotsController_listDecoders: {
     parameters: {
       query?: {
@@ -1044,6 +1188,35 @@ export interface operations {
         };
       };
       /** @description Rules snapshot not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesSnapshotsController_getDecoder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        snapshotId: string;
+        position: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesSnapshotDecoderDocument'];
+        };
+      };
+      /** @description Rules snapshot or decoder record not found. */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1084,7 +1257,37 @@ export interface operations {
         content?: never;
       };
     };
-  };  RulesIntelligenceController_fieldsForSnapshot: {
+  };
+  RulesSnapshotsController_getIssue: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        snapshotId: string;
+        position: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesSnapshotIssueDocument'];
+        };
+      };
+      /** @description Rules snapshot or validation finding not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesIntelligenceController_fieldsForSnapshot: {
     parameters: {
       query?: {
         offset?: number;

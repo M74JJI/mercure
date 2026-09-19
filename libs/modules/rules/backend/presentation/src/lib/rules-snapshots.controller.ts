@@ -32,20 +32,25 @@ import {
   QueryRulesetSnapshots,
   RulesetImportUnavailableError,
   RulesetSnapshotNotFoundError,
+  RulesetSnapshotRecordNotFoundError,
   type RulesetSnapshotDecoderQuery,
   type RulesetSnapshotIssueQuery,
   type RulesetSnapshotRuleQuery,
 } from '@mercure/rules-backend-application';
 
 import {
+  RulesSnapshotDecoderDocument,
   RulesSnapshotDecoderPageDocument,
   RulesSnapshotDecodersQueryDto,
   RulesSnapshotDocument,
+  RulesSnapshotIssueDocument,
   RulesSnapshotIssuePageDocument,
   RulesSnapshotIssuesQueryDto,
   RulesSnapshotListQueryDto,
   RulesSnapshotPageDocument,
   RulesSnapshotParamsDto,
+  RulesSnapshotRecordParamsDto,
+  RulesSnapshotRuleDocument,
   RulesSnapshotRulePageDocument,
   RulesSnapshotRulesQueryDto,
 } from './rules-snapshots.dto';
@@ -61,6 +66,10 @@ async function translateRulesHttpErrors<T>(operation: () => Promise<T>): Promise
   } catch (error) {
     if (error instanceof RulesetSnapshotNotFoundError) {
       throw new NotFoundException('Rules snapshot not found.');
+    }
+
+    if (error instanceof RulesetSnapshotRecordNotFoundError) {
+      throw new NotFoundException(`Rules snapshot ${error.kind} record not found.`);
     }
 
     if (error instanceof RulesetImportUnavailableError) {
@@ -110,6 +119,7 @@ function issueQueryFromDto(query: RulesSnapshotIssuesQueryDto): RulesetSnapshotI
 @ApiTags('rules')
 @ApiExtraModels(
   RulesSnapshotParamsDto,
+  RulesSnapshotRecordParamsDto,
   RulesSnapshotListQueryDto,
   RulesSnapshotRulesQueryDto,
   RulesSnapshotDecodersQueryDto,
@@ -199,6 +209,17 @@ export class RulesSnapshotsController {
     );
   }
 
+  @Get(':snapshotId/rules/:position')
+  @ApiOperation({ summary: 'Get one normalized rule record from a snapshot' })
+  @ApiOkResponse({ type: RulesSnapshotRuleDocument })
+  @ApiNotFoundResponse({ description: 'Rules snapshot or rule record not found.' })
+  @ZodSerializerDto(RulesSnapshotRuleDocument)
+  getRule(@ZodParam(RulesSnapshotRecordParamsDto) params: RulesSnapshotRecordParamsDto) {
+    return translateRulesHttpErrors(() =>
+      this.queries.getRule(params.snapshotId, params.position),
+    );
+  }
+
   @Get(':snapshotId/decoders')
   @ApiOperation({ summary: 'List normalized decoders in a snapshot' })
   @ApiOkResponse({ type: RulesSnapshotDecoderPageDocument })
@@ -213,6 +234,17 @@ export class RulesSnapshotsController {
     );
   }
 
+  @Get(':snapshotId/decoders/:position')
+  @ApiOperation({ summary: 'Get one normalized decoder record from a snapshot' })
+  @ApiOkResponse({ type: RulesSnapshotDecoderDocument })
+  @ApiNotFoundResponse({ description: 'Rules snapshot or decoder record not found.' })
+  @ZodSerializerDto(RulesSnapshotDecoderDocument)
+  getDecoder(@ZodParam(RulesSnapshotRecordParamsDto) params: RulesSnapshotRecordParamsDto) {
+    return translateRulesHttpErrors(() =>
+      this.queries.getDecoder(params.snapshotId, params.position),
+    );
+  }
+
   @Get(':snapshotId/issues')
   @ApiOperation({ summary: 'List validation issues in a snapshot' })
   @ApiOkResponse({ type: RulesSnapshotIssuePageDocument })
@@ -224,6 +256,17 @@ export class RulesSnapshotsController {
   ) {
     return translateRulesHttpErrors(() =>
       this.queries.listIssues(params.snapshotId, issueQueryFromDto(query)),
+    );
+  }
+
+  @Get(':snapshotId/issues/:position')
+  @ApiOperation({ summary: 'Get one validation finding from a snapshot' })
+  @ApiOkResponse({ type: RulesSnapshotIssueDocument })
+  @ApiNotFoundResponse({ description: 'Rules snapshot or validation finding not found.' })
+  @ZodSerializerDto(RulesSnapshotIssueDocument)
+  getIssue(@ZodParam(RulesSnapshotRecordParamsDto) params: RulesSnapshotRecordParamsDto) {
+    return translateRulesHttpErrors(() =>
+      this.queries.getIssue(params.snapshotId, params.position),
     );
   }
 }

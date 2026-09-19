@@ -92,6 +92,143 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
     return row ? mapSnapshot(row) : null;
   }
 
+  async getRule(
+    snapshotId: string,
+    position: number,
+  ): Promise<RulesetSnapshotRuleView | null> {
+    const row = await this.database.rulesetSnapshotRule.findUnique({
+      where: { snapshotId_position: { snapshotId, position } },
+      select: {
+        position: true,
+        ruleId: true,
+        level: true,
+        description: true,
+        status: true,
+        role: true,
+        severity: true,
+        jiraVisible: true,
+        tenant: true,
+        sourceSection: true,
+        useCaseId: true,
+        useCaseConfidence: true,
+        frequency: true,
+        timeframe: true,
+        sourceFile: { select: { name: true } },
+        groups: { orderBy: { position: 'asc' }, select: { value: true } },
+        mitreIds: { orderBy: { position: 'asc' }, select: { value: true } },
+        dependencies: {
+          orderBy: { position: 'asc' },
+          select: { type: true, value: true },
+        },
+        fields: {
+          orderBy: { position: 'asc' },
+          select: { name: true, fieldType: true, value: true },
+        },
+        decodedAs: { orderBy: { position: 'asc' }, select: { value: true } },
+        options: { orderBy: { position: 'asc' }, select: { value: true } },
+      },
+    });
+
+    if (!row) return null;
+
+    return {
+      position: row.position,
+      id: row.ruleId,
+      level: row.level,
+      description: row.description,
+      groups: row.groups.map((group) => group.value),
+      status: row.status,
+      role: row.role,
+      severity: row.severity as RulesetSnapshotRuleView['severity'],
+      jiraVisible: row.jiraVisible,
+      tenant: row.tenant,
+      sourceFile: row.sourceFile.name,
+      ...(row.sourceSection === null ? {} : { sourceSection: row.sourceSection }),
+      useCaseId: row.useCaseId,
+      useCaseConfidence: row.useCaseConfidence as RulesetSnapshotRuleView['useCaseConfidence'],
+      mitre: row.mitreIds.map((mitre) => mitre.value),
+      dependencies: row.dependencies.map((dependency) => ({
+        type: dependency.type as RulesetSnapshotRuleView['dependencies'][number]['type'],
+        value: dependency.value,
+      })),
+      fields: row.fields.map((field) => ({
+        name: field.name,
+        ...(field.fieldType === null ? {} : { type: field.fieldType }),
+        value: field.value,
+      })),
+      ...(row.frequency === null ? {} : { frequency: row.frequency }),
+      ...(row.timeframe === null ? {} : { timeframe: row.timeframe }),
+      decodedAs: row.decodedAs.map((decoded) => decoded.value),
+      options: row.options.map((option) => option.value),
+    };
+  }
+
+  async getDecoder(
+    snapshotId: string,
+    position: number,
+  ): Promise<RulesetSnapshotDecoderView | null> {
+    const row = await this.database.rulesetSnapshotDecoder.findUnique({
+      where: { snapshotId_position: { snapshotId, position } },
+      select: {
+        position: true,
+        name: true,
+        parent: true,
+        tenant: true,
+        sourceFile: { select: { name: true } },
+        prematches: { orderBy: { position: 'asc' }, select: { value: true } },
+        regexValues: { orderBy: { position: 'asc' }, select: { value: true } },
+        orderFields: { orderBy: { position: 'asc' }, select: { value: true } },
+      },
+    });
+
+    if (!row) return null;
+
+    return {
+      position: row.position,
+      name: row.name,
+      ...(row.parent === null ? {} : { parent: row.parent }),
+      prematch: row.prematches.map((prematch) => prematch.value),
+      regex: row.regexValues.map((regex) => regex.value),
+      orderFields: row.orderFields.map((field) => field.value),
+      tenant: row.tenant,
+      sourceFile: row.sourceFile.name,
+    };
+  }
+
+  async getIssue(
+    snapshotId: string,
+    position: number,
+  ): Promise<RulesetSnapshotIssueView | null> {
+    const row = await this.database.rulesetSnapshotIssue.findUnique({
+      where: { snapshotId_position: { snapshotId, position } },
+      select: {
+        position: true,
+        severity: true,
+        type: true,
+        title: true,
+        detail: true,
+        ruleId: true,
+        decoderName: true,
+        fileName: true,
+        tenant: true,
+      },
+    });
+
+    if (!row) return null;
+
+    return {
+      position: row.position,
+      severity: row.severity as RulesetSnapshotIssueView['severity'],
+      type: row.type,
+      title: row.title,
+      detail: row.detail,
+      ...(row.ruleId === null ? {} : { ruleId: row.ruleId }),
+      ...(row.decoderName === null ? {} : { decoderName: row.decoderName }),
+      ...(row.fileName === null ? {} : { fileName: row.fileName }),
+      ...(row.tenant === null ? {} : { tenant: row.tenant }),
+    };
+  }
+
   async listRules(
     snapshotId: string,
     request: RulesetSnapshotRuleQuery,
@@ -114,6 +251,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
         take: request.limit,
         orderBy: { position: 'asc' },
         select: {
+          position: true,
           ruleId: true,
           level: true,
           description: true,
@@ -148,6 +286,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
       ...request,
       total,
       items: rows.map((row) => ({
+        position: row.position,
         id: row.ruleId,
         level: row.level,
         description: row.description,
@@ -197,6 +336,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
         take: request.limit,
         orderBy: { position: 'asc' },
         select: {
+          position: true,
           name: true,
           parent: true,
           tenant: true,
@@ -212,6 +352,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
       ...request,
       total,
       items: rows.map((row) => ({
+        position: row.position,
         name: row.name,
         ...(row.parent === null ? {} : { parent: row.parent }),
         prematch: row.prematches.map((prematch) => prematch.value),
@@ -241,6 +382,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
         take: request.limit,
         orderBy: { position: 'asc' },
         select: {
+          position: true,
           severity: true,
           type: true,
           title: true,
@@ -257,6 +399,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
       ...request,
       total,
       items: rows.map((row) => ({
+        position: row.position,
         severity: row.severity as RulesetSnapshotIssueView['severity'],
         type: row.type,
         title: row.title,
