@@ -57,4 +57,6 @@ Completed:
 Next:
 
 1. the approved non-AI Rules migration scope is complete at the current backend/application and read-only frontend boundaries;
-2. public mutating Rules administration, identity/RBAC, intelligence presentation APIs/UI, and AI-assisted features require separate product/security decisions and ADRs before implementation.
+2. identity/RBAC, intelligence presentation APIs/UI, use-case administration, authenticated snapshot import, and record-level snapshot exploration have now been introduced through dedicated follow-up work;
+3. controlled Rules authoring is approved by ADR-0016 as a PostgreSQL-backed draft → validate → approve → export workflow;
+4. direct Wazuh manager mutation/deployment and AI-assisted authoring remain outside the approved boundary and require separate decisions.
