@@ -19,9 +19,9 @@ Legacy reference: `M74JJI/m-rules@21b1f5d9d4d91ecfd297ac211ce50ac5cd2e2028`.
 | Use-case HTTP CRUD               | Next `api/use-cases`              | Defer                                      | Future Nest presentation/application        |
 | Collection diff                  | `lib/diff.ts`                     | Migrated with tenant-safe regressions      | Rules domain/application                    |
 | XML round-trip/reporting         | `lib/xml-roundtrip.ts`            | Migrated as internal read-only analysis    | Rules domain/application/infrastructure     |
-| Rule quality scoring             | `lib/rule-quality.ts`             | Defer                                      | Rules domain/application                    |
-| Field intelligence               | `lib/field-intelligence.ts`       | Defer                                      | Rules domain/application                    |
-| Dependency/field graph           | `lib/graph-engine.ts`             | Defer                                      | Rules application/frontend                  |
+| Rule quality scoring             | `lib/rule-quality.ts`             | Migrated with tenant-safe scoring          | Rules domain/application                    |
+| Field intelligence               | `lib/field-intelligence.ts`       | Migrated with tenant-scoped lineage        | Rules domain/application                    |
+| Dependency/field graph           | `lib/graph-engine.ts`             | Migrated as layout-free semantic graph     | Rules domain/application                    |
 | AI rule intelligence             | `lib/ai-rule-intelligence.ts`     | Exclude                                    | Requires separate product/ADR decision      |
 | NextAuth/RBAC/sign-in            | `src/auth.ts`, `src/lib/auth/**`  | Exclude                                    | Future identity bounded context             |
 | Monolithic Rules Hub UI          | `WazuhRulesHub.tsx`               | Do not copy                                | Later feature-by-feature frontend migration |
@@ -51,9 +51,10 @@ Completed:
 4. M8 — Nest Rules snapshot import/query endpoints and regenerated frontend API contract;
 5. M9 — Rules frontend data-access, UI, feature composition, and read-only routes;
 6. M10 — tenant-safe snapshot diff and internal read-only XML round-trip analysis;
-7. M11 — canonical PostgreSQL-backed use-case catalog with catalog-backed imports.
+7. M11 — canonical PostgreSQL-backed use-case catalog with catalog-backed imports;
+8. M12 — tenant-scoped field intelligence, quality scoring, and layout-free semantic dependency graph over immutable snapshots.
 
 Next:
 
-1. graph, field intelligence and quality scoring;
-2. only then consider any AI-assisted feature through a separate product/security decision.
+1. the approved non-AI Rules migration scope is complete at the current backend/application and read-only frontend boundaries;
+2. public mutating Rules administration, identity/RBAC, intelligence presentation APIs/UI, and AI-assisted features require separate product/security decisions and ADRs before implementation.
