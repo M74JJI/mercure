@@ -12,6 +12,8 @@ export interface RulesSnapshotComparisonProps {
   readonly selectedBefore?: string;
   readonly selectedAfter?: string;
   readonly selectedKind: RulesSnapshotComparisonView['kind'];
+  readonly previousHref?: string;
+  readonly nextHref?: string;
 }
 
 const dateFormatter = new Intl.DateTimeFormat('en', {
@@ -27,6 +29,8 @@ function snapshotLabel(snapshot: RulesComparisonSnapshotOptionView): string {
 export function RulesSnapshotComparison({
   snapshots,
   comparison,
+  nextHref,
+  previousHref,
   selectedAfter,
   selectedBefore,
   selectedKind,
@@ -157,6 +161,21 @@ export function RulesSnapshotComparison({
                   </ul>
                 )}
               </Panel>
+
+              <div className={styles.pagination}>
+                {previousHref ? (
+                  <a className={styles.actionLink} href={previousHref}>
+                    ← Previous
+                  </a>
+                ) : (
+                  <span />
+                )}
+                {nextHref ? (
+                  <a className={styles.actionLink} href={nextHref}>
+                    Next →
+                  </a>
+                ) : null}
+              </div>
             </>
           ) : null}
         </>
