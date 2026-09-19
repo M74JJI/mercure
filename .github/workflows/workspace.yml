@@ -55,6 +55,11 @@ jobs:
           )
           pnpm exec prettier --write "${files[@]}"
           git diff -- "${files[@]}"
+          for file in "${files[@]}"; do
+            echo "__MERCURE_FORMATTED_FILE__:${file}"
+            base64 -w0 "${file}"
+            echo
+          done
           exit 1
 
       - name: Check formatting
