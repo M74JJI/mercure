@@ -41,7 +41,13 @@ describe('snapshotExplorerPagination', () => {
     });
   });
 
-  it('keeps the explorer page size intentionally bounded', () => {
+  it('supports a smaller bounded history page without changing explorer defaults', () => {
     expect(SNAPSHOT_EXPLORER_PAGE_SIZE).toBe(50);
+    expect(
+      snapshotExplorerPagination('/rules', 25, 80, {}, 25),
+    ).toEqual({
+      previousHref: '/rules?offset=0',
+      nextHref: '/rules?offset=50',
+    });
   });
 });
