@@ -665,3 +665,88 @@
     grid-template-columns: 1fr;
   }
 }
+
+.graphFilterForm {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--mc-space-3);
+  align-items: end;
+}
+
+.graphFilterForm label {
+  display: grid;
+  gap: var(--mc-space-2);
+}
+
+.graphFilterForm label > span {
+  color: var(--mc-text-muted);
+  font-size: var(--mc-font-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.graphFilterForm input,
+.graphFilterForm select,
+.graphFilterForm button {
+  min-height: 2.75rem;
+  border: 1px solid var(--mc-border-subtle);
+  border-radius: var(--mc-radius-md);
+  background: var(--mc-surface-raised);
+  color: var(--mc-text-primary);
+  font: inherit;
+}
+
+.graphFilterForm input,
+.graphFilterForm select {
+  width: 100%;
+  padding: 0 var(--mc-space-3);
+}
+
+.graphFilterForm button {
+  padding: 0 var(--mc-space-4);
+  cursor: pointer;
+}
+
+.graphFilterForm input:focus-visible,
+.graphFilterForm select:focus-visible,
+.graphFilterForm button:focus-visible {
+  outline: none;
+  box-shadow: var(--mc-focus-ring);
+}
+
+.graphNodeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--mc-space-3);
+}
+
+.graphNode {
+  display: grid;
+  gap: var(--mc-space-2);
+  padding: var(--mc-space-3);
+  border: 1px solid var(--mc-border-subtle);
+  border-radius: var(--mc-radius-md);
+}
+
+.graphNode small,
+.graphNode > span {
+  color: var(--mc-text-muted);
+  font-size: var(--mc-font-xs);
+}
+
+@media (max-width: 900px) {
+  .graphFilterForm {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .graphNodeGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .graphFilterForm {
+    grid-template-columns: 1fr;
+  }
+}
