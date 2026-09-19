@@ -52,8 +52,8 @@ async function token(
 }
 
 beforeAll(async () => {
-  const primary = await generateKeyPair('RS256');
-  const alternate = await generateKeyPair('RS256');
+  const primary = await generateKeyPair('RS256', { extractable: true });
+  const alternate = await generateKeyPair('RS256', { extractable: true });
   signingKey = primary.privateKey;
   alternateSigningKey = alternate.privateKey;
 
