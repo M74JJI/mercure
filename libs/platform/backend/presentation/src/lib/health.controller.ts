@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
+import { Controller, Get, Inject, ServiceUnavailableException, SetMetadata } from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
@@ -8,6 +8,7 @@ import {
 } from '@nestjs/swagger';
 
 import { READINESS_SERVICE, type ReadinessService } from '@mercure/platform-backend-health';
+import { PUBLIC_ROUTE_METADATA } from '@mercure/platform-backend-identity-domain';
 
 interface LivenessResponse {
   status: 'up';
@@ -37,6 +38,7 @@ class ReadinessResponseDocument {
   readonly checks: Record<string, 'up'> = {};
 }
 
+@SetMetadata(PUBLIC_ROUTE_METADATA, true)
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
