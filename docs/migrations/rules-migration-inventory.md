@@ -17,8 +17,8 @@ Legacy reference: `M74JJI/m-rules@21b1f5d9d4d91ecfd297ac211ce50ac5cd2e2028`.
 | Archive streaming API            | Next `manager-files/stream` route | Redesign later                             | Nest presentation/application               |
 | Use-case filesystem JSON store   | `lib/use-case-store.ts`           | Do not copy                                | Future PostgreSQL repository                |
 | Use-case HTTP CRUD               | Next `api/use-cases`              | Defer                                      | Future Nest presentation/application        |
-| Collection diff                  | `lib/diff.ts`                     | Defer after normalized model is stable     | Rules domain/application                    |
-| XML round-trip/reporting         | `lib/xml-roundtrip.ts`            | Defer                                      | Rules application/infrastructure            |
+| Collection diff                  | `lib/diff.ts`                     | Migrated with tenant-safe regressions       | Rules domain/application                    |
+| XML round-trip/reporting         | `lib/xml-roundtrip.ts`            | Migrated as internal read-only analysis     | Rules domain/application/infrastructure     |
 | Rule quality scoring             | `lib/rule-quality.ts`             | Defer                                      | Rules domain/application                    |
 | Field intelligence               | `lib/field-intelligence.ts`       | Defer                                      | Rules domain/application                    |
 | Dependency/field graph           | `lib/graph-engine.ts`             | Defer                                      | Rules application/frontend                  |
@@ -49,11 +49,11 @@ Completed:
 2. M6 — manager archive source adapter and import orchestration;
 3. M7 — immutable configuration snapshots and normalized PostgreSQL persistence;
 4. M8 — Nest Rules snapshot import/query endpoints and regenerated frontend API contract;
-5. M9 — Rules frontend data-access, UI, feature composition, and read-only routes.
+5. M9 — Rules frontend data-access, UI, feature composition, and read-only routes;
+6. M10 — tenant-safe snapshot diff and internal read-only XML round-trip analysis.
 
 Next:
 
-1. diff and XML round-trip;
-2. use-case catalog backed by PostgreSQL;
-3. graph, field intelligence and quality scoring;
-4. only then consider any AI-assisted feature through a separate product/security decision.
+1. use-case catalog backed by PostgreSQL;
+2. graph, field intelligence and quality scoring;
+3. only then consider any AI-assisted feature through a separate product/security decision.
