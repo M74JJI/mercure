@@ -49,3 +49,9 @@ export {
   type RulesQualityPageProps,
 } from './lib/rules-quality-page';
 export type { RulesQualityDetailView } from './lib/models';
+
+export {
+  RulesGraphPage,
+  type RulesGraphPageProps,
+} from './lib/rules-graph-page';
+export type { RulesGraphDetailView } from './lib/models';
