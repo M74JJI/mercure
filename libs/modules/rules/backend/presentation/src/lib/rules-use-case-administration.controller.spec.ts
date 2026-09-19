@@ -17,8 +17,6 @@ import {
   type CreateCustomRulesUseCaseInput,
   type RulesUseCaseCatalog,
 } from '@mercure/rules-backend-application';
-import type { RulesUseCase } from '@mercure/rules-backend-domain';
-
 import { RulesUseCaseAdministrationController } from './rules-use-case-administration.controller';
 
 const principal: MercurePrincipal = {
@@ -40,7 +38,9 @@ const editable = {
   category: 'configuration',
 };
 
-function customUseCase(input: CreateCustomRulesUseCaseInput): RulesUseCase {
+function customUseCase(
+  input: CreateCustomRulesUseCaseInput,
+): Awaited<ReturnType<RulesUseCaseCatalog['createCustom']>> {
   return {
     id: input.id,
     name: input.name,
