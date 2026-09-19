@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -11,6 +11,8 @@ import {
   CreateCustomRulesUseCase,
   DeleteCustomRulesUseCase,
   RulesSystemUseCaseProtectedError,
+  RulesUseCaseAlreadyExistsError,
+  RulesUseCaseNotFoundError,
   UpdateCustomRulesUseCase,
   type CreateCustomRulesUseCaseInput,
   type RulesUseCaseCatalog,
@@ -117,6 +119,95 @@ describe('RulesUseCaseAdministrationController', () => {
         { mercurePrincipal: principal },
         { useCaseId: 'uc_system' },
         editable,
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
+  it('maps duplicate create to a conflict', async () => {
+    const catalog: RulesUseCaseCatalog = {
+      list: async () => [],
+      get: async () => null,
+      createCustom: async (input) => {
+        throw new RulesUseCaseAlreadyExistsError(input.id);
+      },
+      updateCustom: async (input) => ({
+        id: input.id,
+        ...editable,
+        source: 'custom',
+        createdBy: principal.subject,
+      }),
+      deleteCustom: async () => undefined,
+    };
+    const controller = new RulesUseCaseAdministrationController(
+      new CreateCustomRulesUseCase(catalog),
+      new UpdateCustomRulesUseCase(catalog),
+      new DeleteCustomRulesUseCase(catalog),
+    );
+
+    await expect(
+      controller.create(
+        { mercurePrincipal: principal },
+        {
+          id: 'uc_admin_config',
+          ...editable,
+        },
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('maps a missing delete target to not found', async () => {
+    const catalog: RulesUseCaseCatalog = {
+      list: async () => [],
+      get: async () => null,
+      createCustom: async (input) => customUseCase(input),
+      updateCustom: async (input) => ({
+        id: input.id,
+        ...editable,
+        source: 'custom',
+        createdBy: principal.subject,
+      }),
+      deleteCustom: async (id) => {
+        throw new RulesUseCaseNotFoundError(id);
+      },
+    };
+    const controller = new RulesUseCaseAdministrationController(
+      new CreateCustomRulesUseCase(catalog),
+      new UpdateCustomRulesUseCase(catalog),
+      new DeleteCustomRulesUseCase(catalog),
+    );
+
+    await expect(
+      controller.delete(
+        { mercurePrincipal: principal },
+        { useCaseId: 'uc_missing' },
+      ),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('maps protected system delete to a conflict', async () => {
+    const catalog: RulesUseCaseCatalog = {
+      list: async () => [],
+      get: async () => null,
+      createCustom: async (input) => customUseCase(input),
+      updateCustom: async (input) => ({
+        id: input.id,
+        ...editable,
+        source: 'custom',
+        createdBy: principal.subject,
+      }),
+      deleteCustom: async (id) => {
+        throw new RulesSystemUseCaseProtectedError(id);
+      },
+    };
+    const controller = new RulesUseCaseAdministrationController(
+      new CreateCustomRulesUseCase(catalog),
+      new UpdateCustomRulesUseCase(catalog),
+      new DeleteCustomRulesUseCase(catalog),
+    );
+
+    await expect(
+      controller.delete(
+        { mercurePrincipal: principal },
+        { useCaseId: 'uc_system' },
       ),
     ).rejects.toBeInstanceOf(ConflictException);
   });
