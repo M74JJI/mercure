@@ -75,6 +75,14 @@ export class RulesDataAccess {
     });
   }
 
+  async importSnapshot(): Promise<RulesSnapshot> {
+    const { data, response } = await safelyRequest('import snapshot', () =>
+      this.client.POST('/api/v1/rules/snapshots/import'),
+    );
+
+    return requireData('import snapshot', data, response);
+  }
+
   async listSnapshots(query: RulesSnapshotListQuery = {}): Promise<RulesSnapshotPage> {
     const { data, response } = await safelyRequest('list snapshots', () =>
       this.client.GET('/api/v1/rules/snapshots', {
