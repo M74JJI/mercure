@@ -2,10 +2,13 @@ import {
   Controller,
   Get,
   Inject,
+  Logger,
   NotFoundException,
   Post,
+  Req,
   ServiceUnavailableException,
   SetMetadata,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -22,6 +25,7 @@ import { ZodSerializerDto } from 'nestjs-zod';
 import {
   REQUIRED_CAPABILITIES_METADATA,
   type MercureCapability,
+  type MercurePrincipal,
 } from '@mercure/platform-backend-identity-domain';
 import {
   PersistImportedRuleset,
@@ -46,6 +50,10 @@ import {
   RulesSnapshotRulesQueryDto,
 } from './rules-snapshots.dto';
 import { ZodParam, ZodQuery } from './zod-route-parameters';
+
+interface PrincipalRequest {
+  readonly mercurePrincipal?: MercurePrincipal;
+}
 
 async function translateRulesHttpErrors<T>(operation: () => Promise<T>): Promise<T> {
   try {
@@ -109,6 +117,8 @@ function issueQueryFromDto(query: RulesSnapshotIssuesQueryDto): RulesetSnapshotI
 )
 @Controller('rules/snapshots')
 export class RulesSnapshotsController {
+  private readonly logger = new Logger(RulesSnapshotsController.name);
+
   constructor(
     @Inject(PersistImportedRuleset)
     private readonly persistImportedRuleset: PersistImportedRuleset,
@@ -127,11 +137,35 @@ export class RulesSnapshotsController {
     description: 'No usable Rules source files are currently available to import.',
   })
   @ZodSerializerDto(RulesSnapshotDocument)
-  importSnapshot() {
-    return translateRulesHttpErrors(async () => {
-      const persisted = await this.persistImportedRuleset.execute();
-      return this.queries.get(persisted.snapshot.id);
-    });
+  async importSnapshot(@Req() request: PrincipalRequest) {
+    const principal = request.mercurePrincipal;
+    if (!principal) {
+      throw new UnauthorizedException('Authentication is required.');
+    }
+
+    try {
+      const snapshot = await translateRulesHttpErrors(async () => {
+        const persisted = await this.persistImportedRuleset.execute();
+        return this.queries.get(persisted.snapshot.id);
+      });
+
+      this.logger.log({
+        event: 'rules.snapshot.import',
+        actorSubject: principal.subject,
+        snapshotId: snapshot.id,
+        outcome: 'success',
+      });
+
+      return snapshot;
+    } catch (error) {
+      this.logger.warn({
+        event: 'rules.snapshot.import',
+        actorSubject: principal.subject,
+        outcome: 'failure',
+        failure: error instanceof Error ? error.name : 'unknown',
+      });
+      throw error;
+    }
   }
 
   @Get()
