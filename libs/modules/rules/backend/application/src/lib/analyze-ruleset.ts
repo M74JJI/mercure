@@ -1,5 +1,7 @@
 import type { ParsedRuleset, RulesUseCase, RulesetSourceType } from '@mercure/rules-backend-domain';
 
+import type { RulesUseCaseCatalogReader } from './use-case-catalog';
+
 export const RULESET_ANALYZER = Symbol('mercure.rules.ruleset-analyzer');
 export const RULESET_ARCHIVE_SOURCE = Symbol('mercure.rules.ruleset-archive-source');
 
@@ -62,13 +64,16 @@ export class ImportArchivedRuleset {
   constructor(
     private readonly source: RulesetArchiveSource,
     private readonly analyzeRuleset: AnalyzeRuleset,
+    private readonly useCaseCatalog?: RulesUseCaseCatalogReader,
   ) {}
 
   async execute(request: ImportArchivedRulesetRequest = {}): Promise<ImportArchivedRulesetResult> {
     const snapshot = await this.source.readSnapshot();
+    const useCases =
+      request.useCases ?? (this.useCaseCatalog ? await this.useCaseCatalog.list() : undefined);
     const analysis = await this.analyzeRuleset.execute({
       files: snapshot.files,
-      ...(request.useCases ? { useCases: request.useCases } : {}),
+      ...(useCases === undefined ? {} : { useCases }),
     });
 
     const source: Omit<RulesetArchiveSnapshot, 'files'> = {
