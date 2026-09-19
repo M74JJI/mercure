@@ -142,6 +142,20 @@ describe('KeycloakAccessTokenVerifier', () => {
     await expect(verifier().verify(accessToken)).rejects.toThrow('Access token is invalid.');
   });
 
+  it('rejects a cryptographically valid token without a subject', async () => {
+    const accessToken = await new SignJWT({
+      realm_access: { roles: ['user'] },
+    })
+      .setProtectedHeader({ alg: 'RS256', kid: 'primary' })
+      .setIssuer(issuer)
+      .setAudience(audience)
+      .setIssuedAt()
+      .setExpirationTime('5m')
+      .sign(signingKey);
+
+    await expect(verifier().verify(accessToken)).rejects.toThrow('Access token is invalid.');
+  });
+
   it('rejects a token that is not valid yet', async () => {
     const accessToken = await new SignJWT({
       realm_access: { roles: ['user'] },
