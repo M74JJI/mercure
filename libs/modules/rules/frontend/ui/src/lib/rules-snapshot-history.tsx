@@ -1,6 +1,7 @@
 import { PageHeader, Panel, StatusBadge } from '@mercure/platform-frontend-design-system';
 
 import type { RulesSnapshotSummaryView } from './models';
+import { RulesSnapshotImportForm } from './rules-snapshot-import-form';
 import styles from './rules.module.css';
 
 export type RulesSnapshotImportStatus = 'unavailable' | 'failed';
@@ -9,7 +10,7 @@ export interface RulesSnapshotHistoryProps {
   readonly snapshots: readonly RulesSnapshotSummaryView[];
   readonly total: number;
   readonly canImport: boolean;
-  readonly importAction?: (formData: FormData) => void | Promise<void>;
+  readonly importAction?: (formData: FormData) => Promise<void>;
   readonly importStatus?: RulesSnapshotImportStatus;
 }
 
@@ -53,11 +54,7 @@ export function RulesSnapshotHistory({
         actions={
           <div className={styles.headerActions}>
             {canImport && importAction ? (
-              <form action={importAction}>
-                <button className={styles.actionButton} type="submit">
-                  Import configured snapshot
-                </button>
-              </form>
+              <RulesSnapshotImportForm action={importAction} />
             ) : null}
             <a className={styles.actionLink} href="/rules/compare">
               Compare
