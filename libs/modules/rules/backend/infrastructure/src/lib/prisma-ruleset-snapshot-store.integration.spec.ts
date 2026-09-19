@@ -2,8 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import { createPrismaClient } from '@mercure/platform-backend-database/client';
 import {
+  AnalyzeRulesetSnapshotFields,
   AnalyzeRulesetSnapshotRoundtrip,
+  BuildRulesetSnapshotGraph,
   CompareRulesetSnapshots,
+  ScoreRulesetSnapshotQuality,
   type ImportArchivedRulesetResult,
 } from '@mercure/rules-backend-application';
 
@@ -33,6 +36,9 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
     const analysisSource = new PrismaRulesetSnapshotAnalysisSource(database);
     const compareSnapshots = new CompareRulesetSnapshots(analysisSource);
     const analyzeRoundtrip = new AnalyzeRulesetSnapshotRoundtrip(analysisSource);
+    const analyzeFields = new AnalyzeRulesetSnapshotFields(analysisSource);
+    const scoreQuality = new ScoreRulesetSnapshotQuality(analysisSource);
+    const buildGraph = new BuildRulesetSnapshotGraph(analysisSource);
 
     const analysis = await analyzer.analyze({
       files: [
@@ -235,6 +241,78 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
       expect(roundtrip.analysis.splitFiles[0]?.xml).toContain(
         '<rule id="310001" level="12" frequency="4" timeframe="60">',
       );
+
+      const fields = await analyzeFields.execute(saved.id);
+      expect(fields.snapshotId).toBe(saved.id);
+      expect(fields.intelligence.rows).toContainEqual(
+        expect.objectContaining({
+          tenant: 'manager-x',
+          field: 'srcip',
+          health: 'healthy',
+          producedBy: [
+            expect.objectContaining({
+              tenant: 'manager-x',
+              name: 'snapshot_decoder',
+            }),
+          ],
+          usedByRules: [
+            expect.objectContaining({
+              tenant: 'manager-x',
+              ruleId: '310001',
+            }),
+          ],
+        }),
+      );
+
+      const quality = await scoreQuality.execute(saved.id);
+      expect(quality.snapshotId).toBe(saved.id);
+      expect(quality.quality.rules[0]).toMatchObject({
+        tenant: 'manager-x',
+        ruleId: '310001',
+        useCaseId: 'uc_snapshot',
+      });
+      expect(quality.quality.rules[0]?.warnings).toContain('Missing tenant dependency SID 999999.');
+      expect(quality.quality.rules[0]?.dimensions.noiseControl).toBeGreaterThanOrEqual(0);
+      expect(quality.quality.rules[0]?.dimensions.noiseControl).toBeLessThanOrEqual(100);
+
+      const graph = await buildGraph.execute({
+        snapshotId: saved.id,
+        filters: {
+          mode: 'all',
+          includeExternal: true,
+          limit: 100,
+        },
+      });
+      expect(graph.snapshotId).toBe(saved.id);
+      expect(graph.graph.nodes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'rule',
+            tenant: 'manager-x',
+            entityId: '310001',
+          }),
+          expect.objectContaining({
+            type: 'decoder',
+            tenant: 'manager-x',
+            entityId: 'snapshot_decoder',
+          }),
+          expect.objectContaining({
+            type: 'field',
+            tenant: 'manager-x',
+            entityId: 'srcip',
+          }),
+          expect.objectContaining({
+            type: 'external',
+            tenant: 'manager-x',
+            entityId: '999999',
+          }),
+        ]),
+      );
+      for (const node of graph.graph.nodes) {
+        expect('x' in node).toBe(false);
+        expect('y' in node).toBe(false);
+        expect('tone' in node).toBe(false);
+      }
 
       const stored = await database.rulesetSnapshot.findUnique({
         where: { id: saved.id },

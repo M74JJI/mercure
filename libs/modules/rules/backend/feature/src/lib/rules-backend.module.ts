@@ -4,7 +4,9 @@ import { PlatformConfig } from '@mercure/platform-backend-config';
 import { PlatformDatabaseModule, PrismaService } from '@mercure/platform-backend-database';
 import {
   AnalyzeRuleset,
+  AnalyzeRulesetSnapshotFields,
   AnalyzeRulesetSnapshotRoundtrip,
+  BuildRulesetSnapshotGraph,
   CompareRulesetSnapshots,
   CreateCustomRulesUseCase,
   DeleteCustomRulesUseCase,
@@ -13,6 +15,7 @@ import {
   ListRulesUseCases,
   PersistImportedRuleset,
   QueryRulesetSnapshots,
+  ScoreRulesetSnapshotQuality,
   RULESET_ANALYZER,
   RULESET_ARCHIVE_SOURCE,
   RULESET_SNAPSHOT_ANALYSIS_SOURCE,
@@ -130,6 +133,23 @@ import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
       inject: [RULESET_SNAPSHOT_ANALYSIS_SOURCE],
     },
     {
+      provide: AnalyzeRulesetSnapshotFields,
+      useFactory: (source: RulesetSnapshotAnalysisSource) =>
+        new AnalyzeRulesetSnapshotFields(source),
+      inject: [RULESET_SNAPSHOT_ANALYSIS_SOURCE],
+    },
+    {
+      provide: ScoreRulesetSnapshotQuality,
+      useFactory: (source: RulesetSnapshotAnalysisSource) =>
+        new ScoreRulesetSnapshotQuality(source),
+      inject: [RULESET_SNAPSHOT_ANALYSIS_SOURCE],
+    },
+    {
+      provide: BuildRulesetSnapshotGraph,
+      useFactory: (source: RulesetSnapshotAnalysisSource) => new BuildRulesetSnapshotGraph(source),
+      inject: [RULESET_SNAPSHOT_ANALYSIS_SOURCE],
+    },
+    {
       provide: ListRulesUseCases,
       useFactory: (catalog: RulesUseCaseCatalogReader) => new ListRulesUseCases(catalog),
       inject: [RULES_USE_CASE_CATALOG],
@@ -162,6 +182,9 @@ import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
     QueryRulesetSnapshots,
     CompareRulesetSnapshots,
     AnalyzeRulesetSnapshotRoundtrip,
+    AnalyzeRulesetSnapshotFields,
+    ScoreRulesetSnapshotQuality,
+    BuildRulesetSnapshotGraph,
     ListRulesUseCases,
     GetRulesUseCase,
     CreateCustomRulesUseCase,
