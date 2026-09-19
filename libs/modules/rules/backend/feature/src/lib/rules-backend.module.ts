@@ -146,8 +146,7 @@ import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
     },
     {
       provide: BuildRulesetSnapshotGraph,
-      useFactory: (source: RulesetSnapshotAnalysisSource) =>
-        new BuildRulesetSnapshotGraph(source),
+      useFactory: (source: RulesetSnapshotAnalysisSource) => new BuildRulesetSnapshotGraph(source),
       inject: [RULESET_SNAPSHOT_ANALYSIS_SOURCE],
     },
     {
