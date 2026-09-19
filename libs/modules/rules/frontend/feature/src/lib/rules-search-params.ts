@@ -31,7 +31,13 @@ export function enumSearchParam<const T extends readonly string[]>(
   allowed: T,
 ): T[number] | undefined {
   const value = firstSearchParam(params, key);
-  return value !== undefined && allowed.includes(value) ? (value as T[number]) : undefined;
+  if (value === undefined) return undefined;
+
+  for (const candidate of allowed) {
+    if (candidate === value) return candidate;
+  }
+
+  return undefined;
 }
 
 export function rulesHref(
