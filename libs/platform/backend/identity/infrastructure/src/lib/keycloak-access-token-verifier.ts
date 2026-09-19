@@ -8,6 +8,8 @@ import {
   type MercurePrincipal,
 } from '@mercure/platform-backend-identity-domain';
 
+type RemoteJwkSet = ReturnType<(typeof import('jose'))['createRemoteJWKSet']>;
+
 export interface KeycloakAccessTokenVerifierOptions {
   readonly issuer: string;
   readonly jwksUrl: string;
@@ -74,7 +76,7 @@ function identityFromPayload(payload: JWTPayload, clientId: string): ExternalIde
 }
 
 export class KeycloakAccessTokenVerifier implements AccessTokenVerifier {
-  private readonly verificationKey: Promise<ReturnType<typeof import('jose')['createRemoteJWKSet']>>;
+  private readonly verificationKey: Promise<RemoteJwkSet>;
 
   constructor(private readonly options: KeycloakAccessTokenVerifierOptions) {
     this.verificationKey = import('jose').then(({ createRemoteJWKSet }) =>
