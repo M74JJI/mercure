@@ -1,17 +1,12 @@
 import type { JWTPayload } from 'jose';
 
+import type { AccessTokenVerifier } from '@mercure/platform-backend-identity-application';
 import {
   resolveMercurePrincipal,
   type AuthorityRoleMapping,
   type ExternalIdentity,
   type MercurePrincipal,
 } from '@mercure/platform-backend-identity-domain';
-
-export const ACCESS_TOKEN_VERIFIER = Symbol('ACCESS_TOKEN_VERIFIER');
-
-export interface AccessTokenVerifier {
-  verify(token: string): Promise<MercurePrincipal>;
-}
 
 export interface KeycloakAccessTokenVerifierOptions {
   readonly issuer: string;
