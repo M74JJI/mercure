@@ -10,6 +10,7 @@ import {
 import {
   RulesFrontendApiError,
   RulesUseCaseAdministrationDataAccess,
+  type RulesUseCaseAdministrationResult,
 } from '@mercure/rules-frontend-data-access';
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
@@ -77,7 +78,7 @@ export async function createRulesUseCaseAction(formData: FormData): Promise<void
     redirect(errorHref('/rules/use-cases/new', 'validation', parsed.error.field));
   }
 
-  let created;
+  let created: RulesUseCaseAdministrationResult;
   try {
     created = await adminApi().create(parsed.value);
   } catch (error) {
