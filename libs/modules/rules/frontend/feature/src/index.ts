@@ -27,3 +27,8 @@ export {
   RulesDiagnosticsFeature,
   type RulesDiagnosticsFeatureProps,
 } from './lib/rules-diagnostics-feature';
+
+export {
+  RulesUseCaseDetailFeature,
+  type RulesUseCaseDetailFeatureProps,
+} from './lib/rules-use-case-detail-feature';
