@@ -17,3 +17,8 @@ export {
   RulesQualityFeature,
   type RulesQualityFeatureProps,
 } from './lib/rules-quality-feature';
+
+export {
+  RulesGraphFeature,
+  type RulesGraphFeatureProps,
+} from './lib/rules-graph-feature';
