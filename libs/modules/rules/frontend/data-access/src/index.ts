@@ -31,3 +31,10 @@ export {
   type RulesUseCaseListQuery,
   type RulesUseCasePage,
 } from './lib/rules-intelligence-api';
+
+export {
+  RulesUseCaseAdministrationDataAccess,
+  type RulesUseCaseAdministrationResult,
+  type RulesUseCaseCreateInput,
+  type RulesUseCaseUpdateInput,
+} from './lib/rules-use-case-administration-api';
