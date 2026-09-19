@@ -1,17 +1,8 @@
-import type {
-  DecoderRecord,
-  ParsedRuleset,
-  RuleRecord,
-  RuleSeverity,
-} from './rules-records';
+import type { DecoderRecord, ParsedRuleset, RuleRecord, RuleSeverity } from './rules-records';
 
 export type FieldCriticality = 'critical' | 'high' | 'medium' | 'low';
 export type FieldHealth =
-  | 'healthy'
-  | 'underused'
-  | 'unknown_source'
-  | 'alias_candidate'
-  | 'orphaned';
+  'healthy' | 'underused' | 'unknown_source' | 'alias_candidate' | 'orphaned';
 
 export interface FieldAliasHint {
   readonly tenant: string;
@@ -94,8 +85,7 @@ const FIELD_DICTIONARY: readonly FieldDictionaryEntry[] = [
     field: 'event.category',
     canonical: 'event.category',
     family: 'event',
-    description:
-      'Normalized event category such as traffic, vpn, system, dns, ips, webfilter.',
+    description: 'Normalized event category such as traffic, vpn, system, dns, ips, webfilter.',
     aliases: ['type', 'subtype', 'fortigate.type'],
     risk: 'high',
   },
@@ -278,9 +268,7 @@ const FIELD_DICTIONARY: readonly FieldDictionaryEntry[] = [
 ];
 
 function average(items: readonly number[]): number {
-  return items.length
-    ? Math.round(items.reduce((sum, value) => sum + value, 0) / items.length)
-    : 0;
+  return items.length ? Math.round(items.reduce((sum, value) => sum + value, 0) / items.length) : 0;
 }
 
 function clamp(value: number): number {
@@ -397,10 +385,7 @@ function buildAliasHints(
           tenant,
           field: field.toLowerCase(),
           alias: entry.canonical,
-          reason:
-            'Likely alias of ' +
-            entry.canonical +
-            '; both forms appear for this tenant.',
+          reason: 'Likely alias of ' + entry.canonical + '; both forms appear for this tenant.',
         });
       }
     }
