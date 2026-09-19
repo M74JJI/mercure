@@ -12,3 +12,8 @@ export {
   RulesFieldIntelligenceFeature,
   type RulesFieldIntelligenceFeatureProps,
 } from './lib/rules-field-intelligence-feature';
+
+export {
+  RulesQualityFeature,
+  type RulesQualityFeatureProps,
+} from './lib/rules-quality-feature';
