@@ -121,3 +121,26 @@ export interface RulesUseCasePreviewView {
   readonly category: string;
   readonly source: 'system' | 'custom';
 }
+
+export interface RulesComparisonSnapshotOptionView {
+  readonly id: string;
+  readonly createdAt: string;
+}
+
+export interface RulesSnapshotComparisonView {
+  readonly kind: 'rules' | 'decoders' | 'files' | 'use_cases' | 'issues';
+  readonly summary: {
+    readonly rulesAdded: number;
+    readonly rulesRemoved: number;
+    readonly rulesChanged: number;
+    readonly newIssues: number;
+  };
+  readonly page: {
+    readonly total: number;
+    readonly items: readonly {
+      readonly key: string;
+      readonly state: 'added' | 'removed' | 'changed' | 'resolved';
+      readonly changes: readonly string[];
+    }[];
+  };
+}
