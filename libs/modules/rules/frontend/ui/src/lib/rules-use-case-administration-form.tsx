@@ -20,7 +20,8 @@ export type RulesUseCaseAdminField =
   | 'vendor'
   | 'product'
   | 'domain'
-  | 'category';
+  | 'category'
+  | 'confirmation';
 
 interface SharedProps {
   readonly action: (formData: FormData) => void | Promise<void>;
