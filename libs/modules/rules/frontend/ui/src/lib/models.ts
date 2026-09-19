@@ -46,3 +46,65 @@ export interface RulesIssuePreviewView {
   readonly decoderName?: string;
   readonly tenant?: string;
 }
+
+export interface RulesFieldIntelligenceView {
+  readonly stats: {
+    readonly totalFields: number;
+  };
+  readonly page: {
+    readonly total: number;
+    readonly items: readonly {
+      readonly key: string;
+      readonly tenant: string;
+      readonly field: string;
+      readonly family: string;
+      readonly health: string;
+      readonly riskScore: number;
+    }[];
+  };
+}
+
+export interface RulesQualityView {
+  readonly stats: {
+    readonly averageOverall: number;
+  };
+  readonly rules?: {
+    readonly total: number;
+    readonly items: readonly {
+      readonly key: string;
+      readonly tenant: string;
+      readonly ruleId: string;
+      readonly useCaseId: string;
+      readonly overall: number;
+      readonly grade: string;
+      readonly strengths: readonly string[];
+      readonly warnings: readonly string[];
+    }[];
+  };
+}
+
+export interface RulesGraphSummaryView {
+  readonly graph: {
+    readonly stats: {
+      readonly nodes: number;
+      readonly edges: number;
+      readonly rules: number;
+      readonly decoders: number;
+      readonly fields: number;
+      readonly useCases: number;
+      readonly mitre: number;
+      readonly external: number;
+    };
+  };
+}
+
+export interface RulesRoundtripSummaryView {
+  readonly summary: {
+    readonly sourceSections: number;
+    readonly commentedRules: number;
+    readonly idRangeWarnings: number;
+    readonly orphanGroups: number;
+    readonly missingGroupProducers: number;
+    readonly missingUseCaseSuggestions: number;
+  };
+}
