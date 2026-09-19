@@ -40,6 +40,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Show canonical Rules intelligence formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            libs/modules/rules/backend/application/src/lib/analyze-ruleset-intelligence.ts
+            libs/modules/rules/backend/domain/src/lib/field-intelligence.ts
+            libs/modules/rules/backend/domain/src/lib/rule-quality.ts
+            libs/modules/rules/backend/domain/src/lib/rules-graph.ts
+            libs/modules/rules/backend/feature/src/lib/rules-backend.module.ts
+            libs/modules/rules/backend/infrastructure/src/lib/prisma-ruleset-snapshot-store.integration.spec.ts
+            libs/modules/rules/backend/infrastructure/src/lib/rules-intelligence.spec.ts
+          )
+          pnpm exec prettier --write "${files[@]}"
+          git diff -- "${files[@]}"
+          exit 1
+
       - name: Check formatting
         run: pnpm format
 
