@@ -837,3 +837,143 @@
     flex-direction: column;
   }
 }
+
+.formNotice {
+  color: var(--mc-text-secondary);
+}
+
+.adminFormPanel {
+  display: grid;
+}
+
+.adminForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--mc-space-4);
+}
+
+.adminForm label,
+.readOnlyField {
+  display: grid;
+  gap: var(--mc-space-2);
+}
+
+.adminForm label > span,
+.readOnlyField > span {
+  color: var(--mc-text-muted);
+  font-size: var(--mc-font-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.adminForm input,
+.adminForm textarea,
+.adminForm button,
+.dangerForm input,
+.dangerForm button {
+  border: 1px solid var(--mc-border-subtle);
+  border-radius: var(--mc-radius-md);
+  background: var(--mc-surface-raised);
+  color: var(--mc-text-primary);
+  font: inherit;
+}
+
+.adminForm input,
+.dangerForm input {
+  min-height: 2.75rem;
+  padding: 0 var(--mc-space-3);
+}
+
+.adminForm textarea {
+  width: 100%;
+  padding: var(--mc-space-3);
+  resize: vertical;
+}
+
+.adminForm input[aria-invalid='true'],
+.adminForm textarea[aria-invalid='true'],
+.dangerForm input[aria-invalid='true'] {
+  border-color: var(--mc-text-accent);
+}
+
+.adminForm small,
+.readOnlyField small {
+  color: var(--mc-text-muted);
+}
+
+.fullWidthField,
+.formActions {
+  grid-column: 1 / -1;
+}
+
+.formActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--mc-space-3);
+  padding-top: var(--mc-space-2);
+}
+
+.adminForm button,
+.dangerForm button {
+  min-height: 2.75rem;
+  padding: 0 var(--mc-space-4);
+  cursor: pointer;
+}
+
+.adminForm input:focus-visible,
+.adminForm textarea:focus-visible,
+.adminForm button:focus-visible,
+.dangerForm input:focus-visible,
+.dangerForm button:focus-visible {
+  outline: none;
+  box-shadow: var(--mc-focus-ring);
+}
+
+.dangerPanel {
+  display: grid;
+  gap: var(--mc-space-4);
+}
+
+.dangerPanel h2,
+.dangerPanel p {
+  margin: 0;
+}
+
+.dangerPanel p {
+  color: var(--mc-text-secondary);
+  line-height: 1.6;
+}
+
+.dangerForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--mc-space-3);
+  align-items: end;
+}
+
+.dangerForm label {
+  display: grid;
+  gap: var(--mc-space-2);
+}
+
+.dangerForm label > span {
+  color: var(--mc-text-muted);
+  font-size: var(--mc-font-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 680px) {
+  .adminForm,
+  .dangerForm {
+    grid-template-columns: 1fr;
+  }
+
+  .formActions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+}
