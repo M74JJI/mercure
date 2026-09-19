@@ -1,0 +1,9 @@
+{
+  "name": "@mercure/platform-backend-identity-infrastructure",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
