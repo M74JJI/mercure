@@ -12,6 +12,8 @@ export interface RulesSnapshotHistoryProps {
   readonly canImport: boolean;
   readonly importAction?: (formData: FormData) => Promise<void>;
   readonly importStatus?: RulesSnapshotImportStatus;
+  readonly previousHref?: string;
+  readonly nextHref?: string;
 }
 
 const dateFormatter = new Intl.DateTimeFormat('en', {
@@ -40,6 +42,8 @@ export function RulesSnapshotHistory({
   canImport,
   importAction,
   importStatus,
+  nextHref,
+  previousHref,
   snapshots,
   total,
 }: RulesSnapshotHistoryProps) {
@@ -122,6 +126,21 @@ export function RulesSnapshotHistory({
           ))}
         </section>
       )}
+
+      <div className={styles.pagination}>
+        {previousHref ? (
+          <a className={styles.actionLink} href={previousHref}>
+            ← Previous
+          </a>
+        ) : (
+          <span />
+        )}
+        {nextHref ? (
+          <a className={styles.actionLink} href={nextHref}>
+            Next →
+          </a>
+        ) : null}
+      </div>
     </div>
   );
 }
