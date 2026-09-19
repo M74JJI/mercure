@@ -4,13 +4,15 @@ import {
   RulesFrontendApiError,
   RulesIntelligenceDataAccess,
 } from '@mercure/rules-frontend-data-access';
-import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 import {
+  RulesIntelligenceUnavailableState,
   RulesSnapshotDetail,
   RulesSnapshotIntelligence,
   RulesSnapshotNotFoundState,
   RulesUnavailableState,
 } from '@mercure/rules-frontend-ui';
+
+import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 
 export interface RulesSnapshotFeatureProps {
   readonly snapshotId: string;
@@ -29,15 +31,37 @@ export async function RulesSnapshotFeature({ snapshotId }: RulesSnapshotFeatureP
       return <RulesSnapshotNotFoundState />;
     }
 
-    const [rules, decoders, issues, fields, quality, graph, roundtrip] = await Promise.all([
+    const [rules, decoders, issues] = await Promise.all([
       api.listRules(snapshotId, { offset: 0, limit: 50 }),
       api.listDecoders(snapshotId, { offset: 0, limit: 30 }),
       api.listIssues(snapshotId, { offset: 0, limit: 30 }),
-      intelligenceApi.fieldIntelligence(snapshotId, { offset: 0, limit: 10 }),
-      intelligenceApi.quality(snapshotId, { kind: 'rules', offset: 0, limit: 10 }),
-      intelligenceApi.graph(snapshotId, { mode: 'all', limit: 120 }),
-      intelligenceApi.roundtrip(snapshotId, { offset: 0, limit: 10 }),
     ]);
+
+    let intelligence = <RulesIntelligenceUnavailableState />;
+
+    try {
+      const [fields, quality, graph, roundtrip] = await Promise.all([
+        intelligenceApi.fieldIntelligence(snapshotId, { offset: 0, limit: 10 }),
+        intelligenceApi.quality(snapshotId, { kind: 'rules', offset: 0, limit: 10 }),
+        intelligenceApi.graph(snapshotId, { mode: 'all', limit: 120 }),
+        intelligenceApi.roundtrip(snapshotId, { offset: 0, limit: 10 }),
+      ]);
+
+      intelligence = (
+        <RulesSnapshotIntelligence
+          fields={fields}
+          quality={quality}
+          graph={graph}
+          roundtrip={roundtrip}
+        />
+      );
+    } catch (error) {
+      if (error instanceof RulesFrontendApiError) {
+        redirectRulesAuthorizationFailure(error);
+      } else {
+        throw error;
+      }
+    }
 
     return (
       <RulesSnapshotDetail
@@ -48,14 +72,7 @@ export async function RulesSnapshotFeature({ snapshotId }: RulesSnapshotFeatureP
         decodersTotal={decoders.total}
         issues={issues.items}
         issuesTotal={issues.total}
-        intelligence={
-          <RulesSnapshotIntelligence
-            fields={fields}
-            quality={quality}
-            graph={graph}
-            roundtrip={roundtrip}
-          />
-        }
+        intelligence={intelligence}
       />
     );
   } catch (error) {
