@@ -8,6 +8,7 @@ import {
   SetMetadata,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiExtraModels,
   ApiNotFoundResponse,
@@ -97,6 +98,7 @@ function issueQueryFromDto(query: RulesSnapshotIssuesQueryDto): RulesetSnapshotI
   REQUIRED_CAPABILITIES_METADATA,
   ['rules:read'] satisfies readonly MercureCapability[],
 )
+@ApiBearerAuth('keycloak')
 @ApiTags('rules')
 @ApiExtraModels(
   RulesSnapshotParamsDto,
