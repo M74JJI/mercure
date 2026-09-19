@@ -47,3 +47,20 @@ export {
   type CompareRulesetSnapshotsResult,
   type RulesetSnapshotAnalysisSource,
 } from './lib/analyze-ruleset-snapshots';
+
+export {
+  CreateCustomRulesUseCase,
+  DeleteCustomRulesUseCase,
+  GetRulesUseCase,
+  ListRulesUseCases,
+  RULES_USE_CASE_CATALOG,
+  RulesSystemUseCaseProtectedError,
+  RulesUseCaseAlreadyExistsError,
+  RulesUseCaseCatalogValidationError,
+  RulesUseCaseNotFoundError,
+  UpdateCustomRulesUseCase,
+  type CreateCustomRulesUseCaseInput,
+  type RulesUseCaseCatalog,
+  type RulesUseCaseCatalogReader,
+  type UpdateCustomRulesUseCaseInput,
+} from './lib/use-case-catalog';
