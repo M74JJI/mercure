@@ -7,3 +7,14 @@ export type {
   RulesRulePreviewView,
   RulesSnapshotSummaryView,
 } from './lib/models';
+
+export {
+  RulesSnapshotIntelligence,
+  type RulesSnapshotIntelligenceProps,
+} from './lib/rules-snapshot-intelligence';
+export type {
+  RulesFieldIntelligenceView,
+  RulesGraphSummaryView,
+  RulesQualityView,
+  RulesRoundtripSummaryView,
+} from './lib/models';
