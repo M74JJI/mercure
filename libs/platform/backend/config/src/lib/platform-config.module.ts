@@ -61,6 +61,25 @@ const corsOrigins = z
     return [...normalized];
   });
 
+const commaSeparatedValues = z
+  .string()
+  .transform((value) => [...new Set(value.split(',').map((item) => item.trim()).filter(Boolean))])
+  .pipe(z.array(z.string().min(1)).min(1));
+
+const httpUrl = z
+  .string()
+  .trim()
+  .url()
+  .superRefine((value, context) => {
+    const url = new URL(value);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      context.addIssue({
+        code: 'custom',
+        message: 'URL must use the http:// or https:// protocol.',
+      });
+    }
+  });
+
 const postgresUrl = z
   .string()
   .trim()
@@ -96,6 +115,20 @@ const platformEnvironmentSchema = z.object({
     .default(1024 * 1024),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   OPENAPI_ENABLED: booleanFromEnvironment.default(false),
+  OIDC_ISSUER_URL: httpUrl.default('https://identity.example.test/realms/mercure'),
+  OIDC_JWKS_URL: httpUrl.optional(),
+  OIDC_AUDIENCE: z.string().trim().min(1).default('mercure-api'),
+  OIDC_CLIENT_ID: z.string().trim().min(1).default('mercure-api'),
+  OIDC_ADMIN_AUTHORITIES: commaSeparatedValues.default('admin,/security-admins'),
+  OIDC_USER_AUTHORITIES: commaSeparatedValues.default('user,/security-users'),
+  OIDC_JWKS_TIMEOUT_MS: z.coerce.number().int().min(100).max(30_000).default(5_000),
+  OIDC_JWKS_COOLDOWN_MS: z.coerce.number().int().min(1_000).max(600_000).default(30_000),
+  OIDC_JWKS_CACHE_MAX_AGE_MS: z.coerce
+    .number()
+    .int()
+    .min(10_000)
+    .max(86_400_000)
+    .default(600_000),
   DATABASE_URL: postgresUrl,
   DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
   DATABASE_CONNECTION_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(5_000),
@@ -122,7 +155,26 @@ export type PlatformEnvironment = z.infer<typeof platformEnvironmentSchema>;
 export function parsePlatformEnvironment(
   environment: Record<string, unknown>,
 ): PlatformEnvironment {
-  return platformEnvironmentSchema.parse(environment);
+  const parsed = platformEnvironmentSchema.parse(environment);
+
+  if (parsed.NODE_ENV === 'production') {
+    const required = ['OIDC_ISSUER_URL', 'OIDC_AUDIENCE', 'OIDC_CLIENT_ID'] as const;
+    for (const key of required) {
+      if (typeof environment[key] !== 'string' || environment[key].trim() === '') {
+        throw new Error(`${key} must be explicitly configured in production.`);
+      }
+    }
+
+    if (!parsed.OIDC_ISSUER_URL.startsWith('https://')) {
+      throw new Error('OIDC_ISSUER_URL must use https:// in production.');
+    }
+
+    if (parsed.OIDC_JWKS_URL && !parsed.OIDC_JWKS_URL.startsWith('https://')) {
+      throw new Error('OIDC_JWKS_URL must use https:// in production.');
+    }
+  }
+
+  return parsed;
 }
 
 @Injectable()
@@ -161,6 +213,47 @@ export class PlatformConfig {
 
   get openApiEnabled(): boolean {
     return this.config.getOrThrow('OPENAPI_ENABLED', { infer: true });
+  }
+
+  get oidcIssuerUrl(): string {
+    return this.config.getOrThrow('OIDC_ISSUER_URL', { infer: true });
+  }
+
+  get oidcJwksUrl(): string {
+    const explicit = this.config.get('OIDC_JWKS_URL', { infer: true });
+    if (explicit) {
+      return explicit;
+    }
+
+    return `${this.oidcIssuerUrl.replace(/\/$/, '')}/protocol/openid-connect/certs`;
+  }
+
+  get oidcAudience(): string {
+    return this.config.getOrThrow('OIDC_AUDIENCE', { infer: true });
+  }
+
+  get oidcClientId(): string {
+    return this.config.getOrThrow('OIDC_CLIENT_ID', { infer: true });
+  }
+
+  get oidcAdminAuthorities(): string[] {
+    return this.config.getOrThrow('OIDC_ADMIN_AUTHORITIES', { infer: true });
+  }
+
+  get oidcUserAuthorities(): string[] {
+    return this.config.getOrThrow('OIDC_USER_AUTHORITIES', { infer: true });
+  }
+
+  get oidcJwksTimeoutMs(): number {
+    return this.config.getOrThrow('OIDC_JWKS_TIMEOUT_MS', { infer: true });
+  }
+
+  get oidcJwksCooldownMs(): number {
+    return this.config.getOrThrow('OIDC_JWKS_COOLDOWN_MS', { infer: true });
+  }
+
+  get oidcJwksCacheMaxAgeMs(): number {
+    return this.config.getOrThrow('OIDC_JWKS_CACHE_MAX_AGE_MS', { infer: true });
   }
 
   get databaseUrl(): string {
