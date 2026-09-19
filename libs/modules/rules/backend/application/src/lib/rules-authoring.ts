@@ -1,7 +1,6 @@
 import type {
   RulesetSourceType,
   ValidationIssue,
-  ValidationSeverity,
 } from '@mercure/rules-backend-domain';
 
 import type { AnalyzeRuleset } from './analyze-ruleset';
@@ -173,12 +172,6 @@ function content(value: string): string {
     throw new RulesAuthoringContentValidationError('Draft XML contains a NUL byte.');
   }
   return value;
-}
-
-function counts(issues: readonly ValidationIssue[]): Record<ValidationSeverity, number> {
-  const result: Record<ValidationSeverity, number> = { error: 0, warning: 0, info: 0 };
-  for (const issue of issues) result[issue.severity] += 1;
-  return result;
 }
 
 async function requiredDraft(
