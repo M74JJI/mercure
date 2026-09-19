@@ -597,3 +597,71 @@
     grid-template-columns: 1fr;
   }
 }
+
+.filterForm {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+  gap: var(--mc-space-3);
+  align-items: end;
+}
+
+.filterForm label {
+  display: grid;
+  gap: var(--mc-space-2);
+}
+
+.filterForm label > span {
+  color: var(--mc-text-muted);
+  font-size: var(--mc-font-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.filterForm input,
+.filterForm select,
+.filterForm button {
+  min-height: 2.75rem;
+  border: 1px solid var(--mc-border-subtle);
+  border-radius: var(--mc-radius-md);
+  background: var(--mc-surface-raised);
+  color: var(--mc-text-primary);
+  font: inherit;
+}
+
+.filterForm input,
+.filterForm select {
+  width: 100%;
+  padding: 0 var(--mc-space-3);
+}
+
+.filterForm button {
+  padding: 0 var(--mc-space-4);
+  cursor: pointer;
+}
+
+.filterForm input:focus-visible,
+.filterForm select:focus-visible,
+.filterForm button:focus-visible {
+  outline: none;
+  box-shadow: var(--mc-focus-ring);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mc-space-3);
+}
+
+@media (max-width: 1100px) {
+  .filterForm {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .filterForm {
+    grid-template-columns: 1fr;
+  }
+}
