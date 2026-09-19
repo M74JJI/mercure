@@ -144,3 +144,40 @@ export interface RulesSnapshotComparisonView {
     }[];
   };
 }
+
+export interface RulesFieldIntelligenceDetailView {
+  readonly stats: {
+    readonly totalFields: number;
+    readonly producedFields: number;
+    readonly usedFields: number;
+    readonly unknownSourceFields: number;
+    readonly orphanedProducedFields: number;
+    readonly aliasCandidates: number;
+    readonly criticalFields: number;
+    readonly averageRisk: number;
+  };
+  readonly page: {
+    readonly offset: number;
+    readonly limit: number;
+    readonly total: number;
+    readonly items: readonly {
+      readonly key: string;
+      readonly tenant: string;
+      readonly field: string;
+      readonly canonical: string;
+      readonly family: string;
+      readonly description: string;
+      readonly aliases: readonly string[];
+      readonly producedByTotal: number;
+      readonly usedByRulesTotal: number;
+      readonly usedByUseCasesTotal: number;
+      readonly jiraVisibleRules: number;
+      readonly criticalRules: number;
+      readonly decodedAsRulesTotal: number;
+      readonly health: string;
+      readonly criticality: string;
+      readonly riskScore: number;
+      readonly aliasHintsTotal: number;
+    }[];
+  };
+}
