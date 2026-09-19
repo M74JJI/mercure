@@ -11,13 +11,14 @@ import {
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 import {
+  SNAPSHOT_EXPLORER_PAGE_SIZE,
+  snapshotExplorerPagination,
+} from './rules-snapshot-explorer-pagination';
+import {
   boundedIntegerSearchParam,
-  rulesHref,
   trimmedSearchParam,
   type RulesSearchParams,
 } from './rules-search-params';
-
-const PAGE_SIZE = 50;
 
 export interface RulesSnapshotDecodersExplorerFeatureProps {
   readonly snapshotId: string;
@@ -41,30 +42,20 @@ export async function RulesSnapshotDecodersExplorerFeature({
 
     const page = await api.listDecoders(snapshotId, {
       offset,
-      limit: PAGE_SIZE,
+      limit: SNAPSHOT_EXPLORER_PAGE_SIZE,
       ...(selectedTenant === undefined ? {} : { tenant: selectedTenant }),
       ...(selectedName === undefined ? {} : { name: selectedName }),
     });
 
-    const shared = {
-      ...(selectedTenant === undefined ? {} : { tenant: selectedTenant }),
-      ...(selectedName === undefined ? {} : { name: selectedName }),
-    };
-    const path = '/rules/' + snapshotId + '/decoders';
-    const previousHref =
-      offset > 0
-        ? rulesHref(path, {
-            ...shared,
-            offset: Math.max(0, offset - PAGE_SIZE),
-          })
-        : undefined;
-    const nextHref =
-      offset + page.items.length < page.total
-        ? rulesHref(path, {
-            ...shared,
-            offset: offset + PAGE_SIZE,
-          })
-        : undefined;
+    const pagination = snapshotExplorerPagination(
+      '/rules/' + snapshotId + '/decoders',
+      offset,
+      page.total,
+      {
+        ...(selectedTenant === undefined ? {} : { tenant: selectedTenant }),
+        ...(selectedName === undefined ? {} : { name: selectedName }),
+      },
+    );
 
     return (
       <RulesSnapshotDecodersExplorer
@@ -73,8 +64,7 @@ export async function RulesSnapshotDecodersExplorerFeature({
         total={page.total}
         {...(selectedTenant === undefined ? {} : { selectedTenant })}
         {...(selectedName === undefined ? {} : { selectedName })}
-        {...(previousHref === undefined ? {} : { previousHref })}
-        {...(nextHref === undefined ? {} : { nextHref })}
+        {...pagination}
       />
     );
   } catch (error) {
