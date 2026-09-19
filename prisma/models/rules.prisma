@@ -282,6 +282,27 @@ model RulesetSnapshotUseCase {
 }
 
 
+model RulesUseCaseCatalogEntry {
+  id          String   @id @db.VarChar(255)
+  name        String   @db.Text
+  shortName   String   @map("short_name") @db.Text
+  description String   @db.Text
+  component   String   @db.Text
+  vendor      String   @db.Text
+  product     String   @db.Text
+  domain      String   @db.Text
+  category    String   @db.Text
+  source      String   @db.VarChar(32)
+  createdBy   String   @map("created_by") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([component, name])
+  @@index([source])
+  @@index([updatedAt])
+  @@map("rules_use_case_catalog")
+}
+
 model RulesetSnapshotSourceError {
   snapshotId String @map("snapshot_id") @db.Uuid
   position   Int

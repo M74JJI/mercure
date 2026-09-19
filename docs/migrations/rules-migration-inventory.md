@@ -15,7 +15,7 @@ Legacy reference: `M74JJI/m-rules@21b1f5d9d4d91ecfd297ac211ce50ac5cd2e2028`.
 | Browser File reading/hash        | `lib/parser.ts`                   | Do not copy                                | Future source adapter                       |
 | Manager archive discovery/import | `lib/manager-archive-source.ts`   | Migrated with hardened direct-read adapter | Rules infrastructure source adapter         |
 | Archive streaming API            | Next `manager-files/stream` route | Redesign later                             | Nest presentation/application               |
-| Use-case filesystem JSON store   | `lib/use-case-store.ts`           | Do not copy                                | Future PostgreSQL repository                |
+| Use-case filesystem JSON store   | `lib/use-case-store.ts`           | Migrated to canonical PostgreSQL catalog   | Rules application/infrastructure            |
 | Use-case HTTP CRUD               | Next `api/use-cases`              | Defer                                      | Future Nest presentation/application        |
 | Collection diff                  | `lib/diff.ts`                     | Migrated with tenant-safe regressions      | Rules domain/application                    |
 | XML round-trip/reporting         | `lib/xml-roundtrip.ts`            | Migrated as internal read-only analysis    | Rules domain/application/infrastructure     |
@@ -50,10 +50,10 @@ Completed:
 3. M7 — immutable configuration snapshots and normalized PostgreSQL persistence;
 4. M8 — Nest Rules snapshot import/query endpoints and regenerated frontend API contract;
 5. M9 — Rules frontend data-access, UI, feature composition, and read-only routes;
-6. M10 — tenant-safe snapshot diff and internal read-only XML round-trip analysis.
+6. M10 — tenant-safe snapshot diff and internal read-only XML round-trip analysis;
+7. M11 — canonical PostgreSQL-backed use-case catalog with catalog-backed imports.
 
 Next:
 
-1. use-case catalog backed by PostgreSQL;
-2. graph, field intelligence and quality scoring;
-3. only then consider any AI-assisted feature through a separate product/security decision.
+1. graph, field intelligence and quality scoring;
+2. only then consider any AI-assisted feature through a separate product/security decision.

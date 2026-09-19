@@ -6,7 +6,11 @@ import {
   AnalyzeRuleset,
   AnalyzeRulesetSnapshotRoundtrip,
   CompareRulesetSnapshots,
+  CreateCustomRulesUseCase,
+  DeleteCustomRulesUseCase,
+  GetRulesUseCase,
   ImportArchivedRuleset,
+  ListRulesUseCases,
   PersistImportedRuleset,
   QueryRulesetSnapshots,
   RULESET_ANALYZER,
@@ -14,16 +18,21 @@ import {
   RULESET_SNAPSHOT_ANALYSIS_SOURCE,
   RULESET_SNAPSHOT_QUERY_STORE,
   RULESET_SNAPSHOT_STORE,
+  RULES_USE_CASE_CATALOG,
+  UpdateCustomRulesUseCase,
   type RulesetArchiveSource,
   type RulesetSnapshotAnalysisSource,
   type RulesetSnapshotQueryStore,
   type RulesetSnapshotStore,
+  type RulesUseCaseCatalog,
+  type RulesUseCaseCatalogReader,
 } from '@mercure/rules-backend-application';
 import {
   FilesystemManagerArchiveSource,
   PrismaRulesetSnapshotAnalysisSource,
   PrismaRulesetSnapshotQueryStore,
   PrismaRulesetSnapshotStore,
+  PrismaRulesUseCaseCatalog,
   WazuhXmlRulesetAnalyzer,
 } from '@mercure/rules-backend-infrastructure';
 import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
@@ -43,6 +52,15 @@ import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
       inject: [WazuhXmlRulesetAnalyzer],
     },
     {
+      provide: PrismaRulesUseCaseCatalog,
+      useFactory: (database: PrismaService) => new PrismaRulesUseCaseCatalog(database),
+      inject: [PrismaService],
+    },
+    {
+      provide: RULES_USE_CASE_CATALOG,
+      useExisting: PrismaRulesUseCaseCatalog,
+    },
+    {
       provide: RULESET_ARCHIVE_SOURCE,
       useFactory: (config: PlatformConfig) =>
         new FilesystemManagerArchiveSource({
@@ -55,9 +73,12 @@ import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
     },
     {
       provide: ImportArchivedRuleset,
-      useFactory: (source: RulesetArchiveSource, analyzeRuleset: AnalyzeRuleset) =>
-        new ImportArchivedRuleset(source, analyzeRuleset),
-      inject: [RULESET_ARCHIVE_SOURCE, AnalyzeRuleset],
+      useFactory: (
+        source: RulesetArchiveSource,
+        analyzeRuleset: AnalyzeRuleset,
+        catalog: RulesUseCaseCatalogReader,
+      ) => new ImportArchivedRuleset(source, analyzeRuleset, catalog),
+      inject: [RULESET_ARCHIVE_SOURCE, AnalyzeRuleset, RULES_USE_CASE_CATALOG],
     },
     {
       provide: PrismaRulesetSnapshotStore,
@@ -108,6 +129,31 @@ import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
         new AnalyzeRulesetSnapshotRoundtrip(source),
       inject: [RULESET_SNAPSHOT_ANALYSIS_SOURCE],
     },
+    {
+      provide: ListRulesUseCases,
+      useFactory: (catalog: RulesUseCaseCatalogReader) => new ListRulesUseCases(catalog),
+      inject: [RULES_USE_CASE_CATALOG],
+    },
+    {
+      provide: GetRulesUseCase,
+      useFactory: (catalog: RulesUseCaseCatalogReader) => new GetRulesUseCase(catalog),
+      inject: [RULES_USE_CASE_CATALOG],
+    },
+    {
+      provide: CreateCustomRulesUseCase,
+      useFactory: (catalog: RulesUseCaseCatalog) => new CreateCustomRulesUseCase(catalog),
+      inject: [RULES_USE_CASE_CATALOG],
+    },
+    {
+      provide: UpdateCustomRulesUseCase,
+      useFactory: (catalog: RulesUseCaseCatalog) => new UpdateCustomRulesUseCase(catalog),
+      inject: [RULES_USE_CASE_CATALOG],
+    },
+    {
+      provide: DeleteCustomRulesUseCase,
+      useFactory: (catalog: RulesUseCaseCatalog) => new DeleteCustomRulesUseCase(catalog),
+      inject: [RULES_USE_CASE_CATALOG],
+    },
   ],
   exports: [
     AnalyzeRuleset,
@@ -116,6 +162,11 @@ import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
     QueryRulesetSnapshots,
     CompareRulesetSnapshots,
     AnalyzeRulesetSnapshotRoundtrip,
+    ListRulesUseCases,
+    GetRulesUseCase,
+    CreateCustomRulesUseCase,
+    UpdateCustomRulesUseCase,
+    DeleteCustomRulesUseCase,
   ],
 })
 export class RulesBackendModule {}
