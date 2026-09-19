@@ -156,6 +156,12 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         value: '999999',
       });
       expect(queriedRules.items[0] && 'rawXml' in queriedRules.items[0]).toBe(false);
+      const rulePosition = queriedRules.items[0]?.position;
+      expect(rulePosition).toBeTypeOf('number');
+      if (rulePosition === undefined) throw new Error('Expected persisted rule position.');
+      const queriedRule = await queryStore.getRule(saved.id, rulePosition);
+      expect(queriedRule).toMatchObject({ position: rulePosition, id: '310001' });
+      expect(queriedRule && 'rawXml' in queriedRule).toBe(false);
 
       const queriedDecoders = await queryStore.listDecoders(saved.id, {
         offset: 0,
@@ -170,6 +176,12 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         sourceFile: 'manager-x.tar.gz/decoders/1000-snapshot_decoders.xml',
       });
       expect(queriedDecoders.items[0] && 'rawXml' in queriedDecoders.items[0]).toBe(false);
+      const decoderPosition = queriedDecoders.items[0]?.position;
+      expect(decoderPosition).toBeTypeOf('number');
+      if (decoderPosition === undefined) throw new Error('Expected persisted decoder position.');
+      const queriedDecoder = await queryStore.getDecoder(saved.id, decoderPosition);
+      expect(queriedDecoder).toMatchObject({ position: decoderPosition, name: 'snapshot_decoder' });
+      expect(queriedDecoder && 'rawXml' in queriedDecoder).toBe(false);
 
       const queriedIssues = await queryStore.listIssues(saved.id, {
         offset: 0,
@@ -183,6 +195,13 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         type: 'external_or_missing_sid',
         ruleId: '310001',
         tenant: 'manager-x',
+      });
+      const issuePosition = queriedIssues.items[0]?.position;
+      expect(issuePosition).toBeTypeOf('number');
+      if (issuePosition === undefined) throw new Error('Expected persisted issue position.');
+      await expect(queryStore.getIssue(saved.id, issuePosition)).resolves.toMatchObject({
+        position: issuePosition,
+        type: 'external_or_missing_sid',
       });
 
       const reconstructed = await analysisSource.load(saved.id);
