@@ -30,6 +30,7 @@ Initial allowed scopes:
 - `web`
 - `api`
 - `rules`
+- `identity`
 - `database`
 - `prisma`
 - `github`
@@ -40,7 +41,7 @@ Initial allowed scopes:
 - `docs`
 - `testing`
 
-New product-module scopes are added deliberately as modules are introduced.
+`identity` is the platform security/SSO scope. New product-module scopes are added deliberately as modules are introduced.
 
 Examples:
 
