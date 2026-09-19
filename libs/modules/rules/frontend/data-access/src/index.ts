@@ -14,3 +14,20 @@ export {
   type RulesSnapshotRuleQuery,
   type RulesSnapshotListQuery,
 } from './lib/rules-api';
+
+export {
+  RulesIntelligenceDataAccess,
+  type RulesFieldIntelligence,
+  type RulesFieldIntelligenceQuery,
+  type RulesGraph,
+  type RulesGraphQuery,
+  type RulesQuality,
+  type RulesQualityQuery,
+  type RulesRoundtrip,
+  type RulesRoundtripQuery,
+  type RulesSnapshotComparison,
+  type RulesSnapshotComparisonQuery,
+  type RulesUseCase,
+  type RulesUseCaseListQuery,
+  type RulesUseCasePage,
+} from './lib/rules-intelligence-api';
