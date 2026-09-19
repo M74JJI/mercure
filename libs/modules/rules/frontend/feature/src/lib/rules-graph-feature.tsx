@@ -21,6 +21,7 @@ const modeValues = [
   'use_cases',
   'mitre',
 ] as const;
+const jiraOnlyValues = ['true'] as const;
 const booleanValues = ['true', 'false'] as const;
 const limitValues = ['100', '200', '300', '500'] as const;
 
@@ -43,7 +44,7 @@ export async function RulesGraphFeature({
   const selectedUseCaseId = trimmedSearchParam(searchParams, 'useCaseId', 255);
   const selectedStatus = trimmedSearchParam(searchParams, 'status', 64);
   const selectedRole = trimmedSearchParam(searchParams, 'role', 64);
-  const selectedJiraOnly = enumSearchParam(searchParams, 'jiraOnly', booleanValues);
+  const selectedJiraOnly = enumSearchParam(searchParams, 'jiraOnly', jiraOnlyValues);
   const selectedIncludeExternal = enumSearchParam(
     searchParams,
     'includeExternal',
