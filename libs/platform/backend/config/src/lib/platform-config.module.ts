@@ -63,7 +63,14 @@ const corsOrigins = z
 
 const commaSeparatedValues = z
   .string()
-  .transform((value) => [...new Set(value.split(',').map((item) => item.trim()).filter(Boolean))])
+  .transform((value) => [
+    ...new Set(
+      value
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean),
+    ),
+  ])
   .pipe(z.array(z.string().min(1)).min(1));
 
 const httpUrl = z
@@ -160,7 +167,8 @@ export function parsePlatformEnvironment(
   if (parsed.NODE_ENV === 'production') {
     const required = ['OIDC_ISSUER_URL', 'OIDC_AUDIENCE', 'OIDC_CLIENT_ID'] as const;
     for (const key of required) {
-      if (typeof environment[key] !== 'string' || environment[key].trim() === '') {
+      const rawValue = environment[key];
+      if (typeof rawValue !== 'string' || rawValue.trim() === '') {
         throw new Error(`${key} must be explicitly configured in production.`);
       }
     }
