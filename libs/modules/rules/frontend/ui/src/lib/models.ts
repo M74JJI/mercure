@@ -382,3 +382,55 @@ export interface RulesUseCaseDetailView extends RulesUseCasePreviewView {
   readonly createdBy: string;
   readonly createdAt?: string;
 }
+
+
+export interface RulesAuthoringValidationIssueView {
+  readonly severity: 'error' | 'warning' | 'info';
+  readonly type: string;
+  readonly title: string;
+  readonly detail: string;
+  readonly ruleId?: string;
+  readonly decoderName?: string;
+  readonly fileName?: string;
+  readonly tenant?: string;
+}
+
+export interface RulesAuthoringValidationView {
+  readonly revision: number;
+  readonly sha256: string;
+  readonly ruleCount: number;
+  readonly decoderCount: number;
+  readonly issueCount: number;
+  readonly errorCount: number;
+  readonly warningCount: number;
+  readonly infoCount: number;
+  readonly validatedAt: string;
+}
+
+export interface RulesAuthoringDraftSummaryView {
+  readonly id: string;
+  readonly sourceSnapshotId: string;
+  readonly sourceFilePosition: number;
+  readonly fileName: string;
+  readonly tenant: string;
+  readonly sourceType: 'rules' | 'decoders';
+  readonly sha256: string;
+  readonly revision: number;
+  readonly state: 'draft' | 'validated' | 'approved';
+  readonly createdBy: string;
+  readonly updatedBy: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly validation?: RulesAuthoringValidationView;
+  readonly approvedRevision?: number;
+  readonly approvedSha256?: string;
+  readonly approvedBy?: string;
+  readonly approvedAt?: string;
+}
+
+export interface RulesAuthoringDraftView extends RulesAuthoringDraftSummaryView {
+  readonly content: string;
+  readonly validation?: RulesAuthoringValidationView & {
+    readonly issues: readonly RulesAuthoringValidationIssueView[];
+  };
+}

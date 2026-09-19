@@ -95,3 +95,14 @@ export {
   RulesSnapshotIssueDetail,
   RulesSnapshotRuleDetail,
 } from './lib/rules-snapshot-record-details';
+
+export {
+  RulesAuthoringDraftDetail,
+  RulesAuthoringDraftList,
+} from './lib/rules-authoring';
+export type {
+  RulesAuthoringDraftSummaryView,
+  RulesAuthoringDraftView,
+  RulesAuthoringValidationIssueView,
+  RulesAuthoringValidationView,
+} from './lib/models';

@@ -3,6 +3,8 @@ import { PageHeader, Panel, StatusBadge } from '@mercure/platform-frontend-desig
 import type { RulesDecoderDetailView, RulesIssueDetailView, RulesRuleDetailView } from './models';
 import styles from './rules.module.css';
 
+type FormAction = (formData: FormData) => void | Promise<void>;
+
 function Navigation({ collection, snapshotId }: { readonly collection: 'rules' | 'decoders' | 'issues'; readonly snapshotId: string }) {
   return <div className={styles.headerActions}>
     <a className={styles.actionLink} href={'/rules/' + snapshotId}>← Snapshot</a>
@@ -18,11 +20,24 @@ function Values({ empty, values }: { readonly empty: string; readonly values: re
   );
 }
 
-export function RulesSnapshotRuleDetail({ rule, snapshotId }: { readonly rule: RulesRuleDetailView; readonly snapshotId: string }) {
+export function RulesSnapshotRuleDetail({
+  createDraftAction,
+  rule,
+  snapshotId,
+}: {
+  readonly createDraftAction?: FormAction;
+  readonly rule: RulesRuleDetailView;
+  readonly snapshotId: string;
+}) {
   return <div className={styles.page}>
     <PageHeader eyebrow="Rules snapshot rule" title={'Rule ' + rule.id} description={rule.description}
       actions={<StatusBadge tone={rule.severity === 'critical' ? 'accent' : 'neutral'}>{'Level ' + rule.level + ' · ' + rule.severity}</StatusBadge>} />
     <Navigation snapshotId={snapshotId} collection="rules" />
+    {createDraftAction ? <form action={createDraftAction}>
+      <input type="hidden" name="sourceSnapshotId" value={snapshotId} />
+      <input type="hidden" name="sourceFilePosition" value={rule.sourceFilePosition} />
+      <button className={styles.actionButton} type="submit">Create authoring draft from source file</button>
+    </form> : null}
     <Panel tone="muted" className={styles.provenance}>
       <div><span>Tenant</span><strong>{rule.tenant}</strong></div>
       <div><span>Status</span><strong>{rule.status}</strong></div>
@@ -64,11 +79,24 @@ export function RulesSnapshotRuleDetail({ rule, snapshotId }: { readonly rule: R
   </div>;
 }
 
-export function RulesSnapshotDecoderDetail({ decoder, snapshotId }: { readonly decoder: RulesDecoderDetailView; readonly snapshotId: string }) {
+export function RulesSnapshotDecoderDetail({
+  createDraftAction,
+  decoder,
+  snapshotId,
+}: {
+  readonly createDraftAction?: FormAction;
+  readonly decoder: RulesDecoderDetailView;
+  readonly snapshotId: string;
+}) {
   return <div className={styles.page}>
     <PageHeader eyebrow="Rules snapshot decoder" title={decoder.name} description="Read-only normalized decoder inspection. Raw XML is intentionally not exposed."
       actions={<StatusBadge tone="neutral">{decoder.parent ? 'Child decoder' : 'Root decoder'}</StatusBadge>} />
     <Navigation snapshotId={snapshotId} collection="decoders" />
+    {createDraftAction ? <form action={createDraftAction}>
+      <input type="hidden" name="sourceSnapshotId" value={snapshotId} />
+      <input type="hidden" name="sourceFilePosition" value={decoder.sourceFilePosition} />
+      <button className={styles.actionButton} type="submit">Create authoring draft from source file</button>
+    </form> : null}
     <Panel tone="muted" className={styles.provenance}>
       <div><span>Tenant</span><strong>{decoder.tenant}</strong></div><div><span>Parent</span><strong>{decoder.parent ?? 'None'}</strong></div>
       <div><span>Source file</span><strong className={styles.mono}>{decoder.sourceFile}</strong></div><div><span>Record position</span><strong>{decoder.position}</strong></div>
