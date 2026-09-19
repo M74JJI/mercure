@@ -3,12 +3,16 @@ export { RulesSnapshotDetail, type RulesSnapshotDetailProps } from './lib/rules-
 export {
   RulesIntelligenceUnavailableState,
   RulesSnapshotNotFoundState,
+  RulesSnapshotRecordNotFoundState,
   RulesUnavailableState,
   RulesUseCaseNotFoundState,
 } from './lib/rules-states';
 export type {
+  RulesDecoderDetailView,
   RulesDecoderPreviewView,
+  RulesIssueDetailView,
   RulesIssuePreviewView,
+  RulesRuleDetailView,
   RulesRulePreviewView,
   RulesSnapshotSummaryView,
 } from './lib/models';
@@ -84,3 +88,10 @@ export {
   RulesSnapshotIssuesExplorer,
   type RulesSnapshotIssuesExplorerProps,
 } from './lib/rules-snapshot-explorers';
+
+
+export {
+  RulesSnapshotDecoderDetail,
+  RulesSnapshotIssueDetail,
+  RulesSnapshotRuleDetail,
+} from './lib/rules-snapshot-record-details';

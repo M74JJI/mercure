@@ -108,9 +108,9 @@ export function RulesSnapshotDetail({
                 </thead>
                 <tbody>
                   {rules.map((rule) => (
-                    <tr key={`${rule.tenant}:${rule.id}`}>
+                    <tr key={rule.position}>
                       <td>
-                        <strong>{rule.id}</strong>
+                        <a className={styles.backLink} href={'/rules/' + snapshot.id + '/rules/' + rule.position}><strong>{rule.id}</strong></a>
                         <small>{rule.description}</small>
                       </td>
                       <td>{rule.level}</td>
@@ -146,10 +146,10 @@ export function RulesSnapshotDetail({
             <p className={styles.emptyInline}>No validation issues in this snapshot.</p>
           ) : (
             <ul className={styles.issueList}>
-              {issues.map((issue, index) => (
-                <li key={`${issue.type}:${issue.ruleId ?? issue.decoderName ?? index}`}>
+              {issues.map((issue) => (
+                <li key={issue.position}>
                   <div className={styles.issueTopline}>
-                    <strong>{issue.title}</strong>
+                    <a className={styles.backLink} href={'/rules/' + snapshot.id + '/issues/' + issue.position}><strong>{issue.title}</strong></a>
                     <StatusBadge tone={issue.severity === 'error' ? 'accent' : 'neutral'}>
                       {issue.severity}
                     </StatusBadge>
@@ -185,9 +185,9 @@ export function RulesSnapshotDetail({
           ) : (
             <ul className={styles.decoderList}>
               {decoders.map((decoder) => (
-                <li key={`${decoder.tenant}:${decoder.name}`}>
+                <li key={decoder.position}>
                   <div>
-                    <strong>{decoder.name}</strong>
+                    <a className={styles.backLink} href={'/rules/' + snapshot.id + '/decoders/' + decoder.position}><strong>{decoder.name}</strong></a>
                     <small>{decoder.tenant}</small>
                   </div>
                   <div>

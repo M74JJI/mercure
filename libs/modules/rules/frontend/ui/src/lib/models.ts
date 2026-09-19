@@ -19,6 +19,7 @@ export interface RulesSnapshotSummaryView {
 }
 
 export interface RulesRulePreviewView {
+  readonly position: number;
   readonly id: string;
   readonly level: number;
   readonly description: string;
@@ -31,6 +32,7 @@ export interface RulesRulePreviewView {
 }
 
 export interface RulesDecoderPreviewView {
+  readonly position: number;
   readonly name: string;
   readonly parent?: string;
   readonly tenant: string;
@@ -38,6 +40,7 @@ export interface RulesDecoderPreviewView {
 }
 
 export interface RulesIssuePreviewView {
+  readonly position: number;
   readonly severity: string;
   readonly type: string;
   readonly title: string;
@@ -45,6 +48,30 @@ export interface RulesIssuePreviewView {
   readonly ruleId?: string;
   readonly decoderName?: string;
   readonly tenant?: string;
+}
+
+export interface RulesRuleDetailView extends RulesRulePreviewView {
+  readonly groups: readonly string[];
+  readonly role: string;
+  readonly sourceFile: string;
+  readonly sourceSection?: string;
+  readonly useCaseConfidence: string;
+  readonly dependencies: readonly { readonly type: string; readonly value: string }[];
+  readonly fields: readonly { readonly name: string; readonly type?: string; readonly value: string }[];
+  readonly frequency?: string;
+  readonly timeframe?: string;
+  readonly decodedAs: readonly string[];
+  readonly options: readonly string[];
+}
+
+export interface RulesDecoderDetailView extends RulesDecoderPreviewView {
+  readonly prematch: readonly string[];
+  readonly regex: readonly string[];
+  readonly orderFields: readonly string[];
+}
+
+export interface RulesIssueDetailView extends RulesIssuePreviewView {
+  readonly fileName?: string;
 }
 
 export interface RulesFieldIntelligenceView {
