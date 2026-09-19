@@ -5,5 +5,8 @@
   "type": "commonjs",
   "exports": {
     ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mercure/platform-backend-identity-domain": "workspace:*"
   }
 }
