@@ -155,26 +155,26 @@ function issueKey(issue: ValidationIssue): string {
 function compareRules(before: RuleRecord, after: RuleRecord): readonly string[] {
   const changes: string[] = [];
 
-  if (before.level !== after.level) changes.push(`level ${before.level} â ${after.level}`);
+  if (before.level !== after.level) changes.push(`level ${before.level} -> ${after.level}`);
   if (before.description !== after.description) changes.push('description changed');
-  if (before.status !== after.status) changes.push(`status ${before.status} â ${after.status}`);
-  if (before.role !== after.role) changes.push(`role ${before.role} â ${after.role}`);
+  if (before.status !== after.status) changes.push(`status ${before.status} -> ${after.status}`);
+  if (before.role !== after.role) changes.push(`role ${before.role} -> ${after.role}`);
   if (before.severity !== after.severity) {
-    changes.push(`severity ${before.severity} â ${after.severity}`);
+    changes.push(`severity ${before.severity} -> ${after.severity}`);
   }
   if (before.jiraVisible !== after.jiraVisible) {
     changes.push(
-      `jira ${before.jiraVisible ? 'visible' : 'hidden'} â ${after.jiraVisible ? 'visible' : 'hidden'}`,
+      `jira ${before.jiraVisible ? 'visible' : 'hidden'} -> ${after.jiraVisible ? 'visible' : 'hidden'}`,
     );
   }
   if (before.useCaseId !== after.useCaseId) {
-    changes.push(`use case ${before.useCaseId} â ${after.useCaseId}`);
+    changes.push(`use case ${before.useCaseId} -> ${after.useCaseId}`);
   }
   if (before.useCaseConfidence !== after.useCaseConfidence) {
-    changes.push(`use case confidence ${before.useCaseConfidence} â ${after.useCaseConfidence}`);
+    changes.push(`use case confidence ${before.useCaseConfidence} -> ${after.useCaseConfidence}`);
   }
   if (before.sourceFile !== after.sourceFile) {
-    changes.push(`source file ${before.sourceFile} â ${after.sourceFile}`);
+    changes.push(`source file ${before.sourceFile} -> ${after.sourceFile}`);
   }
   if (before.sourceSection !== after.sourceSection) changes.push('source section changed');
   if (!unorderedEqual(before.groups, after.groups)) changes.push('groups changed');
@@ -187,7 +187,7 @@ function compareRules(before: RuleRecord, after: RuleRecord): readonly string[] 
   }
   if (before.frequency !== after.frequency || before.timeframe !== after.timeframe) {
     changes.push(
-      `correlation ${before.frequency ?? '-'}/${before.timeframe ?? '-'} â ${after.frequency ?? '-'}/${after.timeframe ?? '-'}`,
+      `correlation ${before.frequency ?? '-'}/${before.timeframe ?? '-'} -> ${after.frequency ?? '-'}/${after.timeframe ?? '-'}`,
     );
   }
   if (!unorderedEqual(before.decodedAs, after.decodedAs)) changes.push('decoded_as changed');
@@ -200,7 +200,7 @@ function compareDecoders(before: DecoderRecord, after: DecoderRecord): readonly 
   const changes: string[] = [];
 
   if (before.parent !== after.parent) {
-    changes.push(`parent ${before.parent ?? 'none'} â ${after.parent ?? 'none'}`);
+    changes.push(`parent ${before.parent ?? 'none'} -> ${after.parent ?? 'none'}`);
   }
   if (!unorderedEqual(before.prematch, after.prematch)) changes.push('prematch changed');
   if (!unorderedEqual(before.regex, after.regex)) changes.push('regex changed');
@@ -208,7 +208,7 @@ function compareDecoders(before: DecoderRecord, after: DecoderRecord): readonly 
     changes.push('order fields changed');
   }
   if (before.sourceFile !== after.sourceFile) {
-    changes.push(`source file ${before.sourceFile} â ${after.sourceFile}`);
+    changes.push(`source file ${before.sourceFile} -> ${after.sourceFile}`);
   }
 
   return changes;
@@ -218,10 +218,10 @@ function compareFiles(before: RulesetSourceFile, after: RulesetSourceFile): read
   const changes: string[] = [];
 
   if (before.sha256 !== after.sha256) changes.push('sha256/content changed');
-  if (before.type !== after.type) changes.push(`type ${before.type} â ${after.type}`);
-  if (before.size !== after.size) changes.push(`size ${before.size} â ${after.size}`);
+  if (before.type !== after.type) changes.push(`type ${before.type} -> ${after.type}`);
+  if (before.size !== after.size) changes.push(`size ${before.size} -> ${after.size}`);
   if (before.tenant !== after.tenant) {
-    changes.push(`tenant ${before.tenant} â ${after.tenant}`);
+    changes.push(`tenant ${before.tenant} -> ${after.tenant}`);
   }
 
   return changes;
