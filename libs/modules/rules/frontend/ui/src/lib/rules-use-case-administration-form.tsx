@@ -7,7 +7,9 @@ export type RulesUseCaseAdminErrorCode =
   | 'validation'
   | 'conflict'
   | 'not-found'
-  | 'unavailable';
+  | 'unavailable'
+  | 'protected'
+  | 'confirmation';
 
 export type RulesUseCaseAdminField =
   | 'id'
@@ -52,6 +54,8 @@ function errorMessage(code: RulesUseCaseAdminErrorCode | undefined): string | un
   if (code === 'conflict') return 'This change conflicts with the current catalog state.';
   if (code === 'not-found') return 'This use case no longer exists.';
   if (code === 'unavailable') return 'The Rules administration API is temporarily unavailable.';
+  if (code === 'protected') return 'System Rules use cases are read-only.';
+  if (code === 'confirmation') return 'Deletion confirmation did not match the use-case ID.';
   return undefined;
 }
 
