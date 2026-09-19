@@ -207,10 +207,7 @@ function suggestRuleXml(rule: RuleRecord, insertLine: string): string {
   }
 
   if (/<description>[\s\S]*?<\/description>/i.test(rule.rawXml)) {
-    return rule.rawXml.replace(
-      /(<description>[\s\S]*?<\/description>)/i,
-      `$1\n  ${insertLine}`,
-    );
+    return rule.rawXml.replace(/(<description>[\s\S]*?<\/description>)/i, `$1\n  ${insertLine}`);
   }
 
   return rule.rawXml.replace(/(<rule\b[^>]*>)/i, `$1\n  ${insertLine}`);
