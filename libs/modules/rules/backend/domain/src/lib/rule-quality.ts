@@ -75,9 +75,7 @@ function clamp(value: number): number {
 }
 
 function average(items: readonly number[]): number {
-  return items.length
-    ? Math.round(items.reduce((sum, value) => sum + value, 0) / items.length)
-    : 0;
+  return items.length ? Math.round(items.reduce((sum, value) => sum + value, 0) / items.length) : 0;
 }
 
 function gradeOf(score: number): QualityGrade {
@@ -135,10 +133,7 @@ function buildTenantContexts(data: ParsedRuleset): ReadonlyMap<string, TenantQua
   return contexts;
 }
 
-function scoreRule(
-  rule: RuleRecord,
-  context: TenantQualityContext,
-): RuleQualityScore {
+function scoreRule(rule: RuleRecord, context: TenantQualityContext): RuleQualityScore {
   const strengths: string[] = [];
   const warnings: string[] = [];
   const recommendations: string[] = [];
@@ -174,7 +169,10 @@ function scoreRule(
     recommendations.push('Assign a canonical Rules use case.');
   }
 
-  if (rule.rawXml.includes('<options>no_full_log</options>') || rule.options.includes('no_full_log')) {
+  if (
+    rule.rawXml.includes('<options>no_full_log</options>') ||
+    rule.options.includes('no_full_log')
+  ) {
     quality += 2;
   }
 
@@ -185,7 +183,11 @@ function scoreRule(
   }
   if (rule.frequency || rule.timeframe) noiseControl += 8;
   if (rule.level <= 5 && rule.jiraVisible) noiseControl -= 30;
-  if (rule.level >= 11 && rule.mitre.length === 0 && !['helper', 'parser_health'].includes(rule.role)) {
+  if (
+    rule.level >= 11 &&
+    rule.mitre.length === 0 &&
+    !['helper', 'parser_health'].includes(rule.role)
+  ) {
     noiseControl -= 12;
   }
   if (rule.role === 'detection' && rule.level >= 11 && !(rule.frequency || rule.timeframe)) {
@@ -287,7 +289,9 @@ function scoreRule(
   if (rule.role === 'correlation') qaReadiness += 10;
   if (rule.useCaseConfidence === 'confirmed') qaReadiness += 10;
   if (rule.mitre.length > 0) qaReadiness += 6;
-  recommendations.push('Attach at least one positive and one negative QA test case for high-impact rules.');
+  recommendations.push(
+    'Attach at least one positive and one negative QA test case for high-impact rules.',
+  );
 
   let clientReadiness = 65;
   if (rule.useCaseId !== 'unassigned') clientReadiness += 10;
@@ -359,15 +363,11 @@ export function buildQualitySummary(data: ParsedRuleset): QualitySummary {
       const averageScore = average(groupedRules.map((rule) => rule.overall));
       const weakSignals = [
         groupedRules.some((rule) => rule.useCaseId === 'unassigned') ? 'unassigned rules' : '',
-        groupedRules.some((rule) => rule.dimensions.mitreQuality < 60)
-          ? 'weak MITRE quality'
-          : '',
+        groupedRules.some((rule) => rule.dimensions.mitreQuality < 60) ? 'weak MITRE quality' : '',
         groupedRules.some((rule) => rule.dimensions.decoderConfidence < 60)
           ? 'decoder confidence gaps'
           : '',
-        groupedRules.some(
-          (rule) => rule.jiraVisible && rule.dimensions.jiraReadiness < 70,
-        )
+        groupedRules.some((rule) => rule.jiraVisible && rule.dimensions.jiraReadiness < 70)
           ? 'Jira readiness gaps'
           : '',
       ].filter(Boolean);
@@ -400,13 +400,10 @@ export function buildQualitySummary(data: ParsedRuleset): QualitySummary {
       needsReview: rules.filter((rule) => rule.grade === 'needs_review').length,
       risky: rules.filter((rule) => rule.grade === 'risky').length,
       broken: rules.filter((rule) => rule.grade === 'broken').length,
-      jiraReady: rules.filter(
-        (rule) => rule.jiraVisible && rule.dimensions.jiraReadiness >= 75,
-      ).length,
+      jiraReady: rules.filter((rule) => rule.jiraVisible && rule.dimensions.jiraReadiness >= 75)
+        .length,
       noisyCandidates: rules.filter((rule) => rule.dimensions.noiseControl < 65).length,
-      weakDecoderConfidence: rules.filter(
-        (rule) => rule.dimensions.decoderConfidence < 60,
-      ).length,
+      weakDecoderConfidence: rules.filter((rule) => rule.dimensions.decoderConfidence < 60).length,
       weakMitreQuality: rules.filter((rule) => rule.dimensions.mitreQuality < 60).length,
     },
   };
