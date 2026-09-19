@@ -41,12 +41,18 @@ import {
 import {
   RulesIntelligenceController,
   RulesSnapshotsController,
+  RulesUseCaseAdministrationController,
   RulesUseCasesController,
 } from '@mercure/rules-backend-presentation';
 
 @Module({
   imports: [PlatformDatabaseModule],
-  controllers: [RulesSnapshotsController, RulesIntelligenceController, RulesUseCasesController],
+  controllers: [
+    RulesSnapshotsController,
+    RulesIntelligenceController,
+    RulesUseCasesController,
+    RulesUseCaseAdministrationController,
+  ],
   providers: [
     WazuhXmlRulesetAnalyzer,
     {
