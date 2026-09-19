@@ -304,19 +304,23 @@ export function buildRulesGraph(
         }
       }
 
-      for (const group of rule.groups) {
-        const groupId = groupNodeId(rule.tenant, group);
-        if (nodes.has(groupId)) {
-          const source = ruleNodeId(rule.tenant, rule.id);
-          addEdge({
-            id: source + '->' + groupId + ':group_produces',
-            source,
-            target: groupId,
-            type: 'group_produces',
-            label: 'produces',
-            weight: 1,
-          });
-        }
+    }
+
+    for (const producer of selectedRules) {
+      for (const group of producer.groups) {
+        const groupId = groupNodeId(producer.tenant, group);
+        if (!nodes.has(groupId)) continue;
+
+        addRule(producer);
+        const source = ruleNodeId(producer.tenant, producer.id);
+        addEdge({
+          id: source + '->' + groupId + ':group_produces',
+          source,
+          target: groupId,
+          type: 'group_produces',
+          label: 'produces',
+          weight: 1,
+        });
       }
     }
   }
