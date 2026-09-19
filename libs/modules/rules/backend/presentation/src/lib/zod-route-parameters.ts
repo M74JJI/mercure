@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { Param, Query } from '@nestjs/common';
+import { Body, Param, Query } from '@nestjs/common';
 import type { ZodDto } from 'nestjs-zod';
 
 function withZodDesignType(decorator: ParameterDecorator, dto: ZodDto): ParameterDecorator {
@@ -26,4 +26,8 @@ export function ZodQuery(dto: ZodDto): ParameterDecorator {
 
 export function ZodParam(dto: ZodDto): ParameterDecorator {
   return withZodDesignType(Param(), dto);
+}
+
+export function ZodBody(dto: ZodDto): ParameterDecorator {
+  return withZodDesignType(Body(), dto);
 }
