@@ -4,6 +4,7 @@ import type {
   BuildRulesetSnapshotGraphResult,
   CompareRulesetSnapshotsResult,
   ScoreRulesetSnapshotQualityResult,
+  ListRulesUseCases,
 } from '@mercure/rules-backend-application';
 
 import type {
@@ -378,22 +379,36 @@ export function presentRoundtrip(
     summary: analysis.summary,
     sourceSections: page(analysis.sourceSections, query.offset, query.limit),
     commentedRules: page(
-      analysis.commentedRules.map(({ snippet: _snippet, ...safe }) => safe),
+      analysis.commentedRules.map((rule) => ({
+        tenant: rule.tenant,
+        fileName: rule.fileName,
+        ruleId: rule.ruleId,
+        ...(rule.level === undefined ? {} : { level: rule.level }),
+        ...(rule.description === undefined ? {} : { description: rule.description }),
+      })),
       query.offset,
       query.limit,
     ),
     groupFlows: page(analysis.groupFlows, query.offset, query.limit),
     missingUseCaseSuggestions: page(
-      analysis.missingUseCaseSuggestions.map(
-        ({ insertLine: _insertLine, suggestedXml: _suggestedXml, ...safe }) => safe,
-      ),
+      analysis.missingUseCaseSuggestions.map((suggestion) => ({
+        tenant: suggestion.tenant,
+        ruleId: suggestion.ruleId,
+        sourceFile: suggestion.sourceFile,
+        ...(suggestion.sourceSection === undefined
+          ? {}
+          : { sourceSection: suggestion.sourceSection }),
+        useCaseId: suggestion.useCaseId,
+        confidence: suggestion.confidence,
+        placement: suggestion.placement,
+      })),
       query.offset,
       query.limit,
     ),
   };
 }
 
-type RulesUseCase = Awaited<ReturnType<import('@mercure/rules-backend-application').ListRulesUseCases['execute']>>[number];
+type RulesUseCase = Awaited<ReturnType<ListRulesUseCases['execute']>>[number];
 
 export function presentUseCases(
   items: readonly RulesUseCase[],
