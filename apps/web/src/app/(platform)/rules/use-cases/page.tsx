@@ -9,6 +9,16 @@ export const metadata: Metadata = {
   description: 'Inspect the read-only canonical Mercure Rules use-case catalog.',
 };
 
-export default function RulesUseCasesPage() {
-  return <RulesUseCaseCatalogFeature />;
+interface RulesUseCasesPageProps {
+  readonly searchParams: Promise<
+    Readonly<Record<string, string | readonly string[] | undefined>>
+  >;
+}
+
+export default async function RulesUseCasesPage({
+  searchParams,
+}: RulesUseCasesPageProps) {
+  const query = await searchParams;
+
+  return <RulesUseCaseCatalogFeature searchParams={query} />;
 }
