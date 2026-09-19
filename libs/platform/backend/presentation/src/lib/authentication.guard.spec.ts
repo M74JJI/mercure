@@ -49,6 +49,22 @@ describe('AuthenticationGuard', () => {
     );
   });
 
+  it('returns 401 for malformed bearer authorization syntax', async () => {
+    const verifier: AccessTokenVerifier = {
+      verify: vi.fn(),
+    };
+    const guard = new AuthenticationGuard(reflector(false), verifier);
+
+    await expect(
+      guard.canActivate(
+        executionContext({
+          headers: { authorization: 'Basic not-a-bearer-token' },
+        }),
+      ),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(verifier.verify).not.toHaveBeenCalled();
+  });
+
   it('returns 403 for a cryptographically valid but unmapped identity', async () => {
     const guard = new AuthenticationGuard(reflector(false), {
       verify: vi.fn().mockResolvedValue({
