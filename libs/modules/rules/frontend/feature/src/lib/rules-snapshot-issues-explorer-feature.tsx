@@ -11,14 +11,16 @@ import {
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 import {
+  SNAPSHOT_EXPLORER_PAGE_SIZE,
+  snapshotExplorerPagination,
+} from './rules-snapshot-explorer-pagination';
+import {
   boundedIntegerSearchParam,
   enumSearchParam,
-  rulesHref,
   trimmedSearchParam,
   type RulesSearchParams,
 } from './rules-search-params';
 
-const PAGE_SIZE = 50;
 const severities = ['error', 'warning', 'info'] as const;
 
 export interface RulesSnapshotIssuesExplorerFeatureProps {
@@ -43,30 +45,20 @@ export async function RulesSnapshotIssuesExplorerFeature({
 
     const page = await api.listIssues(snapshotId, {
       offset,
-      limit: PAGE_SIZE,
+      limit: SNAPSHOT_EXPLORER_PAGE_SIZE,
       ...(selectedSeverity === undefined ? {} : { severity: selectedSeverity }),
       ...(selectedType === undefined ? {} : { type: selectedType }),
     });
 
-    const shared = {
-      ...(selectedSeverity === undefined ? {} : { severity: selectedSeverity }),
-      ...(selectedType === undefined ? {} : { type: selectedType }),
-    };
-    const path = '/rules/' + snapshotId + '/issues';
-    const previousHref =
-      offset > 0
-        ? rulesHref(path, {
-            ...shared,
-            offset: Math.max(0, offset - PAGE_SIZE),
-          })
-        : undefined;
-    const nextHref =
-      offset + page.items.length < page.total
-        ? rulesHref(path, {
-            ...shared,
-            offset: offset + PAGE_SIZE,
-          })
-        : undefined;
+    const pagination = snapshotExplorerPagination(
+      '/rules/' + snapshotId + '/issues',
+      offset,
+      page.total,
+      {
+        ...(selectedSeverity === undefined ? {} : { severity: selectedSeverity }),
+        ...(selectedType === undefined ? {} : { type: selectedType }),
+      },
+    );
 
     return (
       <RulesSnapshotIssuesExplorer
@@ -75,8 +67,7 @@ export async function RulesSnapshotIssuesExplorerFeature({
         total={page.total}
         {...(selectedSeverity === undefined ? {} : { selectedSeverity })}
         {...(selectedType === undefined ? {} : { selectedType })}
-        {...(previousHref === undefined ? {} : { previousHref })}
-        {...(nextHref === undefined ? {} : { nextHref })}
+        {...pagination}
       />
     );
   } catch (error) {
