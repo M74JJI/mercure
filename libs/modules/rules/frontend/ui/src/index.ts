@@ -4,6 +4,7 @@ export {
   RulesIntelligenceUnavailableState,
   RulesSnapshotNotFoundState,
   RulesUnavailableState,
+  RulesUseCaseNotFoundState,
 } from './lib/rules-states';
 export type {
   RulesDecoderPreviewView,
@@ -61,3 +62,9 @@ export {
   type RulesDiagnosticsPageProps,
 } from './lib/rules-diagnostics-page';
 export type { RulesDiagnosticsDetailView } from './lib/models';
+
+export {
+  RulesUseCaseDetail,
+  type RulesUseCaseDetailProps,
+} from './lib/rules-use-case-detail';
+export type { RulesUseCaseDetailView } from './lib/models';
