@@ -64,3 +64,13 @@ export {
   type RulesUseCaseCatalogReader,
   type UpdateCustomRulesUseCaseInput,
 } from './lib/use-case-catalog';
+
+export {
+  AnalyzeRulesetSnapshotFields,
+  BuildRulesetSnapshotGraph,
+  ScoreRulesetSnapshotQuality,
+  type AnalyzeRulesetSnapshotFieldsResult,
+  type BuildRulesetSnapshotGraphRequest,
+  type BuildRulesetSnapshotGraphResult,
+  type ScoreRulesetSnapshotQualityResult,
+} from './lib/analyze-ruleset-intelligence';
