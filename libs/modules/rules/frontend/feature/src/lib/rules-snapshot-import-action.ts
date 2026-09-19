@@ -15,7 +15,7 @@ import {
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 
-export async function importRulesSnapshotAction(): Promise<void> {
+export async function importRulesSnapshotAction(_formData: FormData): Promise<void> {
   const identity = await getServerMercureIdentity();
 
   if (!identity) {
