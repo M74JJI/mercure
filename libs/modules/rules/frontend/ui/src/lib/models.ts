@@ -181,3 +181,65 @@ export interface RulesFieldIntelligenceDetailView {
     }[];
   };
 }
+
+export interface RulesQualityDetailView {
+  readonly kind: 'rules' | 'use_cases';
+  readonly stats: {
+    readonly averageOverall: number;
+    readonly excellent: number;
+    readonly good: number;
+    readonly needsReview: number;
+    readonly risky: number;
+    readonly broken: number;
+    readonly jiraReady: number;
+    readonly noisyCandidates: number;
+    readonly weakDecoderConfidence: number;
+    readonly weakMitreQuality: number;
+  };
+  readonly rules?: {
+    readonly offset: number;
+    readonly limit: number;
+    readonly total: number;
+    readonly items: readonly {
+      readonly key: string;
+      readonly tenant: string;
+      readonly ruleId: string;
+      readonly description: string;
+      readonly useCaseId: string;
+      readonly level: number;
+      readonly role: string;
+      readonly status: string;
+      readonly jiraVisible: boolean;
+      readonly overall: number;
+      readonly grade: string;
+      readonly dimensions: {
+        readonly quality: number;
+        readonly noiseControl: number;
+        readonly decoderConfidence: number;
+        readonly dependencyHealth: number;
+        readonly mitreQuality: number;
+        readonly jiraReadiness: number;
+        readonly qaReadiness: number;
+        readonly clientReadiness: number;
+      };
+      readonly strengths: readonly string[];
+      readonly warnings: readonly string[];
+      readonly recommendations: readonly string[];
+    }[];
+  };
+  readonly useCases?: {
+    readonly offset: number;
+    readonly limit: number;
+    readonly total: number;
+    readonly items: readonly {
+      readonly key: string;
+      readonly tenant: string;
+      readonly useCaseId: string;
+      readonly rules: number;
+      readonly jiraVisible: number;
+      readonly average: number;
+      readonly grade: string;
+      readonly weakSignals: readonly string[];
+    }[];
+  };
+}
