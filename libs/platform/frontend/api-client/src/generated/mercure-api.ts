@@ -136,7 +136,126 @@ export interface paths {
     head?: never;
     patch?: never;
     trace?: never;
+  };  '/api/v1/rules/intelligence/snapshots/{snapshotId}/fields': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Read bounded field intelligence for a Rules snapshot */
+    get: operations['RulesIntelligenceController_fieldsForSnapshot'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
   };
+  '/api/v1/rules/intelligence/snapshots/{snapshotId}/quality': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Read bounded quality scoring for a Rules snapshot */
+    get: operations['RulesIntelligenceController_qualityForSnapshot'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/rules/intelligence/snapshots/{snapshotId}/graph': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Read a bounded semantic graph for a Rules snapshot */
+    get: operations['RulesIntelligenceController_graphForSnapshot'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/rules/intelligence/snapshots/{snapshotId}/roundtrip': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Read safe XML round-trip diagnostics for a Rules snapshot */
+    get: operations['RulesIntelligenceController_roundtripForSnapshot'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/rules/intelligence/compare': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Compare two immutable Rules snapshots with bounded detail output */
+    get: operations['RulesIntelligenceController_compareSnapshots'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/rules/use-cases': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List the canonical Rules use-case catalog */
+    get: operations['RulesUseCasesController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/rules/use-cases/{useCaseId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Read one canonical Rules use case */
+    get: operations['RulesUseCasesController_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -308,7 +427,404 @@ export interface components {
         fileName?: string;
         tenant?: string;
       }[];
+    };    RulesIntelligenceSnapshotParamsDto: {
+      /** Format: uuid */
+      snapshotId: string;
     };
+    RulesFieldIntelligenceQueryDto: {
+      /** @default 0 */
+      offset: number;
+      /** @default 50 */
+      limit: number;
+      tenant?: string;
+      /** @enum {string} */
+      health?: 'healthy' | 'underused' | 'unknown_source' | 'alias_candidate' | 'orphaned';
+      /** @enum {string} */
+      criticality?: 'critical' | 'high' | 'medium' | 'low';
+      family?: string;
+      query?: string;
+    };
+    RulesQualityQueryDto: {
+      /** @default 0 */
+      offset: number;
+      /** @default 50 */
+      limit: number;
+      /** @default rules */
+      kind: 'rules' | 'use_cases';
+      tenant?: string;
+      /** @enum {string} */
+      grade?: 'excellent' | 'good' | 'needs_review' | 'risky' | 'broken';
+      useCaseId?: string;
+      query?: string;
+    };
+    RulesGraphQueryDto: {
+      /** @default all */
+      mode: 'rules' | 'decoders' | 'decoder_rules' | 'use_cases' | 'mitre' | 'fields' | 'all';
+      query?: string;
+      tenant?: string;
+      useCaseId?: string;
+      status?: string;
+      role?: string;
+      jiraOnly?: 'true' | 'false';
+      includeExternal?: 'true' | 'false';
+      /** @default 200 */
+      limit: number;
+    };
+    RulesSnapshotCompareQueryDto: {
+      /** Format: uuid */
+      beforeSnapshotId: string;
+      /** Format: uuid */
+      afterSnapshotId: string;
+      /** @default rules */
+      kind: 'rules' | 'decoders' | 'files' | 'use_cases' | 'issues';
+      /** @default 0 */
+      offset: number;
+      /** @default 50 */
+      limit: number;
+    };
+    RulesRoundtripQueryDto: {
+      /** @default 0 */
+      offset: number;
+      /** @default 50 */
+      limit: number;
+    };
+    RulesUseCaseParamsDto: {
+      useCaseId: string;
+    };
+    RulesUseCaseListQueryDto: {
+      /** @default 0 */
+      offset: number;
+      /** @default 50 */
+      limit: number;
+      /** @enum {string} */
+      source?: 'system' | 'custom';
+      query?: string;
+    };
+    RulesFieldIntelligenceDocument: {
+      /** Format: uuid */
+      snapshotId: string;
+      stats: {
+        totalFields: number;
+        producedFields: number;
+        usedFields: number;
+        unknownSourceFields: number;
+        orphanedProducedFields: number;
+        aliasCandidates: number;
+        criticalFields: number;
+        averageRisk: number;
+      };
+      page: {
+        offset: number;
+        limit: number;
+        total: number;
+        items: {
+          key: string;
+          tenant: string;
+          field: string;
+          canonical: string;
+          family: string;
+          description: string;
+          aliases: string[];
+          producedBy: {
+            tenant: string;
+            id: string;
+          }[];
+          producedByTotal: number;
+          usedByRules: {
+            tenant: string;
+            id: string;
+            level: number;
+            /** @enum {string} */
+            severity: 'informational' | 'low' | 'medium' | 'high' | 'critical';
+            jiraVisible: boolean;
+          }[];
+          usedByRulesTotal: number;
+          usedByUseCases: string[];
+          usedByUseCasesTotal: number;
+          jiraVisibleRules: number;
+          criticalRules: number;
+          decodedAsRules: string[];
+          decodedAsRulesTotal: number;
+          /** @enum {string} */
+          health: 'healthy' | 'underused' | 'unknown_source' | 'alias_candidate' | 'orphaned';
+          /** @enum {string} */
+          criticality: 'critical' | 'high' | 'medium' | 'low';
+          riskScore: number;
+          aliasHints: {
+            field: string;
+            alias: string;
+            reason: string;
+          }[];
+          aliasHintsTotal: number;
+        }[];
+      };
+    };
+    RulesQualityDocument: {
+      /** Format: uuid */
+      snapshotId: string;
+      /** @enum {string} */
+      kind: 'rules' | 'use_cases';
+      stats: {
+        averageOverall: number;
+        excellent: number;
+        good: number;
+        needsReview: number;
+        risky: number;
+        broken: number;
+        jiraReady: number;
+        noisyCandidates: number;
+        weakDecoderConfidence: number;
+        weakMitreQuality: number;
+      };
+      rules?: {
+        offset: number;
+        limit: number;
+        total: number;
+        items: {
+          key: string;
+          tenant: string;
+          ruleId: string;
+          description: string;
+          useCaseId: string;
+          level: number;
+          role: string;
+          status: string;
+          jiraVisible: boolean;
+          overall: number;
+          /** @enum {string} */
+          grade: 'excellent' | 'good' | 'needs_review' | 'risky' | 'broken';
+          dimensions: {
+            quality: number;
+            noiseControl: number;
+            decoderConfidence: number;
+            dependencyHealth: number;
+            mitreQuality: number;
+            jiraReadiness: number;
+            qaReadiness: number;
+            clientReadiness: number;
+          };
+          strengths: string[];
+          warnings: string[];
+          recommendations: string[];
+        }[];
+      };
+      useCases?: {
+        offset: number;
+        limit: number;
+        total: number;
+        items: {
+          key: string;
+          tenant: string;
+          useCaseId: string;
+          rules: number;
+          jiraVisible: number;
+          average: number;
+          /** @enum {string} */
+          grade: 'excellent' | 'good' | 'needs_review' | 'risky' | 'broken';
+          weakSignals: string[];
+        }[];
+      };
+    };
+    RulesGraphDocument: {
+      /** Format: uuid */
+      snapshotId: string;
+      graph: {
+        nodes: {
+          id: string;
+          /** @enum {string} */
+          type: 'rule' | 'decoder' | 'use_case' | 'mitre' | 'field' | 'group' | 'external';
+          label: string;
+          weight: number;
+          tenant?: string;
+          entityId?: string;
+          meta?: {
+            [key: string]: string | number | boolean;
+          };
+        }[];
+        edges: {
+          id: string;
+          source: string;
+          target: string;
+          /** @enum {string} */
+          type:
+            | 'if_sid'
+            | 'if_group'
+            | 'if_matched_sid'
+            | 'if_matched_group'
+            | 'decoded_as'
+            | 'decoder_parent'
+            | 'group_produces'
+            | 'field_produces'
+            | 'field_uses'
+            | 'use_case'
+            | 'mitre';
+          label: string;
+          weight: number;
+        }[];
+        stats: {
+          nodes: number;
+          edges: number;
+          rules: number;
+          decoders: number;
+          fields: number;
+          groups: number;
+          useCases: number;
+          mitre: number;
+          external: number;
+        };
+      };
+    };
+    RulesSnapshotCompareDocument: {
+      /** Format: uuid */
+      beforeSnapshotId: string;
+      /** Format: uuid */
+      afterSnapshotId: string;
+      /** @enum {string} */
+      kind: 'rules' | 'decoders' | 'files' | 'use_cases' | 'issues';
+      summary: {
+        rulesAdded: number;
+        rulesRemoved: number;
+        rulesChanged: number;
+        decodersAdded: number;
+        decodersRemoved: number;
+        decodersChanged: number;
+        filesAdded: number;
+        filesRemoved: number;
+        filesChanged: number;
+        useCasesAdded: number;
+        useCasesRemoved: number;
+        newIssues: number;
+        resolvedIssues: number;
+        jiraVisibilityChanged: number;
+        severityChanged: number;
+        mitreChanged: number;
+        useCaseChanged: number;
+      };
+      page: {
+        offset: number;
+        limit: number;
+        total: number;
+        items: {
+          key: string;
+          /** @enum {string} */
+          state: 'added' | 'removed' | 'changed' | 'resolved';
+          changes: string[];
+          before?: {
+            [key: string]: unknown;
+          };
+          after?: {
+            [key: string]: unknown;
+          };
+        }[];
+      };
+    };
+    RulesRoundtripDocument: {
+      /** Format: uuid */
+      snapshotId: string;
+      summary: {
+        sourceSections: number;
+        combinedFiles: number;
+        commentedRules: number;
+        idRangeWarnings: number;
+        orphanGroups: number;
+        missingGroupProducers: number;
+        missingUseCaseSuggestions: number;
+      };
+      sourceSections: {
+        offset: number;
+        limit: number;
+        total: number;
+        items: {
+          key: string;
+          tenant: string;
+          sourceFile: string;
+          hostFile: string;
+          ruleCount: number;
+          minRuleId?: number;
+          maxRuleId?: number;
+          expectedPrefix?: string;
+          /** @enum {string} */
+          idRangeStatus: 'pass' | 'warning' | 'unknown';
+          statusSummary: string;
+        }[];
+      };
+      commentedRules: {
+        offset: number;
+        limit: number;
+        total: number;
+        items: {
+          tenant: string;
+          fileName: string;
+          ruleId: string;
+          level?: string;
+          description?: string;
+        }[];
+      };
+      groupFlows: {
+        offset: number;
+        limit: number;
+        total: number;
+        items: {
+          tenant: string;
+          group: string;
+          producedByRules: string[];
+          consumedByRules: string[];
+          /** @enum {string} */
+          status: 'active' | 'orphan_producer' | 'missing_producer';
+        }[];
+      };
+      missingUseCaseSuggestions: {
+        offset: number;
+        limit: number;
+        total: number;
+        items: {
+          tenant: string;
+          ruleId: string;
+          sourceFile: string;
+          sourceSection?: string;
+          useCaseId: string;
+          /** @enum {string} */
+          confidence: 'confirmed' | 'inferred' | 'unassigned';
+          placement: string;
+        }[];
+      };
+    };
+    RulesUseCasePageDocument: {
+      offset: number;
+      limit: number;
+      total: number;
+      items: {
+        id: string;
+        name: string;
+        shortName: string;
+        description: string;
+        component: string;
+        vendor: string;
+        product: string;
+        domain: string;
+        category: string;
+        /** @enum {string} */
+        source: 'system' | 'custom';
+        createdBy: string;
+        createdAt?: string;
+      }[];
+    };
+    RulesUseCaseDocument: {
+      id: string;
+      name: string;
+      shortName: string;
+      description: string;
+      component: string;
+      vendor: string;
+      product: string;
+      domain: string;
+      category: string;
+      /** @enum {string} */
+      source: 'system' | 'custom';
+      createdBy: string;
+      createdAt?: string;
+    };
+
   };
   responses: never;
   parameters: never;
@@ -541,5 +1057,230 @@ export interface operations {
         content?: never;
       };
     };
+  };  RulesIntelligenceController_fieldsForSnapshot: {
+    parameters: {
+      query?: {
+        offset?: number;
+        limit?: number;
+        tenant?: string;
+        health?: 'healthy' | 'underused' | 'unknown_source' | 'alias_candidate' | 'orphaned';
+        criticality?: 'critical' | 'high' | 'medium' | 'low';
+        family?: string;
+        query?: string;
+      };
+      header?: never;
+      path: {
+        snapshotId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesFieldIntelligenceDocument'];
+        };
+      };
+      /** @description Rules snapshot not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
   };
+  RulesIntelligenceController_qualityForSnapshot: {
+    parameters: {
+      query?: {
+        offset?: number;
+        limit?: number;
+        kind?: 'rules' | 'use_cases';
+        tenant?: string;
+        grade?: 'excellent' | 'good' | 'needs_review' | 'risky' | 'broken';
+        useCaseId?: string;
+        query?: string;
+      };
+      header?: never;
+      path: {
+        snapshotId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesQualityDocument'];
+        };
+      };
+      /** @description Rules snapshot not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesIntelligenceController_graphForSnapshot: {
+    parameters: {
+      query?: {
+        mode?: 'rules' | 'decoders' | 'decoder_rules' | 'use_cases' | 'mitre' | 'fields' | 'all';
+        query?: string;
+        tenant?: string;
+        useCaseId?: string;
+        status?: string;
+        role?: string;
+        jiraOnly?: 'true' | 'false';
+        includeExternal?: 'true' | 'false';
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        snapshotId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesGraphDocument'];
+        };
+      };
+      /** @description Rules snapshot not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesIntelligenceController_roundtripForSnapshot: {
+    parameters: {
+      query?: {
+        offset?: number;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        snapshotId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesRoundtripDocument'];
+        };
+      };
+      /** @description Rules snapshot not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesIntelligenceController_compareSnapshots: {
+    parameters: {
+      query: {
+        beforeSnapshotId: string;
+        afterSnapshotId: string;
+        kind?: 'rules' | 'decoders' | 'files' | 'use_cases' | 'issues';
+        offset?: number;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesSnapshotCompareDocument'];
+        };
+      };
+      /** @description One or both Rules snapshots were not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesUseCasesController_list: {
+    parameters: {
+      query?: {
+        offset?: number;
+        limit?: number;
+        source?: 'system' | 'custom';
+        query?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesUseCasePageDocument'];
+        };
+      };
+    };
+  };
+  RulesUseCasesController_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        useCaseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesUseCaseDocument'];
+        };
+      };
+      /** @description Rules use case not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+
 }
