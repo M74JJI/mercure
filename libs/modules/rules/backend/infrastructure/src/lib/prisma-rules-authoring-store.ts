@@ -142,24 +142,48 @@ function detail(row: DraftRow, issues: readonly ValidationIssueRow[]): RulesAuth
 }
 
 function summary(row: DraftRow): RulesAuthoringDraftSummary {
-  const { content: _content, validation, ...rest } = detail(row, []);
-  return {
-    ...rest,
-    ...(validation === undefined
-      ? {}
+  const validation =
+    row.validatedRevision === null ||
+    row.validatedSha256 === null ||
+    row.validatedRuleCount === null ||
+    row.validatedDecoderCount === null ||
+    row.validationIssueCount === null ||
+    row.validationErrorCount === null ||
+    row.validationWarningCount === null ||
+    row.validationInfoCount === null ||
+    row.validatedAt === null
+      ? undefined
       : {
-          validation: {
-            revision: validation.revision,
-            sha256: validation.sha256,
-            ruleCount: validation.ruleCount,
-            decoderCount: validation.decoderCount,
-            issueCount: validation.issueCount,
-            errorCount: validation.errorCount,
-            warningCount: validation.warningCount,
-            infoCount: validation.infoCount,
-            validatedAt: validation.validatedAt,
-          },
-        }),
+          revision: row.validatedRevision,
+          sha256: row.validatedSha256,
+          ruleCount: row.validatedRuleCount,
+          decoderCount: row.validatedDecoderCount,
+          issueCount: row.validationIssueCount,
+          errorCount: row.validationErrorCount,
+          warningCount: row.validationWarningCount,
+          infoCount: row.validationInfoCount,
+          validatedAt: row.validatedAt.toISOString(),
+        };
+
+  return {
+    id: row.id,
+    sourceSnapshotId: row.sourceSnapshotId,
+    sourceFilePosition: row.sourceFilePosition,
+    fileName: row.fileName,
+    tenant: row.tenant,
+    sourceType: sourceType(row.sourceType),
+    sha256: row.sha256,
+    revision: row.revision,
+    state: state(row.state),
+    createdBy: row.createdBy,
+    updatedBy: row.updatedBy,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+    ...(validation === undefined ? {} : { validation }),
+    ...(row.approvedRevision === null ? {} : { approvedRevision: row.approvedRevision }),
+    ...(row.approvedSha256 === null ? {} : { approvedSha256: row.approvedSha256 }),
+    ...(row.approvedBy === null ? {} : { approvedBy: row.approvedBy }),
+    ...(row.approvedAt === null ? {} : { approvedAt: row.approvedAt.toISOString() }),
   };
 }
 

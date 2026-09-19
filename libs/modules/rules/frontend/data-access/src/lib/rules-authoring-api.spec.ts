@@ -45,8 +45,23 @@ describe('RulesAuthoringDataAccess', () => {
           });
         }
         if (pathname.endsWith('/drafts') && request.method === 'GET') {
-          const { content: _content, ...summary } = draft;
-          return jsonResponse([summary]);
+          return jsonResponse([
+            {
+              id: draft.id,
+              sourceSnapshotId: draft.sourceSnapshotId,
+              sourceFilePosition: draft.sourceFilePosition,
+              fileName: draft.fileName,
+              tenant: draft.tenant,
+              sourceType: draft.sourceType,
+              sha256: draft.sha256,
+              revision: draft.revision,
+              state: draft.state,
+              createdBy: draft.createdBy,
+              updatedBy: draft.updatedBy,
+              createdAt: draft.createdAt,
+              updatedAt: draft.updatedAt,
+            },
+          ]);
         }
         return jsonResponse(draft, request.method === 'POST' && pathname.endsWith('/drafts') ? 201 : 200);
       },
