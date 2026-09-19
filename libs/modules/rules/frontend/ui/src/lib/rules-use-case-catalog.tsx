@@ -6,6 +6,8 @@ import styles from './rules.module.css';
 export interface RulesUseCaseCatalogProps {
   readonly useCases: readonly RulesUseCasePreviewView[];
   readonly total: number;
+  readonly canAdminister: boolean;
+  readonly deletedUseCaseId?: string;
   readonly selectedQuery?: string;
   readonly selectedSource?: 'system' | 'custom';
   readonly previousHref?: string;
@@ -13,6 +15,8 @@ export interface RulesUseCaseCatalogProps {
 }
 
 export function RulesUseCaseCatalog({
+  canAdminister,
+  deletedUseCaseId,
   nextHref,
   previousHref,
   selectedQuery,
@@ -25,8 +29,17 @@ export function RulesUseCaseCatalog({
       <PageHeader
         eyebrow="Rules intelligence"
         title="Use-case catalog"
-        description="Read-only canonical use cases used to classify Rules snapshots. System and custom catalog entries are visible here; mutation is intentionally not exposed."
-        actions={<StatusBadge tone="neutral">{String(total) + ' use cases'}</StatusBadge>}
+        description="Canonical use cases used to classify Rules snapshots. Custom entries can be managed only by Rules administrators; system entries remain immutable."
+        actions={
+          <div className={styles.headerActions}>
+            {canAdminister ? (
+              <a className={styles.actionLink} href="/rules/use-cases/new">
+                New custom use case
+              </a>
+            ) : null}
+            <StatusBadge tone="neutral">{String(total) + ' use cases'}</StatusBadge>
+          </div>
+        }
       />
 
       <div className={styles.headerActions}>
@@ -37,6 +50,14 @@ export function RulesUseCaseCatalog({
           Compare snapshots
         </a>
       </div>
+
+      {deletedUseCaseId ? (
+        <Panel tone="muted" className={styles.formNotice}>
+          <strong>
+            Deleted custom use case <span className={styles.mono}>{deletedUseCaseId}</span>.
+          </strong>
+        </Panel>
+      ) : null}
 
       <Panel tone="raised" className={styles.compareControls}>
         <form action="/rules/use-cases" method="get" className={styles.catalogFilterForm}>
@@ -104,12 +125,22 @@ export function RulesUseCaseCatalog({
 
               <div className={styles.useCaseCardFooter}>
                 <span className={styles.mono}>{useCase.id}</span>
-                <a
-                  className={styles.actionLink}
-                  href={'/rules/use-cases/' + encodeURIComponent(useCase.id)}
-                >
-                  View details
-                </a>
+                <div className={styles.headerActions}>
+                  <a
+                    className={styles.actionLink}
+                    href={'/rules/use-cases/' + encodeURIComponent(useCase.id)}
+                  >
+                    View details
+                  </a>
+                  {canAdminister && useCase.source === 'custom' ? (
+                    <a
+                      className={styles.actionLink}
+                      href={'/rules/use-cases/' + encodeURIComponent(useCase.id) + '/edit'}
+                    >
+                      Edit
+                    </a>
+                  ) : null}
+                </div>
               </div>
             </Panel>
           ))}
