@@ -81,15 +81,6 @@ import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
       inject: [RULESET_ARCHIVE_SOURCE, AnalyzeRuleset, RULES_USE_CASE_CATALOG],
     },
     {
-      provide: ImportArchivedRuleset,
-      useFactory: (
-        source: RulesetArchiveSource,
-        analyzeRuleset: AnalyzeRuleset,
-        catalog: RulesUseCaseCatalogReader,
-      ) => new ImportArchivedRuleset(source, analyzeRuleset, catalog),
-      inject: [RULESET_ARCHIVE_SOURCE, AnalyzeRuleset, RULES_USE_CASE_CATALOG],
-    },
-    {
       provide: PrismaRulesetSnapshotStore,
       useFactory: (database: PrismaService) => new PrismaRulesetSnapshotStore(database),
       inject: [PrismaService],
