@@ -43,3 +43,9 @@ export {
   type RulesFieldIntelligencePageProps,
 } from './lib/rules-field-intelligence-page';
 export type { RulesFieldIntelligenceDetailView } from './lib/models';
+
+export {
+  RulesQualityPage,
+  type RulesQualityPageProps,
+} from './lib/rules-quality-page';
+export type { RulesQualityDetailView } from './lib/models';
