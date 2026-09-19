@@ -283,3 +283,132 @@
     grid-template-columns: 1fr;
   }
 }
+
+.intelligenceSection {
+  display: grid;
+  gap: var(--mc-space-5);
+}
+
+.intelligenceHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mc-space-4);
+}
+
+.intelligenceHeading h2 {
+  margin: var(--mc-space-1) 0 var(--mc-space-2);
+  font-size: var(--mc-font-xl);
+}
+
+.intelligenceHeading > div > p:last-child,
+.supportingText {
+  margin: 0;
+  color: var(--mc-text-secondary);
+  font-size: var(--mc-font-sm);
+  line-height: 1.6;
+}
+
+.intelligenceMetrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--mc-space-3);
+}
+
+.intelligenceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--mc-space-4);
+  align-items: start;
+}
+
+.intelligenceList {
+  display: grid;
+  gap: var(--mc-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.intelligenceList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mc-space-4);
+  padding: var(--mc-space-3) 0;
+  border-bottom: 1px solid var(--mc-border-subtle);
+}
+
+.intelligenceList li:last-child {
+  border-bottom: 0;
+}
+
+.intelligenceList li > div {
+  display: grid;
+  gap: var(--mc-space-1);
+}
+
+.intelligenceList small {
+  color: var(--mc-text-muted);
+}
+
+.intelligenceListMeta {
+  justify-items: end;
+  text-align: right;
+}
+
+.intelligenceListMeta > span {
+  color: var(--mc-text-secondary);
+  font-size: var(--mc-font-sm);
+}
+
+.graphStats,
+.diagnosticGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--mc-space-3);
+}
+
+.graphStats span,
+.diagnosticGrid span {
+  display: grid;
+  gap: var(--mc-space-1);
+  padding: var(--mc-space-3);
+  border: 1px solid var(--mc-border-subtle);
+  border-radius: var(--mc-radius-md);
+  color: var(--mc-text-muted);
+  font-size: var(--mc-font-xs);
+}
+
+.graphStats strong,
+.diagnosticGrid strong {
+  color: var(--mc-text-primary);
+  font-size: var(--mc-font-lg);
+}
+
+@media (max-width: 1050px) {
+  .intelligenceMetrics,
+  .intelligenceGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .intelligenceHeading,
+  .intelligenceList li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .intelligenceMetrics,
+  .intelligenceGrid,
+  .graphStats,
+  .diagnosticGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .intelligenceListMeta {
+    justify-items: start;
+    text-align: left;
+  }
+}
