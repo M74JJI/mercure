@@ -9,6 +9,7 @@ import type {
 import styles from './rules.module.css';
 
 export interface RulesSnapshotIntelligenceProps {
+  readonly snapshotId: string;
   readonly fields: RulesFieldIntelligenceView;
   readonly quality: RulesQualityView;
   readonly graph: RulesGraphSummaryView;
@@ -26,6 +27,7 @@ export function RulesSnapshotIntelligence({
   graph,
   quality,
   roundtrip,
+  snapshotId,
 }: RulesSnapshotIntelligenceProps) {
   const qualityRules = quality.rules?.items ?? [];
 
@@ -41,6 +43,21 @@ export function RulesSnapshotIntelligence({
           </p>
         </div>
         <StatusBadge tone="neutral">Snapshot derived</StatusBadge>
+      </div>
+
+      <div className={styles.headerActions}>
+        <a className={styles.actionLink} href={'/rules/' + snapshotId + '/fields'}>
+          Explore fields
+        </a>
+        <a className={styles.actionLink} href={'/rules/' + snapshotId + '/quality'}>
+          Explore quality
+        </a>
+        <a className={styles.actionLink} href={'/rules/' + snapshotId + '/graph'}>
+          Explore graph
+        </a>
+        <a className={styles.actionLink} href={'/rules/' + snapshotId + '/diagnostics'}>
+          Explore diagnostics
+        </a>
       </div>
 
       <div className={styles.intelligenceMetrics} aria-label="Rules intelligence summary">
