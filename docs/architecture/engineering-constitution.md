@@ -17,7 +17,7 @@ Mercure is a modular security platform. Engineering decisions optimize for corre
 9. Frontend code cannot import backend implementation libraries.
 10. Backend domain code remains framework-independent where practical and must not depend on NestJS, Prisma, Fastify, HTTP, or filesystem implementations.
 11. Nx project tags and lint rules enforce architectural boundaries in CI.
-12. Authentication and authorization are intentionally out of scope until a dedicated identity/security design is approved.
+12. Authentication and authorization follow ADR-0015: external OIDC identity, server-side web sessions, backend-enforced bearer authentication and centralized capability-based authorization.
 13. New distributed infrastructure such as queues, workers, caches, microservices, or Kubernetes requires a demonstrated requirement and an ADR.
 
 ## Engineering quality policy
