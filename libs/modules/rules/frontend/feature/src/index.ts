@@ -70,3 +70,14 @@ export {
   RulesSnapshotIssueDetailFeature,
   RulesSnapshotRuleDetailFeature,
 } from './lib/rules-snapshot-record-detail-feature';
+
+export {
+  RulesAuthoringDraftDetailFeature,
+  RulesAuthoringDraftListFeature,
+} from './lib/rules-authoring-feature';
+export {
+  approveRulesAuthoringDraftAction,
+  createRulesAuthoringDraftAction,
+  updateRulesAuthoringDraftAction,
+  validateRulesAuthoringDraftAction,
+} from './lib/rules-authoring-actions';

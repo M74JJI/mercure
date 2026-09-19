@@ -1,4 +1,7 @@
-import { authenticatedMercureFetch } from '@mercure/platform-frontend-identity-data-access/server';
+import {
+  authenticatedMercureFetch,
+  getServerMercureIdentity,
+} from '@mercure/platform-frontend-identity-data-access/server';
 import { RulesDataAccess, RulesFrontendApiError } from '@mercure/rules-frontend-data-access';
 import {
   RulesSnapshotDecoderDetail,
@@ -9,6 +12,7 @@ import {
 } from '@mercure/rules-frontend-ui';
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
+import { createRulesAuthoringDraftAction } from './rules-authoring-actions';
 
 function recordPosition(value: string): number | null {
   if (!/^\d+$/.test(value)) return null;
@@ -42,9 +46,16 @@ export async function RulesSnapshotRuleDetailFeature({
   if (parsed === null) return <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="rules" />;
   const api = new RulesDataAccess({ fetch: authenticatedMercureFetch });
   try {
-    const rule = await api.getRule(snapshotId, parsed);
+    const [rule, identity] = await Promise.all([
+      api.getRule(snapshotId, parsed),
+      getServerMercureIdentity(),
+    ]);
     return rule
-      ? <RulesSnapshotRuleDetail snapshotId={snapshotId} rule={rule} />
+      ? <RulesSnapshotRuleDetail
+          snapshotId={snapshotId}
+          rule={rule}
+          {...(identity?.role === 'admin' ? { createDraftAction: createRulesAuthoringDraftAction } : {})}
+        />
       : <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="rules" />;
   } catch (error) {
     return recordError(error, snapshotId, 'rules');
@@ -62,9 +73,16 @@ export async function RulesSnapshotDecoderDetailFeature({
   if (parsed === null) return <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="decoders" />;
   const api = new RulesDataAccess({ fetch: authenticatedMercureFetch });
   try {
-    const decoder = await api.getDecoder(snapshotId, parsed);
+    const [decoder, identity] = await Promise.all([
+      api.getDecoder(snapshotId, parsed),
+      getServerMercureIdentity(),
+    ]);
     return decoder
-      ? <RulesSnapshotDecoderDetail snapshotId={snapshotId} decoder={decoder} />
+      ? <RulesSnapshotDecoderDetail
+          snapshotId={snapshotId}
+          decoder={decoder}
+          {...(identity?.role === 'admin' ? { createDraftAction: createRulesAuthoringDraftAction } : {})}
+        />
       : <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="decoders" />;
   } catch (error) {
     return recordError(error, snapshotId, 'decoders');
