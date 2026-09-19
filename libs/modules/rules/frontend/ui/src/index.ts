@@ -37,3 +37,9 @@ export type {
   RulesComparisonSnapshotOptionView,
   RulesSnapshotComparisonView,
 } from './lib/models';
+
+export {
+  RulesFieldIntelligencePage,
+  type RulesFieldIntelligencePageProps,
+} from './lib/rules-field-intelligence-page';
+export type { RulesFieldIntelligenceDetailView } from './lib/models';
