@@ -55,3 +55,9 @@ export {
   type RulesGraphPageProps,
 } from './lib/rules-graph-page';
 export type { RulesGraphDetailView } from './lib/models';
+
+export {
+  RulesDiagnosticsPage,
+  type RulesDiagnosticsPageProps,
+} from './lib/rules-diagnostics-page';
+export type { RulesDiagnosticsDetailView } from './lib/models';
