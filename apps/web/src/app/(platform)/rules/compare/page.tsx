@@ -14,6 +14,7 @@ interface RulesComparisonPageProps {
     readonly before?: string | readonly string[];
     readonly after?: string | readonly string[];
     readonly kind?: string | readonly string[];
+    readonly offset?: string | readonly string[];
   }>;
 }
 
@@ -29,12 +30,14 @@ export default async function RulesComparisonPage({
   const beforeSnapshotId = first(query.before);
   const afterSnapshotId = first(query.after);
   const kind = first(query.kind);
+  const offset = first(query.offset);
 
   return (
     <RulesComparisonFeature
       {...(beforeSnapshotId === undefined ? {} : { beforeSnapshotId })}
       {...(afterSnapshotId === undefined ? {} : { afterSnapshotId })}
       {...(kind === undefined ? {} : { kind })}
+      {...(offset === undefined ? {} : { offset })}
     />
   );
 }
