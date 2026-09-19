@@ -1,7 +1,7 @@
 import { createServer, type Server } from 'node:http';
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { SignJWT, exportJWK, generateKeyPair, type KeyLike } from 'jose';
+import { SignJWT, exportJWK, generateKeyPair } from 'jose';
 
 import { KeycloakAccessTokenVerifier } from './keycloak-access-token-verifier';
 
@@ -11,8 +11,8 @@ const clientId = 'mercure-api';
 
 let server: Server;
 let jwksUrl = '';
-let signingKey: KeyLike;
-let alternateSigningKey: KeyLike;
+let signingKey: CryptoKey;
+let alternateSigningKey: CryptoKey;
 let jwksRequests = 0;
 
 function verifier() {
@@ -34,7 +34,7 @@ function verifier() {
 async function token(
   claims: Record<string, unknown> = {},
   options: {
-    readonly key?: KeyLike;
+    readonly key?: CryptoKey;
     readonly kid?: string;
     readonly tokenIssuer?: string;
     readonly tokenAudience?: string;
