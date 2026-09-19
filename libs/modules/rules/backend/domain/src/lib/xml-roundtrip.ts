@@ -201,17 +201,25 @@ function buildSplitXml(tenant: string, section: string, rules: readonly RuleReco
   return `${header}\n\n${body}\n\n</group>\n`;
 }
 
+function suggestRuleXml(rule: RuleRecord, insertLine: string): string {
+  if (/<info\b[^>]*>\s*use_case:/i.test(rule.rawXml)) {
+    return rule.rawXml;
+  }
+
+  if (/<description>[\s\S]*?<\/description>/i.test(rule.rawXml)) {
+    return rule.rawXml.replace(
+      /(<description>[\s\S]*?<\/description>)/i,
+      `$1\n  ${insertLine}`,
+    );
+  }
+
+  return rule.rawXml.replace(/(<rule\b[^>]*>)/i, `$1\n  ${insertLine}`);
+}
+
 function buildPatchSuggestion(rule: RuleRecord): RoundtripPatchSuggestion {
   const useCaseId = rule.useCaseId === 'unassigned' ? 'uc_todo_assign' : rule.useCaseId;
   const insertLine = `<info type="text">use_case:${useCaseId}</info>`;
-  const suggestedXml = /<info\b[^>]*>\s*use_case:/i.test(rule.rawXml)
-    ? rule.rawXml
-    : /<description>[\s\S]*?<\/description>/i.test(rule.rawXml)
-      ? rule.rawXml.replace(
-          /(<description>[\s\S]*?<\/description>)/i,
-          `$1\n  ${insertLine}`,
-        )
-      : rule.rawXml.replace(/(<rule\b[^>]*>)/i, `$1\n  ${insertLine}`);
+  const suggestedXml = suggestRuleXml(rule, insertLine);
 
   return {
     tenant: rule.tenant,
