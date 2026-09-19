@@ -35,3 +35,13 @@ export {
   RulesUseCaseDetailFeature,
   type RulesUseCaseDetailFeatureProps,
 } from './lib/rules-use-case-detail-feature';
+
+export {
+  RulesUseCaseCreateFeature,
+  type RulesUseCaseCreateFeatureProps,
+} from './lib/rules-use-case-create-feature';
+
+export {
+  RulesUseCaseEditFeature,
+  type RulesUseCaseEditFeatureProps,
+} from './lib/rules-use-case-edit-feature';
