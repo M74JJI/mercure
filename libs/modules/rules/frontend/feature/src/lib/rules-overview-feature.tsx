@@ -47,6 +47,7 @@ export async function RulesOverviewFeature({
       <RulesSnapshotHistory
         snapshots={snapshots.items}
         total={snapshots.total}
+        canAuthor={canImport}
         canImport={canImport}
         {...(canImport ? { importAction: importRulesSnapshotAction } : {})}
         {...(importStatus === undefined ? {} : { importStatus })}

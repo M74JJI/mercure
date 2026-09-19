@@ -10,6 +10,7 @@ export interface RulesSnapshotHistoryProps {
   readonly snapshots: readonly RulesSnapshotSummaryView[];
   readonly total: number;
   readonly canImport: boolean;
+  readonly canAuthor: boolean;
   readonly importAction?: (formData: FormData) => Promise<void>;
   readonly importStatus?: RulesSnapshotImportStatus;
   readonly previousHref?: string;
@@ -39,6 +40,7 @@ function importStatusMessage(status: RulesSnapshotImportStatus | undefined): str
 }
 
 export function RulesSnapshotHistory({
+  canAuthor,
   canImport,
   importAction,
   importStatus,
@@ -59,6 +61,11 @@ export function RulesSnapshotHistory({
           <div className={styles.headerActions}>
             {canImport && importAction ? (
               <RulesSnapshotImportForm action={importAction} />
+            ) : null}
+            {canAuthor ? (
+              <a className={styles.actionLink} href="/rules/drafts">
+                Authoring drafts
+              </a>
             ) : null}
             <a className={styles.actionLink} href="/rules/compare">
               Compare
