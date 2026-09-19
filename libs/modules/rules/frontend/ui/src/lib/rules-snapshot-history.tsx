@@ -79,11 +79,13 @@ export function RulesSnapshotHistory({
 
       {snapshots.length === 0 ? (
         <Panel tone="muted" className={styles.empty}>
-          <h2>No Rules snapshots yet</h2>
+          <h2>{total > 0 ? 'No snapshots on this page' : 'No Rules snapshots yet'}</h2>
           <p>
-            {canImport
-              ? 'Import the configured manager archive source to create the first immutable snapshot.'
-              : 'No imported configuration snapshot is currently available to inspect.'}
+            {total > 0
+              ? 'Use the previous page to return to available snapshot history.'
+              : canImport
+                ? 'Import the configured manager archive source to create the first immutable snapshot.'
+                : 'No imported configuration snapshot is currently available to inspect.'}
           </p>
         </Panel>
       ) : (
