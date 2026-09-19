@@ -5,6 +5,7 @@ import {
   NotFoundException,
   Post,
   ServiceUnavailableException,
+  SetMetadata,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -17,6 +18,10 @@ import {
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
 
+import {
+  REQUIRED_CAPABILITIES_METADATA,
+  type MercureCapability,
+} from '@mercure/platform-backend-identity-domain';
 import {
   PersistImportedRuleset,
   QueryRulesetSnapshots,
@@ -88,6 +93,10 @@ function issueQueryFromDto(query: RulesSnapshotIssuesQueryDto): RulesetSnapshotI
   };
 }
 
+@SetMetadata(
+  REQUIRED_CAPABILITIES_METADATA,
+  ['rules:read'] satisfies readonly MercureCapability[],
+)
 @ApiTags('rules')
 @ApiExtraModels(
   RulesSnapshotParamsDto,
@@ -106,6 +115,10 @@ export class RulesSnapshotsController {
   ) {}
 
   @Post('import')
+  @SetMetadata(
+    REQUIRED_CAPABILITIES_METADATA,
+    ['rules:import'] satisfies readonly MercureCapability[],
+  )
   @ApiOperation({ summary: 'Import and persist the configured Rules manager snapshot' })
   @ApiCreatedResponse({ type: RulesSnapshotDocument })
   @ApiServiceUnavailableResponse({
