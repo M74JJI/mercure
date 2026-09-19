@@ -18,6 +18,7 @@ export interface RulesComparisonFeatureProps {
   readonly beforeSnapshotId?: string;
   readonly afterSnapshotId?: string;
   readonly kind?: string;
+  readonly offset?: string;
 }
 
 function comparisonKind(value: string | undefined): ComparisonKind {
@@ -33,10 +34,20 @@ function comparisonKind(value: string | undefined): ComparisonKind {
   return 'rules';
 }
 
+const PAGE_SIZE = 50;
+
+function comparisonOffset(value: string | undefined): number {
+  if (value === undefined) return 0;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 0) return 0;
+  return Math.min(parsed, 1_000_000);
+}
+
 export async function RulesComparisonFeature({
   afterSnapshotId,
   beforeSnapshotId,
   kind,
+  offset,
 }: RulesComparisonFeatureProps) {
   const api = new RulesDataAccess({ fetch: authenticatedMercureFetch });
   const intelligenceApi = new RulesIntelligenceDataAccess({
@@ -49,6 +60,7 @@ export async function RulesComparisonFeature({
     const latest = snapshots.items[0];
     const previous = snapshots.items[1];
     const selectedKind = comparisonKind(kind);
+    const selectedOffset = comparisonOffset(offset);
 
     if (!latest || !previous) {
       return (
@@ -75,9 +87,30 @@ export async function RulesComparisonFeature({
       beforeSnapshotId: selectedBefore,
       afterSnapshotId: selectedAfter,
       kind: selectedKind,
-      offset: 0,
-      limit: 50,
+      offset: selectedOffset,
+      limit: PAGE_SIZE,
     });
+
+    const previousHref =
+      selectedOffset > 0
+        ? '/rules/compare?' +
+          new URLSearchParams({
+            before: selectedBefore,
+            after: selectedAfter,
+            kind: selectedKind,
+            offset: String(Math.max(0, selectedOffset - PAGE_SIZE)),
+          }).toString()
+        : undefined;
+    const nextHref =
+      selectedOffset + comparison.page.items.length < comparison.page.total
+        ? '/rules/compare?' +
+          new URLSearchParams({
+            before: selectedBefore,
+            after: selectedAfter,
+            kind: selectedKind,
+            offset: String(selectedOffset + PAGE_SIZE),
+          }).toString()
+        : undefined;
 
     return (
       <RulesSnapshotComparison
@@ -86,6 +119,8 @@ export async function RulesComparisonFeature({
         selectedBefore={selectedBefore}
         selectedAfter={selectedAfter}
         selectedKind={selectedKind}
+        {...(previousHref === undefined ? {} : { previousHref })}
+        {...(nextHref === undefined ? {} : { nextHref })}
       />
     );
   } catch (error) {
