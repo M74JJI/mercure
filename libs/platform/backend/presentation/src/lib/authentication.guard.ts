@@ -12,7 +12,10 @@ import {
   ACCESS_TOKEN_VERIFIER,
   type AccessTokenVerifier,
 } from '@mercure/platform-backend-identity-application';
-import { PUBLIC_ROUTE_METADATA } from '@mercure/platform-backend-identity-domain';
+import {
+  PUBLIC_ROUTE_METADATA,
+  type MercurePrincipal,
+} from '@mercure/platform-backend-identity-domain';
 
 import type { MercureAuthenticatedRequest } from './authenticated-request';
 
@@ -49,7 +52,7 @@ export class AuthenticationGuard implements CanActivate {
       throw new UnauthorizedException('Authentication is required.');
     }
 
-    let principal;
+    let principal: MercurePrincipal;
     try {
       principal = await this.verifier.verify(token);
     } catch {
