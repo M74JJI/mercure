@@ -55,6 +55,7 @@ const ruleSchema = z
     jiraVisible: z.boolean(),
     tenant: z.string(),
     sourceFile: z.string(),
+    sourceFilePosition: z.number().int().min(0),
     sourceSection: z.string().optional(),
     useCaseId: z.string(),
     useCaseConfidence: useCaseConfidenceSchema,
@@ -93,6 +94,7 @@ const decoderSchema = z
     orderFields: z.array(z.string()),
     tenant: z.string(),
     sourceFile: z.string(),
+    sourceFilePosition: z.number().int().min(0),
   })
   .strict();
 

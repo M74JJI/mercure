@@ -27,6 +27,7 @@ export interface RulesRulePreviewView {
   readonly severity: string;
   readonly jiraVisible: boolean;
   readonly tenant: string;
+  readonly sourceFilePosition: number;
   readonly useCaseId: string;
   readonly mitre: readonly string[];
 }
@@ -37,6 +38,7 @@ export interface RulesDecoderPreviewView {
   readonly parent?: string;
   readonly tenant: string;
   readonly sourceFile: string;
+  readonly sourceFilePosition: number;
 }
 
 export interface RulesIssuePreviewView {

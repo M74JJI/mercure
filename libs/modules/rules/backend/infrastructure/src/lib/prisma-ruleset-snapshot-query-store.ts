@@ -109,6 +109,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
         jiraVisible: true,
         tenant: true,
         sourceSection: true,
+        sourceFilePosition: true,
         useCaseId: true,
         useCaseConfidence: true,
         frequency: true,
@@ -143,6 +144,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
       jiraVisible: row.jiraVisible,
       tenant: row.tenant,
       sourceFile: row.sourceFile.name,
+      sourceFilePosition: row.sourceFilePosition,
       ...(row.sourceSection === null ? {} : { sourceSection: row.sourceSection }),
       useCaseId: row.useCaseId,
       useCaseConfidence: row.useCaseConfidence as RulesetSnapshotRuleView['useCaseConfidence'],
@@ -174,6 +176,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
         name: true,
         parent: true,
         tenant: true,
+        sourceFilePosition: true,
         sourceFile: { select: { name: true } },
         prematches: { orderBy: { position: 'asc' }, select: { value: true } },
         regexValues: { orderBy: { position: 'asc' }, select: { value: true } },
@@ -192,6 +195,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
       orderFields: row.orderFields.map((field) => field.value),
       tenant: row.tenant,
       sourceFile: row.sourceFile.name,
+      sourceFilePosition: row.sourceFilePosition,
     };
   }
 
@@ -261,6 +265,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
           jiraVisible: true,
           tenant: true,
           sourceSection: true,
+          sourceFilePosition: true,
           useCaseId: true,
           useCaseConfidence: true,
           frequency: true,
@@ -297,6 +302,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
         jiraVisible: row.jiraVisible,
         tenant: row.tenant,
         sourceFile: row.sourceFile.name,
+        sourceFilePosition: row.sourceFilePosition,
         ...(row.sourceSection === null ? {} : { sourceSection: row.sourceSection }),
         useCaseId: row.useCaseId,
         useCaseConfidence: row.useCaseConfidence as RulesetSnapshotRuleView['useCaseConfidence'],
@@ -340,6 +346,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
           name: true,
           parent: true,
           tenant: true,
+          sourceFilePosition: true,
           sourceFile: { select: { name: true } },
           prematches: { orderBy: { position: 'asc' }, select: { value: true } },
           regexValues: { orderBy: { position: 'asc' }, select: { value: true } },
@@ -360,6 +367,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
         orderFields: row.orderFields.map((field) => field.value),
         tenant: row.tenant,
         sourceFile: row.sourceFile.name,
+        sourceFilePosition: row.sourceFilePosition,
       })),
     };
   }
