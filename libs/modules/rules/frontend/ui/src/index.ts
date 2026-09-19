@@ -18,3 +18,9 @@ export type {
   RulesQualityView,
   RulesRoundtripSummaryView,
 } from './lib/models';
+
+export {
+  RulesUseCaseCatalog,
+  type RulesUseCaseCatalogProps,
+} from './lib/rules-use-case-catalog';
+export type { RulesUseCasePreviewView } from './lib/models';
