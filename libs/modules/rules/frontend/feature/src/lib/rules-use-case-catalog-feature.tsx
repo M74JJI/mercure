@@ -33,7 +33,11 @@ export async function RulesUseCaseCatalogFeature({
   const offset = boundedIntegerSearchParam(searchParams, 'offset', 0, 0, 1_000_000);
   const selectedQuery = trimmedSearchParam(searchParams, 'q', 256);
   const selectedSource = enumSearchParam(searchParams, 'source', sourceValues);
-  const deletedUseCaseId = trimmedSearchParam(searchParams, 'deleted', 255);
+  const deletedCandidate = trimmedSearchParam(searchParams, 'deleted', 255);
+  const deletedUseCaseId =
+    deletedCandidate && /^uc_[a-z0-9_]+$/.test(deletedCandidate)
+      ? deletedCandidate
+      : undefined;
   const identity = await getServerMercureIdentity();
   const canAdminister = identity?.role === 'admin';
 
