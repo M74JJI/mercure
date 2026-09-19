@@ -11,10 +11,7 @@ import {
 import type { RulesetSnapshotAnalysisSource } from './analyze-ruleset-snapshots';
 import { RulesetSnapshotNotFoundError } from './query-ruleset-snapshots';
 
-async function requireSnapshot(
-  source: RulesetSnapshotAnalysisSource,
-  snapshotId: string,
-) {
+async function requireSnapshot(source: RulesetSnapshotAnalysisSource, snapshotId: string) {
   const ruleset = await source.load(snapshotId);
   if (!ruleset) {
     throw new RulesetSnapshotNotFoundError(snapshotId);
