@@ -151,6 +151,7 @@ export class RulesIntelligenceController {
           snapshotId: params.snapshotId,
           filters,
         }),
+        query.limit,
       ),
     );
   }
