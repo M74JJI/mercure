@@ -3,12 +3,22 @@
   "name": "platform-backend-config",
   "projectType": "library",
   "sourceRoot": "libs/platform/backend/config/src",
-  "tags": ["scope:platform", "side:backend", "type:infrastructure"],
+  "tags": [
+    "scope:platform",
+    "side:backend",
+    "type:infrastructure"
+  ],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
         "command": "tsc --noEmit -p libs/platform/backend/config/tsconfig.lib.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config libs/platform/backend/config/vitest.config.ts"
       }
     }
   }
