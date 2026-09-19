@@ -177,7 +177,10 @@ export function RulesSnapshotRulesExplorer({
         )}
       </Panel>
 
-      <Pagination previousHref={previousHref} nextHref={nextHref} />
+      <Pagination
+        {...(previousHref === undefined ? {} : { previousHref })}
+        {...(nextHref === undefined ? {} : { nextHref })}
+      />
     </div>
   );
 }
@@ -257,7 +260,10 @@ export function RulesSnapshotDecodersExplorer({
         )}
       </Panel>
 
-      <Pagination previousHref={previousHref} nextHref={nextHref} />
+      <Pagination
+        {...(previousHref === undefined ? {} : { previousHref })}
+        {...(nextHref === undefined ? {} : { nextHref })}
+      />
     </div>
   );
 }
@@ -336,7 +342,10 @@ export function RulesSnapshotIssuesExplorer({
         )}
       </Panel>
 
-      <Pagination previousHref={previousHref} nextHref={nextHref} />
+      <Pagination
+        {...(previousHref === undefined ? {} : { previousHref })}
+        {...(nextHref === undefined ? {} : { nextHref })}
+      />
     </div>
   );
 }
