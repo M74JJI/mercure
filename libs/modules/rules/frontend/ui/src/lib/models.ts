@@ -108,3 +108,16 @@ export interface RulesRoundtripSummaryView {
     readonly missingUseCaseSuggestions: number;
   };
 }
+
+export interface RulesUseCasePreviewView {
+  readonly id: string;
+  readonly name: string;
+  readonly shortName: string;
+  readonly description: string;
+  readonly component: string;
+  readonly vendor: string;
+  readonly product: string;
+  readonly domain: string;
+  readonly category: string;
+  readonly source: 'system' | 'custom';
+}
