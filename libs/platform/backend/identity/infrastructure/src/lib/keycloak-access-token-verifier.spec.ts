@@ -1,7 +1,8 @@
 import { createServer, type Server } from 'node:http';
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { SignJWT, exportJWK, generateKeyPair } from 'jose';
+
+type JoseModule = typeof import('jose');
 
 import { KeycloakAccessTokenVerifier } from './keycloak-access-token-verifier';
 
@@ -10,6 +11,9 @@ const audience = 'mercure-api';
 const clientId = 'mercure-api';
 
 let server: Server;
+let SignJWT: JoseModule['SignJWT'];
+let exportJWK: JoseModule['exportJWK'];
+let generateKeyPair: JoseModule['generateKeyPair'];
 let jwksUrl = '';
 let signingKey: CryptoKey;
 let alternateSigningKey: CryptoKey;
@@ -52,6 +56,8 @@ async function token(
 }
 
 beforeAll(async () => {
+  ({ SignJWT, exportJWK, generateKeyPair } = await import('jose'));
+
   const primary = await generateKeyPair('RS256', { extractable: true });
   const alternate = await generateKeyPair('RS256', { extractable: true });
   signingKey = primary.privateKey;
