@@ -22,3 +22,8 @@ export {
   RulesGraphFeature,
   type RulesGraphFeatureProps,
 } from './lib/rules-graph-feature';
+
+export {
+  RulesDiagnosticsFeature,
+  type RulesDiagnosticsFeatureProps,
+} from './lib/rules-diagnostics-feature';
