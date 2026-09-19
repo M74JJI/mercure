@@ -36,3 +36,15 @@ export function RulesSnapshotNotFoundState() {
     </div>
   );
 }
+
+export function RulesIntelligenceUnavailableState() {
+  return (
+    <Panel tone="muted" className={styles.statePanel}>
+      <h2>Intelligence is temporarily unavailable</h2>
+      <p>
+        Core snapshot data remains available. Derived quality, field, graph, and diagnostic
+        analysis could not be loaded for this request.
+      </p>
+    </Panel>
+  );
+}
