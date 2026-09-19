@@ -9,7 +9,7 @@ export interface RulesSnapshotHistoryProps {
   readonly snapshots: readonly RulesSnapshotSummaryView[];
   readonly total: number;
   readonly canImport: boolean;
-  readonly importAction?: () => void | Promise<void>;
+  readonly importAction?: (formData: FormData) => void | Promise<void>;
   readonly importStatus?: RulesSnapshotImportStatus;
 }
 
