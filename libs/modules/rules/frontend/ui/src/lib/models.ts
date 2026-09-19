@@ -243,3 +243,47 @@ export interface RulesQualityDetailView {
     }[];
   };
 }
+
+export interface RulesGraphDetailView {
+  readonly graph: {
+    readonly nodes: readonly {
+      readonly id: string;
+      readonly type: 'rule' | 'decoder' | 'use_case' | 'mitre' | 'field' | 'group' | 'external';
+      readonly label: string;
+      readonly weight: number;
+      readonly tenant?: string;
+      readonly entityId?: string;
+      readonly meta?: Readonly<Record<string, string | number | boolean>>;
+    }[];
+    readonly edges: readonly {
+      readonly id: string;
+      readonly source: string;
+      readonly target: string;
+      readonly type:
+        | 'if_sid'
+        | 'if_group'
+        | 'if_matched_sid'
+        | 'if_matched_group'
+        | 'decoded_as'
+        | 'decoder_parent'
+        | 'group_produces'
+        | 'field_produces'
+        | 'field_uses'
+        | 'use_case'
+        | 'mitre';
+      readonly label: string;
+      readonly weight: number;
+    }[];
+    readonly stats: {
+      readonly nodes: number;
+      readonly edges: number;
+      readonly rules: number;
+      readonly decoders: number;
+      readonly fields: number;
+      readonly groups: number;
+      readonly useCases: number;
+      readonly mitre: number;
+      readonly external: number;
+    };
+  };
+}
