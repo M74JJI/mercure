@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@mercure/platform-frontend-identity-feature": "workspace:*",
     "@mercure/platform-frontend-shell": "workspace:*",
+    "@mercure/rules-frontend-feature": "workspace:*",
     "next": "16.3.3",
-    "react": "19.3.0",
-    "@mercure/rules-frontend-feature": "workspace:*"
+    "react": "19.3.0"
   }
 }
