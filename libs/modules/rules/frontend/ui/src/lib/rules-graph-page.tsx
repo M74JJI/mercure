@@ -113,9 +113,8 @@ export function RulesGraphPage({
           <label>
             <span>Jira only</span>
             <select name="jiraOnly" defaultValue={selectedJiraOnly ?? ''}>
-              <option value="">Either</option>
-              <option value="true">Yes</option>
-              <option value="false">No</option>
+              <option value="">All rules</option>
+              <option value="true">Jira-visible only</option>
             </select>
           </label>
           <label>
