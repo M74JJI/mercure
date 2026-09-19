@@ -271,9 +271,7 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         ruleId: '310001',
         useCaseId: 'uc_snapshot',
       });
-      expect(quality.quality.rules[0]?.warnings).toContain(
-        'Missing tenant dependency SID 999999.',
-      );
+      expect(quality.quality.rules[0]?.warnings).toContain('Missing tenant dependency SID 999999.');
       expect(quality.quality.rules[0]?.dimensions.noiseControl).toBeGreaterThanOrEqual(0);
       expect(quality.quality.rules[0]?.dimensions.noiseControl).toBeLessThanOrEqual(100);
 
