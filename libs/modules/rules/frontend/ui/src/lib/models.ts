@@ -348,3 +348,8 @@ export interface RulesDiagnosticsDetailView {
     }[];
   };
 }
+
+export interface RulesUseCaseDetailView extends RulesUseCasePreviewView {
+  readonly createdBy: string;
+  readonly createdAt?: string;
+}
