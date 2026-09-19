@@ -119,8 +119,8 @@ const platformEnvironmentSchema = z.object({
   OIDC_JWKS_URL: httpUrl.optional(),
   OIDC_AUDIENCE: z.string().trim().min(1).default('mercure-api'),
   OIDC_CLIENT_ID: z.string().trim().min(1).default('mercure-api'),
-  OIDC_ADMIN_AUTHORITIES: commaSeparatedValues.default('admin,/security-admins'),
-  OIDC_USER_AUTHORITIES: commaSeparatedValues.default('user,/security-users'),
+  OIDC_ADMIN_AUTHORITIES: commaSeparatedValues.default(['admin', '/security-admins']),
+  OIDC_USER_AUTHORITIES: commaSeparatedValues.default(['user', '/security-users']),
   OIDC_JWKS_TIMEOUT_MS: z.coerce.number().int().min(100).max(30_000).default(5_000),
   OIDC_JWKS_COOLDOWN_MS: z.coerce.number().int().min(1_000).max(600_000).default(30_000),
   OIDC_JWKS_CACHE_MAX_AGE_MS: z.coerce
