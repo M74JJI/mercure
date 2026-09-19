@@ -10,6 +10,7 @@ import {
 import {
   RulesDataAccess,
   RulesFrontendApiError,
+  type RulesSnapshot,
 } from '@mercure/rules-frontend-data-access';
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
@@ -25,7 +26,7 @@ export async function importRulesSnapshotAction(): Promise<void> {
     fetch: authenticatedMercureFetch,
   });
 
-  let snapshot;
+  let snapshot: RulesSnapshot;
   try {
     snapshot = await api.importSnapshot();
   } catch (error) {
