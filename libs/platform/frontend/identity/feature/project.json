@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "name": "platform-frontend-identity-feature",
+  "projectType": "library",
+  "sourceRoot": "libs/platform/frontend/identity/feature/src",
+  "tags": ["scope:platform", "side:frontend", "type:feature"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/platform/frontend/identity/feature/tsconfig.lib.json"
+      }
+    }
+  }
+}

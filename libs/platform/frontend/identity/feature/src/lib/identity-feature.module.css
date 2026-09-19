@@ -1,0 +1,99 @@
+.page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: var(--surface-canvas, #f5f7fa);
+  color: var(--text-primary, #17202a);
+}
+
+.card {
+  width: min(100%, 32rem);
+  padding: 2rem;
+  border: 1px solid var(--border-subtle, #d8dee6);
+  border-radius: 1.25rem;
+  background: var(--surface-panel, #ffffff);
+  box-shadow: 0 1rem 3rem rgb(15 23 42 / 0.08);
+}
+
+.brandMark {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  margin-bottom: 1.5rem;
+  border-radius: 0.75rem;
+  background: var(--accent-solid, #17202a);
+  color: var(--accent-contrast, #ffffff);
+  font-weight: 800;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--text-secondary, #52606d);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 2.4rem);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+
+.detail {
+  margin: 1rem 0 0;
+  color: var(--text-secondary, #52606d);
+  line-height: 1.65;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0.75rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primaryButton {
+  border: 1px solid var(--accent-solid, #17202a);
+  background: var(--accent-solid, #17202a);
+  color: var(--accent-contrast, #ffffff);
+}
+
+.secondaryButton {
+  border: 1px solid var(--border-strong, #aab4c0);
+  background: transparent;
+  color: inherit;
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .primaryButton,
+  .secondaryButton {
+    transition:
+      transform 120ms ease,
+      opacity 120ms ease;
+  }
+
+  .primaryButton:hover,
+  .secondaryButton:hover {
+    transform: translateY(-1px);
+  }
+}
