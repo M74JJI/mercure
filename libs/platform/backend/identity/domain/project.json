@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "name": "platform-backend-identity-domain",
+  "projectType": "library",
+  "sourceRoot": "libs/platform/backend/identity/domain/src",
+  "tags": ["scope:platform", "side:backend", "type:domain"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/platform/backend/identity/domain/tsconfig.lib.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config libs/platform/backend/identity/domain/vitest.config.ts"
+      }
+    }
+  }
+}
