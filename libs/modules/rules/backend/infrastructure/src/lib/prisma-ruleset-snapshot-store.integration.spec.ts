@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import { createPrismaClient } from '@mercure/platform-backend-database/client';
-import type { ImportArchivedRulesetResult } from '@mercure/rules-backend-application';
+import {
+  AnalyzeRulesetSnapshotRoundtrip,
+  CompareRulesetSnapshots,
+  type ImportArchivedRulesetResult,
+} from '@mercure/rules-backend-application';
 
+import { PrismaRulesetSnapshotAnalysisSource } from './prisma-ruleset-snapshot-analysis-source';
 import { PrismaRulesetSnapshotQueryStore } from './prisma-ruleset-snapshot-query-store';
 import { PrismaRulesetSnapshotStore } from './prisma-ruleset-snapshot-store';
 import { WazuhXmlRulesetAnalyzer } from './wazuh-xml-ruleset-analyzer';
@@ -25,12 +30,16 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const store = new PrismaRulesetSnapshotStore(database);
     const queryStore = new PrismaRulesetSnapshotQueryStore(database);
+    const analysisSource = new PrismaRulesetSnapshotAnalysisSource(database);
+    const compareSnapshots = new CompareRulesetSnapshots(analysisSource);
+    const analyzeRoundtrip = new AnalyzeRulesetSnapshotRoundtrip(analysisSource);
 
     const analysis = await analyzer.analyze({
       files: [
         {
           name: 'manager-x.tar.gz/rules/1000-snapshot_rules.xml',
           content: [
+            '<!-- Source file: 3100-snapshot.xml -->',
             '<group name="snapshot,">',
             '  <rule id="310001" level="12" frequency="4" timeframe="60">',
             '    <decoded_as>snapshot_decoder</decoded_as>',
@@ -169,6 +178,63 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         ruleId: '310001',
         tenant: 'manager-x',
       });
+
+      const reconstructed = await analysisSource.load(saved.id);
+      expect(reconstructed).not.toBeNull();
+      expect(reconstructed?.files[0]?.content).toContain('<!-- Source file: 3100-snapshot.xml -->');
+      expect(reconstructed?.rules[0]).toMatchObject({
+        id: '310001',
+        sourceSection: '3100-snapshot.xml',
+        useCaseId: 'uc_snapshot',
+        useCaseConfidence: 'confirmed',
+      });
+      expect(reconstructed?.rules[0]?.rawXml).toContain(
+        '<rule id="310001" level="12" frequency="4" timeframe="60">',
+      );
+      expect(reconstructed?.rules[0]?.dependencies).toContainEqual({
+        type: 'if_sid',
+        value: '999999',
+      });
+      expect(reconstructed?.decoders[0]?.rawXml).toContain('<decoder name="snapshot_decoder">');
+      expect(reconstructed?.useCases[0]).toMatchObject({
+        id: 'uc_snapshot',
+        createdAt: '2026-09-18T12:00:00.000Z',
+      });
+
+      const selfDiff = await compareSnapshots.execute({
+        beforeSnapshotId: saved.id,
+        afterSnapshotId: saved.id,
+      });
+      expect(selfDiff.diff.summary).toMatchObject({
+        rulesAdded: 0,
+        rulesRemoved: 0,
+        rulesChanged: 0,
+        decodersAdded: 0,
+        decodersRemoved: 0,
+        decodersChanged: 0,
+        filesAdded: 0,
+        filesRemoved: 0,
+        filesChanged: 0,
+        newIssues: 0,
+        resolvedIssues: 0,
+      });
+
+      const roundtrip = await analyzeRoundtrip.execute(saved.id);
+      expect(roundtrip.snapshotId).toBe(saved.id);
+      expect(roundtrip.analysis.summary).toMatchObject({
+        sourceSections: 1,
+        idRangeWarnings: 0,
+        missingUseCaseSuggestions: 0,
+      });
+      expect(roundtrip.analysis.sourceSections[0]).toMatchObject({
+        tenant: 'manager-x',
+        sourceFile: '3100-snapshot.xml',
+        idRangeStatus: 'pass',
+      });
+      expect(roundtrip.analysis.splitFiles[0]?.fileName).toBe('manager-x__3100-snapshot.xml');
+      expect(roundtrip.analysis.splitFiles[0]?.xml).toContain(
+        '<rule id="310001" level="12" frequency="4" timeframe="60">',
+      );
 
       const stored = await database.rulesetSnapshot.findUnique({
         where: { id: saved.id },

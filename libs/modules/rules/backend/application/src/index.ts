@@ -37,3 +37,13 @@ export {
   type RulesetSnapshotRuleView,
   type RulesetSnapshotSummary,
 } from './lib/query-ruleset-snapshots';
+
+export {
+  AnalyzeRulesetSnapshotRoundtrip,
+  CompareRulesetSnapshots,
+  RULESET_SNAPSHOT_ANALYSIS_SOURCE,
+  type AnalyzeRulesetSnapshotRoundtripResult,
+  type CompareRulesetSnapshotsRequest,
+  type CompareRulesetSnapshotsResult,
+  type RulesetSnapshotAnalysisSource,
+} from './lib/analyze-ruleset-snapshots';
