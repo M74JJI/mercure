@@ -1,5 +1,3 @@
-import type { JWTPayload } from 'jose';
-
 import type { AccessTokenVerifier } from '@mercure/platform-backend-identity-application';
 import {
   resolveMercurePrincipal,
@@ -8,6 +6,7 @@ import {
   type MercurePrincipal,
 } from '@mercure/platform-backend-identity-domain';
 
+type JoseJwtPayload = import('jose').JWTPayload;
 type RemoteJwkSet = ReturnType<(typeof import('jose'))['createRemoteJWKSet']>;
 
 export interface KeycloakAccessTokenVerifierOptions {
@@ -52,7 +51,7 @@ function objectClaim(value: unknown): Readonly<Record<string, unknown>> | undefi
   return value as Readonly<Record<string, unknown>>;
 }
 
-function identityFromPayload(payload: JWTPayload, clientId: string): ExternalIdentity {
+function identityFromPayload(payload: JoseJwtPayload, clientId: string): ExternalIdentity {
   if (typeof payload.sub !== 'string' || payload.sub.trim() === '') {
     throw new InvalidAccessTokenError();
   }
