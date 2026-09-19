@@ -12,7 +12,7 @@ import {
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 
-type ComparisonKind = RulesSnapshotComparisonQuery['kind'];
+type ComparisonKind = NonNullable<RulesSnapshotComparisonQuery['kind']>;
 
 export interface RulesComparisonFeatureProps {
   readonly beforeSnapshotId?: string;
@@ -65,8 +65,10 @@ export async function RulesComparisonFeature({
       beforeSnapshotId && knownIds.has(beforeSnapshotId) ? beforeSnapshotId : previous.id;
 
     if (selectedBefore === selectedAfter) {
-      selectedBefore = snapshots.items.find((snapshot) => snapshot.id !== selectedAfter)?.id ?? previous.id;
-      selectedAfter = snapshots.items.find((snapshot) => snapshot.id !== selectedBefore)?.id ?? latest.id;
+      selectedBefore =
+        snapshots.items.find((snapshot) => snapshot.id !== selectedAfter)?.id ?? previous.id;
+      selectedAfter =
+        snapshots.items.find((snapshot) => snapshot.id !== selectedBefore)?.id ?? latest.id;
     }
 
     const comparison = await intelligenceApi.compare({
