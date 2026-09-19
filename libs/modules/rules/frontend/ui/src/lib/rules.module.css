@@ -1065,3 +1065,17 @@
     grid-template-columns: 1fr;
   }
 }
+
+.sectionMetaActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--mc-space-3);
+}
+
+@media (max-width: 620px) {
+  .sectionMetaActions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
