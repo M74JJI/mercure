@@ -49,6 +49,7 @@ export async function RulesSnapshotFeature({ snapshotId }: RulesSnapshotFeatureP
 
       intelligence = (
         <RulesSnapshotIntelligence
+          snapshotId={snapshotId}
           fields={fields}
           quality={quality}
           graph={graph}
