@@ -292,7 +292,7 @@ function scopedKey(tenant: string, value: string): string {
 }
 
 function normalizeObservedField(value: string): string {
-  return value.trim().replace(/^.+|.+$/g, '').toLowerCase();
+  return value.trim().toLowerCase();
 }
 
 function fieldFromRule(rule: RuleRecord): readonly string[] {
