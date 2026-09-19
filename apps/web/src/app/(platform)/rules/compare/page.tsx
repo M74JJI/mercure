@@ -26,11 +26,15 @@ export default async function RulesComparisonPage({
 }: RulesComparisonPageProps) {
   const query = await searchParams;
 
+  const beforeSnapshotId = first(query.before);
+  const afterSnapshotId = first(query.after);
+  const kind = first(query.kind);
+
   return (
     <RulesComparisonFeature
-      beforeSnapshotId={first(query.before)}
-      afterSnapshotId={first(query.after)}
-      kind={first(query.kind)}
+      {...(beforeSnapshotId === undefined ? {} : { beforeSnapshotId })}
+      {...(afterSnapshotId === undefined ? {} : { afterSnapshotId })}
+      {...(kind === undefined ? {} : { kind })}
     />
   );
 }
