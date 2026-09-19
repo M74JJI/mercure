@@ -3,10 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import {
-  authenticatedMercureFetch,
-  getServerMercureIdentity,
-} from '@mercure/platform-frontend-identity-data-access/server';
+import { authenticatedMercureFetch } from '@mercure/platform-frontend-identity-data-access/server';
 import {
   RulesFrontendApiError,
   RulesUseCaseAdministrationDataAccess,
@@ -14,6 +11,7 @@ import {
 } from '@mercure/rules-frontend-data-access';
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
+import { requireRulesAdminIdentity } from './rules-use-case-admin-boundary';
 import {
   parseCreateRulesUseCaseForm,
   parseUpdateRulesUseCaseForm,
@@ -21,20 +19,6 @@ import {
   validateDeleteConfirmation,
   type RulesUseCaseFormError,
 } from './rules-use-case-administration-form';
-
-async function requireAdminIdentity() {
-  const identity = await getServerMercureIdentity();
-
-  if (!identity) {
-    redirect('/auth/sign-in');
-  }
-
-  if (identity.role !== 'admin') {
-    redirect('/auth/forbidden');
-  }
-
-  return identity;
-}
 
 function errorHref(
   path: string,
@@ -71,7 +55,7 @@ function adminApi(): RulesUseCaseAdministrationDataAccess {
 }
 
 export async function createRulesUseCaseAction(formData: FormData): Promise<void> {
-  await requireAdminIdentity();
+  await requireRulesAdminIdentity();
 
   const parsed = parseCreateRulesUseCaseForm(formData);
   if (!parsed.ok) {
@@ -94,7 +78,7 @@ export async function createRulesUseCaseAction(formData: FormData): Promise<void
 }
 
 export async function updateRulesUseCaseAction(formData: FormData): Promise<void> {
-  await requireAdminIdentity();
+  await requireRulesAdminIdentity();
 
   const idResult = parseUseCaseId(formData);
   if (!idResult.ok) {
@@ -123,7 +107,7 @@ export async function updateRulesUseCaseAction(formData: FormData): Promise<void
 }
 
 export async function deleteRulesUseCaseAction(formData: FormData): Promise<void> {
-  await requireAdminIdentity();
+  await requireRulesAdminIdentity();
 
   const idResult = parseUseCaseId(formData);
   if (!idResult.ok) {
