@@ -12,19 +12,20 @@ export function snapshotExplorerPagination(
   offset: number,
   total: number,
   filters: Readonly<Record<string, string | number | undefined>>,
+  pageSize: number = SNAPSHOT_EXPLORER_PAGE_SIZE,
 ): SnapshotExplorerPagination {
   const previousHref =
     offset > 0
       ? rulesHref(path, {
           ...filters,
-          offset: Math.max(0, offset - SNAPSHOT_EXPLORER_PAGE_SIZE),
+          offset: Math.max(0, offset - pageSize),
         })
       : undefined;
   const nextHref =
-    offset + SNAPSHOT_EXPLORER_PAGE_SIZE < total
+    offset + pageSize < total
       ? rulesHref(path, {
           ...filters,
-          offset: offset + SNAPSHOT_EXPLORER_PAGE_SIZE,
+          offset: offset + pageSize,
         })
       : undefined;
 
