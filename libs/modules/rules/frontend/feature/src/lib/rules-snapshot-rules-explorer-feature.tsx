@@ -11,14 +11,16 @@ import {
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 import {
+  SNAPSHOT_EXPLORER_PAGE_SIZE,
+  snapshotExplorerPagination,
+} from './rules-snapshot-explorer-pagination';
+import {
   boundedIntegerSearchParam,
   enumSearchParam,
-  rulesHref,
   trimmedSearchParam,
   type RulesSearchParams,
 } from './rules-search-params';
 
-const PAGE_SIZE = 50;
 const severities = ['informational', 'low', 'medium', 'high', 'critical'] as const;
 const jiraVisibility = ['true', 'false'] as const;
 
@@ -52,7 +54,7 @@ export async function RulesSnapshotRulesExplorerFeature({
 
     const page = await api.listRules(snapshotId, {
       offset,
-      limit: PAGE_SIZE,
+      limit: SNAPSHOT_EXPLORER_PAGE_SIZE,
       ...(selectedTenant === undefined ? {} : { tenant: selectedTenant }),
       ...(selectedSeverity === undefined ? {} : { severity: selectedSeverity }),
       ...(selectedStatus === undefined ? {} : { status: selectedStatus }),
@@ -63,31 +65,21 @@ export async function RulesSnapshotRulesExplorerFeature({
         : { jiraVisible: selectedJiraVisible }),
     });
 
-    const shared = {
-      ...(selectedTenant === undefined ? {} : { tenant: selectedTenant }),
-      ...(selectedSeverity === undefined ? {} : { severity: selectedSeverity }),
-      ...(selectedStatus === undefined ? {} : { status: selectedStatus }),
-      ...(selectedUseCaseId === undefined ? {} : { useCaseId: selectedUseCaseId }),
-      ...(selectedRuleId === undefined ? {} : { ruleId: selectedRuleId }),
-      ...(selectedJiraVisible === undefined
-        ? {}
-        : { jiraVisible: selectedJiraVisible }),
-    };
-    const path = '/rules/' + snapshotId + '/rules';
-    const previousHref =
-      offset > 0
-        ? rulesHref(path, {
-            ...shared,
-            offset: Math.max(0, offset - PAGE_SIZE),
-          })
-        : undefined;
-    const nextHref =
-      offset + page.items.length < page.total
-        ? rulesHref(path, {
-            ...shared,
-            offset: offset + PAGE_SIZE,
-          })
-        : undefined;
+    const pagination = snapshotExplorerPagination(
+      '/rules/' + snapshotId + '/rules',
+      offset,
+      page.total,
+      {
+        ...(selectedTenant === undefined ? {} : { tenant: selectedTenant }),
+        ...(selectedSeverity === undefined ? {} : { severity: selectedSeverity }),
+        ...(selectedStatus === undefined ? {} : { status: selectedStatus }),
+        ...(selectedUseCaseId === undefined ? {} : { useCaseId: selectedUseCaseId }),
+        ...(selectedRuleId === undefined ? {} : { ruleId: selectedRuleId }),
+        ...(selectedJiraVisible === undefined
+          ? {}
+          : { jiraVisible: selectedJiraVisible }),
+      },
+    );
 
     return (
       <RulesSnapshotRulesExplorer
@@ -100,8 +92,7 @@ export async function RulesSnapshotRulesExplorerFeature({
         {...(selectedUseCaseId === undefined ? {} : { selectedUseCaseId })}
         {...(selectedRuleId === undefined ? {} : { selectedRuleId })}
         {...(selectedJiraVisible === undefined ? {} : { selectedJiraVisible })}
-        {...(previousHref === undefined ? {} : { previousHref })}
-        {...(nextHref === undefined ? {} : { nextHref })}
+        {...pagination}
       />
     );
   } catch (error) {
