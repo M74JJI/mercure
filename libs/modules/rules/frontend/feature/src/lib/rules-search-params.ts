@@ -10,6 +10,16 @@ export function firstSearchParam(
   return typeof value === 'string' ? value : value?.[0];
 }
 
+export function trimmedSearchParam(
+  params: RulesSearchParams,
+  key: string,
+  maximumLength: number,
+): string | undefined {
+  const value = firstSearchParam(params, key)?.trim();
+  if (!value || value.length > maximumLength) return undefined;
+  return value;
+}
+
 export function boundedIntegerSearchParam(
   params: RulesSearchParams,
   key: string,
