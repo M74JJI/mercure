@@ -12,6 +12,64 @@ function jsonResponse(body: unknown, status = 200): Response {
 }
 
 describe('RulesDataAccess', () => {
+  it('imports the configured server-side Rules snapshot without a client body', async () => {
+    const requests: Request[] = [];
+    const api = new RulesDataAccess({
+      baseUrl: 'https://api.mercure.test',
+      fetch: async (request) => {
+        requests.push(request);
+        return jsonResponse(
+          {
+            id: '00000000-0000-4000-8000-000000000001',
+            sourceFingerprint: 'a'.repeat(64),
+            contentFingerprint: 'b'.repeat(64),
+            loadedAt: '2026-09-19T20:00:00.000Z',
+            createdAt: '2026-09-19T20:01:00.000Z',
+            complete: true,
+            sourceErrorCount: 0,
+            archiveCount: 2,
+            fileCount: 12,
+            ruleCount: 120,
+            decoderCount: 8,
+            useCaseCount: 6,
+            jiraVisibleCount: 20,
+            testingCount: 5,
+            productionCount: 115,
+            criticalCount: 12,
+            mitreMappedCount: 100,
+            missingUseCaseCount: 3,
+            brokenDependencyCount: 1,
+          },
+          201,
+        );
+      },
+    });
+
+    const snapshot = await api.importSnapshot();
+
+    expect(snapshot.id).toBe('00000000-0000-4000-8000-000000000001');
+    expect(requests).toHaveLength(1);
+    expect(requests[0]?.method).toBe('POST');
+    expect(requests[0]?.url).toBe('https://api.mercure.test/api/v1/rules/snapshots/import');
+    expect(await requests[0]?.text()).toBe('');
+  });
+
+  it('surfaces unavailable imports without exposing response content', async () => {
+    const api = new RulesDataAccess({
+      baseUrl: 'https://api.mercure.test',
+      fetch: async () => jsonResponse({ detail: '/opt/private/rules' }, 503),
+    });
+
+    const error = await api.importSnapshot().catch((failure: unknown) => failure);
+
+    expect(error).toBeInstanceOf(RulesFrontendApiError);
+    expect(error).toMatchObject({
+      operation: 'import snapshot',
+      status: 503,
+    });
+    expect(String(error)).not.toContain('/opt/private/rules');
+  });
+
   it('lists snapshots using the generated query contract', async () => {
     const requests: Request[] = [];
     const api = new RulesDataAccess({
