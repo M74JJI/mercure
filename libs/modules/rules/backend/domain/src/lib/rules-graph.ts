@@ -2,22 +2,10 @@ import { buildFieldIntelligence } from './field-intelligence';
 import type { DecoderRecord, ParsedRuleset, RuleRecord } from './rules-records';
 
 export type RulesGraphMode =
-  | 'rules'
-  | 'decoders'
-  | 'decoder_rules'
-  | 'use_cases'
-  | 'mitre'
-  | 'fields'
-  | 'all';
+  'rules' | 'decoders' | 'decoder_rules' | 'use_cases' | 'mitre' | 'fields' | 'all';
 
 export type RulesGraphNodeType =
-  | 'rule'
-  | 'decoder'
-  | 'use_case'
-  | 'mitre'
-  | 'field'
-  | 'group'
-  | 'external';
+  'rule' | 'decoder' | 'use_case' | 'mitre' | 'field' | 'group' | 'external';
 
 export type RulesGraphEdgeType =
   | 'if_sid'
@@ -149,10 +137,7 @@ function decoderHaystack(decoder: DecoderRecord): string {
     .toLowerCase();
 }
 
-function filteredRules(
-  data: ParsedRuleset,
-  filters: RulesGraphFilters,
-): readonly RuleRecord[] {
+function filteredRules(data: ParsedRuleset, filters: RulesGraphFilters): readonly RuleRecord[] {
   const query = filters.query?.trim().toLowerCase() ?? '';
   const limit = Math.max(1, Math.min(filters.limit ?? 500, 2_000));
 
@@ -175,10 +160,7 @@ function filteredRules(
     .slice(0, limit);
 }
 
-export function buildRulesGraph(
-  data: ParsedRuleset,
-  filters: RulesGraphFilters,
-): RulesGraphData {
+export function buildRulesGraph(data: ParsedRuleset, filters: RulesGraphFilters): RulesGraphData {
   const nodes = new Map<string, RulesGraphNode>();
   const edges = new Map<string, RulesGraphEdge>();
   const selectedRules = filteredRules(data, filters);
@@ -303,7 +285,6 @@ export function buildRulesGraph(
           }
         }
       }
-
     }
 
     for (const producer of selectedRules) {
@@ -361,11 +342,7 @@ export function buildRulesGraph(
     }
   }
 
-  if (
-    filters.mode === 'decoder_rules' ||
-    filters.mode === 'fields' ||
-    filters.mode === 'all'
-  ) {
+  if (filters.mode === 'decoder_rules' || filters.mode === 'fields' || filters.mode === 'all') {
     const intelligence = buildFieldIntelligence(data);
 
     for (const rule of selectedRules) {
