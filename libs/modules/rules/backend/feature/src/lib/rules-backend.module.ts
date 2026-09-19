@@ -51,6 +51,7 @@ import {
   WazuhXmlRulesetAnalyzer,
 } from '@mercure/rules-backend-infrastructure';
 import {
+  RulesAuthoringController,
   RulesIntelligenceController,
   RulesSnapshotsController,
   RulesUseCaseAdministrationController,
@@ -61,6 +62,7 @@ import {
   imports: [PlatformDatabaseModule],
   controllers: [
     RulesSnapshotsController,
+    RulesAuthoringController,
     RulesIntelligenceController,
     RulesUseCasesController,
     RulesUseCaseAdministrationController,

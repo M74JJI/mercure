@@ -44,3 +44,15 @@ export {
   RulesUseCaseCreateDto,
   RulesUseCaseUpdateDto,
 } from './lib/rules-use-case-administration.dto';
+
+export { RulesAuthoringController } from './lib/rules-authoring.controller';
+export {
+  RulesAuthoringDraftCreateDto,
+  RulesAuthoringDraftDocument,
+  RulesAuthoringDraftListDocument,
+  RulesAuthoringDraftParamsDto,
+  RulesAuthoringDraftSummaryDocument,
+  RulesAuthoringDraftTransitionDto,
+  RulesAuthoringDraftUpdateDto,
+  RulesAuthoringExportDocument,
+} from './lib/rules-authoring.dto';
