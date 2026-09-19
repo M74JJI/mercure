@@ -38,11 +38,15 @@ import {
   PrismaRulesUseCaseCatalog,
   WazuhXmlRulesetAnalyzer,
 } from '@mercure/rules-backend-infrastructure';
-import { RulesSnapshotsController } from '@mercure/rules-backend-presentation';
+import {
+  RulesIntelligenceController,
+  RulesSnapshotsController,
+  RulesUseCasesController,
+} from '@mercure/rules-backend-presentation';
 
 @Module({
   imports: [PlatformDatabaseModule],
-  controllers: [RulesSnapshotsController],
+  controllers: [RulesSnapshotsController, RulesIntelligenceController, RulesUseCasesController],
   providers: [
     WazuhXmlRulesetAnalyzer,
     {
