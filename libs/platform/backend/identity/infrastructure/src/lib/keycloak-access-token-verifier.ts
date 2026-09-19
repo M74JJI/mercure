@@ -39,16 +39,20 @@ function stringArray(value: unknown): readonly string[] {
   return value;
 }
 
+function isObjectClaim(value: unknown): value is Readonly<Record<string, unknown>> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 function objectClaim(value: unknown): Readonly<Record<string, unknown>> | undefined {
   if (value === undefined) {
     return undefined;
   }
 
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+  if (!isObjectClaim(value)) {
     throw new InvalidAccessTokenError();
   }
 
-  return value as Readonly<Record<string, unknown>>;
+  return value;
 }
 
 function identityFromPayload(payload: JoseJwtPayload, clientId: string): ExternalIdentity {
