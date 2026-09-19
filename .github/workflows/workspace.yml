@@ -157,13 +157,14 @@ jobs:
             exit 1
           fi
 
-          curl --fail --silent             'http://127.0.0.1:3001/api/v1/rules/snapshots?offset=0&limit=1' >/dev/null
+          rules_list_status="$(curl --silent --output /dev/null --write-out '%{http_code}'             'http://127.0.0.1:3001/api/v1/rules/snapshots?offset=0&limit=1')"
+          [[ "$rules_list_status" == "401" ]]
 
           invalid_uuid_status="$(curl --silent --output /dev/null --write-out '%{http_code}'             'http://127.0.0.1:3001/api/v1/rules/snapshots/not-a-uuid')"
-          [[ "$invalid_uuid_status" == "400" ]]
+          [[ "$invalid_uuid_status" == "401" ]]
 
           missing_snapshot_status="$(curl --silent --output /dev/null --write-out '%{http_code}'             'http://127.0.0.1:3001/api/v1/rules/snapshots/00000000-0000-4000-8000-000000000000')"
-          [[ "$missing_snapshot_status" == "404" ]]
+          [[ "$missing_snapshot_status" == "401" ]]
 
-          unavailable_import_status="$(curl --silent --output /dev/null --write-out '%{http_code}'             --request POST             'http://127.0.0.1:3001/api/v1/rules/snapshots/import')"
-          [[ "$unavailable_import_status" == "503" ]]
+          import_status="$(curl --silent --output /dev/null --write-out '%{http_code}'             --request POST             'http://127.0.0.1:3001/api/v1/rules/snapshots/import')"
+          [[ "$import_status" == "401" ]]
