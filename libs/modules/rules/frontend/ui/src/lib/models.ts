@@ -287,3 +287,64 @@ export interface RulesGraphDetailView {
     };
   };
 }
+
+export interface RulesDiagnosticsDetailView {
+  readonly summary: {
+    readonly sourceSections: number;
+    readonly combinedFiles: number;
+    readonly commentedRules: number;
+    readonly idRangeWarnings: number;
+    readonly orphanGroups: number;
+    readonly missingGroupProducers: number;
+    readonly missingUseCaseSuggestions: number;
+  };
+  readonly sourceSections: {
+    readonly offset: number;
+    readonly limit: number;
+    readonly total: number;
+    readonly items: readonly {
+      readonly key: string;
+      readonly tenant: string;
+      readonly sourceFile: string;
+      readonly hostFile: string;
+      readonly ruleCount: number;
+      readonly minRuleId?: number;
+      readonly maxRuleId?: number;
+      readonly expectedPrefix?: string;
+      readonly idRangeStatus: 'pass' | 'warning' | 'unknown';
+      readonly statusSummary: string;
+    }[];
+  };
+  readonly commentedRules: {
+    readonly total: number;
+    readonly items: readonly {
+      readonly tenant: string;
+      readonly fileName: string;
+      readonly ruleId: string;
+      readonly level?: string;
+      readonly description?: string;
+    }[];
+  };
+  readonly groupFlows: {
+    readonly total: number;
+    readonly items: readonly {
+      readonly tenant: string;
+      readonly group: string;
+      readonly producedByRules: readonly string[];
+      readonly consumedByRules: readonly string[];
+      readonly status: 'active' | 'orphan_producer' | 'missing_producer';
+    }[];
+  };
+  readonly missingUseCaseSuggestions: {
+    readonly total: number;
+    readonly items: readonly {
+      readonly tenant: string;
+      readonly ruleId: string;
+      readonly sourceFile: string;
+      readonly sourceSection?: string;
+      readonly useCaseId: string;
+      readonly confidence: 'confirmed' | 'inferred' | 'unassigned';
+      readonly placement: string;
+    }[];
+  };
+}
