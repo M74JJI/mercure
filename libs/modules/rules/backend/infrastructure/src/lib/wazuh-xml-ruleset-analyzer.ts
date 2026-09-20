@@ -32,9 +32,7 @@ function decodeEntities(value: string): string {
 }
 
 function attribute(xml: string, name: string): string | undefined {
-  const match = xml.match(
-    new RegExp(`(?:^|\\s)${name}\\s*=\\s*["']([^"']+)["']`, 'i'),
-  );
+  const match = xml.match(new RegExp(`(?:^|\\s)${name}\\s*=\\s*["']([^"']+)["']`, 'i'));
   return match?.[1] ? decodeEntities(match[1]) : undefined;
 }
 
@@ -68,9 +66,7 @@ function splitSidReferences(value: string | undefined): string[] {
 }
 
 function maskXmlCommentsPreservingOffsets(content: string): string {
-  return content.replace(/<!--[\s\S]*?-->/g, (comment) =>
-    comment.replace(/[^\r\n]/g, ' '),
-  );
+  return content.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/[^\r\n]/g, ' '));
 }
 
 function enclosingRuleGroups(content: string, ruleStartIndex: number): string[] {
@@ -318,9 +314,7 @@ function parseRuleBlock(
 
   const level = Number(attribute(xml, 'level') ?? 0);
   const description = tagValues(xml, 'description')[0] ?? `Rule ${id}`;
-  const groups = [
-    ...new Set([...wrapperGroups, ...splitCsv(tagValues(xml, 'group').join(','))]),
-  ];
+  const groups = [...new Set([...wrapperGroups, ...splitCsv(tagValues(xml, 'group').join(','))])];
   const infoUseCase = extractUseCaseFromInfo(xml);
   const useCase = infoUseCase
     ? { id: infoUseCase, confidence: 'confirmed' as const }
