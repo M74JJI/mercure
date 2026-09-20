@@ -56,7 +56,7 @@ describe('web identity environment', () => {
     expect(environment).toMatchObject({
       authOrigin: 'https://mercure.example.test',
       secureCookies: true,
-      sessionCookieName: '__Secure-authjs.session-token',
+      sessionCookieName: '__Host-authjs.session-token',
       issuer: 'https://identity.example.test/realms/mercure',
       adminAuthorities: ['admin', '/security-admins'],
       userAuthorities: ['user', '/security-users'],

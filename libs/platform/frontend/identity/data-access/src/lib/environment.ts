@@ -136,7 +136,7 @@ export function parseWebIdentityEnvironment(
     sessionMaxAgeSeconds: parsed.WEB_AUTH_SESSION_MAX_AGE_SECONDS,
     secureCookies,
     sessionCookieName: secureCookies
-      ? '__Secure-authjs.session-token'
+      ? '__Host-authjs.session-token'
       : 'authjs.session-token',
   };
 }
