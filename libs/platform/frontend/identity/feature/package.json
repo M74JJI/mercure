@@ -1,16 +1,16 @@
 {
-  "name": "@mercure/rules-frontend-feature",
+  "name": "@mercure/platform-frontend-identity-feature",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./auth": "./src/auth.ts"
   },
   "dependencies": {
     "@mercure/platform-frontend-identity-data-access": "workspace:*",
-    "@mercure/rules-frontend-data-access": "workspace:*",
-    "@mercure/rules-frontend-ui": "workspace:*",
     "next": "16.3.3",
+    "next-auth": "5.0.0-beta.32",
     "react": "19.3.0"
   }
 }

@@ -1,4 +1,6 @@
+import { authenticatedMercureFetch } from '@mercure/platform-frontend-identity-data-access/server';
 import { RulesDataAccess, RulesFrontendApiError } from '@mercure/rules-frontend-data-access';
+import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 import {
   RulesSnapshotDetail,
   RulesSnapshotNotFoundState,
@@ -10,7 +12,7 @@ export interface RulesSnapshotFeatureProps {
 }
 
 export async function RulesSnapshotFeature({ snapshotId }: RulesSnapshotFeatureProps) {
-  const api = new RulesDataAccess();
+  const api = new RulesDataAccess({ fetch: authenticatedMercureFetch });
 
   try {
     const snapshot = await api.getSnapshot(snapshotId);
@@ -38,6 +40,7 @@ export async function RulesSnapshotFeature({ snapshotId }: RulesSnapshotFeatureP
     );
   } catch (error) {
     if (error instanceof RulesFrontendApiError) {
+      redirectRulesAuthorizationFailure(error);
       return <RulesUnavailableState />;
     }
 

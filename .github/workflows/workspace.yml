@@ -17,6 +17,14 @@ jobs:
     name: Workspace quality
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      AUTH_SECRET: mercure-ci-auth-secret-not-a-production-secret-000000
+      AUTH_URL: https://mercure-ci.example.test
+      AUTH_TRUST_HOST: 'true'
+      AUTH_KEYCLOAK_ID: mercure-web-ci
+      AUTH_KEYCLOAK_SECRET: ci-only-not-a-production-secret
+      AUTH_KEYCLOAK_ISSUER: https://identity.example.test/realms/mercure
+      WEB_AUTH_AUTHORITY_CLIENT_ID: mercure-api
 
     steps:
       - name: Checkout
