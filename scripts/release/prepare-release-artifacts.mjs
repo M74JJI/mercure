@@ -2,7 +2,11 @@ import { cp, mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const workspaceRoot = process.cwd();
-const apiEntrypoint = path.join(workspaceRoot, 'dist/apps/api/main.js');
+const apiRoot = path.join(workspaceRoot, 'dist/apps/api');
+const apiEntrypoint = path.join(apiRoot, 'main.js');
+const apiPackageManifest = path.join(apiRoot, 'package.json');
+const apiLockfile = path.join(apiRoot, 'pnpm-lock.yaml');
+const apiWorkspaceSettings = path.join(apiRoot, 'pnpm-workspace.yaml');
 const appRoot = path.join(workspaceRoot, 'apps/web');
 const standaloneSource = path.join(appRoot, '.next/standalone');
 const staticSource = path.join(appRoot, '.next/static');
@@ -55,6 +59,9 @@ async function findGeneratedServers(directory) {
 }
 
 await requireFile('API production entrypoint', apiEntrypoint);
+await requireFile('API production package manifest', apiPackageManifest);
+await requireFile('API pruned pnpm lockfile', apiLockfile);
+await requireFile('API pnpm workspace settings', apiWorkspaceSettings);
 await requireDirectory('Next standalone output', standaloneSource);
 await requireDirectory('Next static output', staticSource);
 
@@ -78,8 +85,9 @@ if (await directoryExists(publicSource)) {
 
 const releaseManifest = {
   api: {
-    entrypoint: path.relative(workspaceRoot, apiEntrypoint).split(path.sep).join('/'),
-    requiresInstalledProductionDependencies: true,
+    artifactRoot: path.relative(workspaceRoot, apiRoot).split(path.sep).join('/'),
+    entrypoint: path.relative(apiRoot, apiEntrypoint).split(path.sep).join('/'),
+    installCommand: 'pnpm install --prod --frozen-lockfile',
   },
   web: {
     artifactRoot: path.relative(workspaceRoot, webOutputRoot).split(path.sep).join('/'),
@@ -95,6 +103,7 @@ await writeFile(
 
 process.stdout.write(
   `Prepared release artifacts.\n` +
+    `API artifact: ${releaseManifest.api.artifactRoot}\n` +
     `API entrypoint: ${releaseManifest.api.entrypoint}\n` +
     `Web artifact: ${releaseManifest.web.artifactRoot}\n` +
     `Web entrypoint: ${releaseManifest.web.entrypoint}\n`,
