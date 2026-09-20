@@ -10,6 +10,12 @@
       "options": {
         "command": "tsc --noEmit -p libs/platform/backend/logging/tsconfig.lib.json"
       }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config libs/platform/backend/logging/vitest.config.ts"
+      }
     }
   }
 }
