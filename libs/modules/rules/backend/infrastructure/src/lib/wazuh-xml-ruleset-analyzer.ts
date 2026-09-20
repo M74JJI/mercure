@@ -37,9 +37,8 @@ function attribute(xml: string, name: string): string | undefined {
 }
 
 function maskNonSemanticMarkupPreservingOffsets(content: string): string {
-  return content.replace(
-    /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>/g,
-    (markup) => markup.replace(/[^\r\n]/g, ' '),
+  return content.replace(/<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>/g, (markup) =>
+    markup.replace(/[^\r\n]/g, ' '),
   );
 }
 
@@ -281,7 +280,8 @@ function xmlFragmentStructureError(content: string): string | undefined {
 }
 
 function inferFileType(name: string, content: string): RulesetSourceType {
-  const sample = `${name}\n${maskNonSemanticMarkupPreservingOffsets(content).slice(0, 2_000)}`.toLowerCase();
+  const sample =
+    `${name}\n${maskNonSemanticMarkupPreservingOffsets(content).slice(0, 2_000)}`.toLowerCase();
   if (sample.includes('<decoder') || sample.includes('decoders')) return 'decoders';
   if (sample.includes('<rule') || sample.includes('rules')) return 'rules';
   return 'unknown';
@@ -457,8 +457,7 @@ function parseDecoders(source: RulesetSourceFile): DecoderRecord[] {
     if (!semanticXml) continue;
     const rawXml = source.content.slice(match.index, match.index + semanticXml.length);
 
-    const name =
-      attribute(rawXml, 'name') ?? tagValues(rawXml, 'name')[0] ?? 'unnamed_decoder';
+    const name = attribute(rawXml, 'name') ?? tagValues(rawXml, 'name')[0] ?? 'unnamed_decoder';
     const regex = tagValues(rawXml, 'regex');
     const parent = tagValues(rawXml, 'parent')[0];
     const prematch = tagValues(rawXml, 'prematch');
