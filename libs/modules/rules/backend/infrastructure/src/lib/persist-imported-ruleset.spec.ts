@@ -91,9 +91,9 @@ describe('PersistImportedRuleset', () => {
 
     const first = persist.execute({ useCases: [useCase('First')] });
 
-    await expect(
-      persist.execute({ useCases: [useCase('Rejected')] }),
-    ).rejects.toBeInstanceOf(RulesetImportInProgressError);
+    await expect(persist.execute({ useCases: [useCase('Rejected')] })).rejects.toBeInstanceOf(
+      RulesetImportInProgressError,
+    );
 
     releaseFirstRead?.();
     const firstResult = await first;

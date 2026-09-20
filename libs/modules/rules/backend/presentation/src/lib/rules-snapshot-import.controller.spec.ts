@@ -36,9 +36,9 @@ describe('Rules snapshot import authorization metadata', () => {
     const queries = {} as QueryRulesetSnapshots;
     const controller = new RulesSnapshotsController(persistImportedRuleset, queries);
 
-    await expect(
-      controller.importSnapshot({ mercurePrincipal: principal }),
-    ).rejects.toBeInstanceOf(ConflictException);
+    await expect(controller.importSnapshot({ mercurePrincipal: principal })).rejects.toBeInstanceOf(
+      ConflictException,
+    );
   });
 
   it('requires rules:import specifically for the import mutation', () => {
