@@ -653,7 +653,8 @@ export interface components {
         fileName?: string;
         tenant?: string;
       }[];
-    };    RulesAuthoringDraftListQueryDto: {
+    };
+    RulesAuthoringDraftListQueryDto: {
       /** @default 0 */
       offset: number;
       /** @default 25 */
@@ -724,16 +725,16 @@ export interface components {
         infoCount: number;
         validatedAt: string;
         issues: {
-        /** @enum {string} */
-        severity: 'error' | 'warning' | 'info';
-        type: string;
-        title: string;
-        detail: string;
-        ruleId?: string;
-        decoderName?: string;
-        fileName?: string;
-        tenant?: string;
-      }[];
+          /** @enum {string} */
+          severity: 'error' | 'warning' | 'info';
+          type: string;
+          title: string;
+          detail: string;
+          ruleId?: string;
+          decoderName?: string;
+          fileName?: string;
+          tenant?: string;
+        }[];
       };
     };
     RulesAuthoringDraftSummaryDocument: {
@@ -1541,8 +1542,12 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: {
-        headers: { [name: string]: unknown };
-        content: { 'application/json': components['schemas']['RulesAuthoringDraftListDocument'] };
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftListDocument'];
+        };
       };
     };
   };
@@ -1554,15 +1559,33 @@ export interface operations {
       cookie?: never;
     };
     requestBody: {
-      content: { 'application/json': components['schemas']['RulesAuthoringDraftCreateDto'] };
+      content: {
+        'application/json': components['schemas']['RulesAuthoringDraftCreateDto'];
+      };
     };
     responses: {
       201: {
-        headers: { [name: string]: unknown };
-        content: { 'application/json': components['schemas']['RulesAuthoringDraftDocument'] };
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftDocument'];
+        };
       };
-      400: { headers: { [name: string]: unknown }; content?: never };
-      404: { headers: { [name: string]: unknown }; content?: never };
+      /** @description The source is not authorable. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The source snapshot file was not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   RulesAuthoringController_createNew: {
@@ -1573,105 +1596,213 @@ export interface operations {
       cookie?: never;
     };
     requestBody: {
-      content: { 'application/json': components['schemas']['RulesAuthoringDraftCreateNewDto'] };
+      content: {
+        'application/json': components['schemas']['RulesAuthoringDraftCreateNewDto'];
+      };
     };
     responses: {
       201: {
-        headers: { [name: string]: unknown };
-        content: { 'application/json': components['schemas']['RulesAuthoringDraftDocument'] };
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftDocument'];
+        };
       };
-      400: { headers: { [name: string]: unknown }; content?: never };
+      /** @description The logical file name, tenant, or source type is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   RulesAuthoringController_get: {
     parameters: {
       query?: never;
       header?: never;
-      path: { draftId: string };
+      path: {
+        draftId: string;
+      };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
       200: {
-        headers: { [name: string]: unknown };
-        content: { 'application/json': components['schemas']['RulesAuthoringDraftDocument'] };
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftDocument'];
+        };
       };
-      404: { headers: { [name: string]: unknown }; content?: never };
+      /** @description Rules authoring draft not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   RulesAuthoringController_update: {
     parameters: {
       query?: never;
       header?: never;
-      path: { draftId: string };
+      path: {
+        draftId: string;
+      };
       cookie?: never;
     };
     requestBody: {
-      content: { 'application/json': components['schemas']['RulesAuthoringDraftUpdateDto'] };
+      content: {
+        'application/json': components['schemas']['RulesAuthoringDraftUpdateDto'];
+      };
     };
     responses: {
       200: {
-        headers: { [name: string]: unknown };
-        content: { 'application/json': components['schemas']['RulesAuthoringDraftDocument'] };
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftDocument'];
+        };
       };
-      400: { headers: { [name: string]: unknown }; content?: never };
-      404: { headers: { [name: string]: unknown }; content?: never };
-      409: { headers: { [name: string]: unknown }; content?: never };
+      /** @description The draft content is invalid or exceeds limits. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Rules authoring draft not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The draft revision changed concurrently. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   RulesAuthoringController_validate: {
     parameters: {
       query?: never;
       header?: never;
-      path: { draftId: string };
+      path: {
+        draftId: string;
+      };
       cookie?: never;
     };
     requestBody: {
-      content: { 'application/json': components['schemas']['RulesAuthoringDraftTransitionDto'] };
+      content: {
+        'application/json': components['schemas']['RulesAuthoringDraftTransitionDto'];
+      };
     };
     responses: {
       200: {
-        headers: { [name: string]: unknown };
-        content: { 'application/json': components['schemas']['RulesAuthoringDraftDocument'] };
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftDocument'];
+        };
       };
-      404: { headers: { [name: string]: unknown }; content?: never };
-      409: { headers: { [name: string]: unknown }; content?: never };
+      /** @description Rules authoring draft not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The draft revision changed concurrently. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   RulesAuthoringController_approve: {
     parameters: {
       query?: never;
       header?: never;
-      path: { draftId: string };
+      path: {
+        draftId: string;
+      };
       cookie?: never;
     };
     requestBody: {
-      content: { 'application/json': components['schemas']['RulesAuthoringDraftTransitionDto'] };
+      content: {
+        'application/json': components['schemas']['RulesAuthoringDraftTransitionDto'];
+      };
     };
     responses: {
       200: {
-        headers: { [name: string]: unknown };
-        content: { 'application/json': components['schemas']['RulesAuthoringDraftDocument'] };
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftDocument'];
+        };
       };
-      404: { headers: { [name: string]: unknown }; content?: never };
-      409: { headers: { [name: string]: unknown }; content?: never };
+      /** @description Rules authoring draft not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The draft is stale, unvalidated, or contains errors. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   RulesAuthoringController_export: {
     parameters: {
       query?: never;
       header?: never;
-      path: { draftId: string };
+      path: {
+        draftId: string;
+      };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
       200: {
-        headers: { [name: string]: unknown };
-        content: { 'application/json': components['schemas']['RulesAuthoringExportDocument'] };
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringExportDocument'];
+        };
       };
-      404: { headers: { [name: string]: unknown }; content?: never };
-      409: { headers: { [name: string]: unknown }; content?: never };
+      /** @description Rules authoring draft not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only an unchanged approved revision can be exported. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   RulesIntelligenceController_fieldsForSnapshot: {
