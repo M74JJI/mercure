@@ -66,3 +66,12 @@ export function RulesUseCaseNotFoundState() {
     </div>
   );
 }
+
+
+export function RulesSnapshotRecordNotFoundState({ collection, snapshotId }: { readonly collection: 'rules' | 'decoders' | 'issues'; readonly snapshotId: string }) {
+  const label = collection === 'issues' ? 'Finding' : collection === 'rules' ? 'Rule' : 'Decoder';
+  return <div className={styles.page}>
+    <PageHeader eyebrow="Rules snapshot" title={label + ' not found'} description="This immutable snapshot record does not exist, or its snapshot is no longer available." actions={<StatusBadge>Not found</StatusBadge>} />
+    <Panel tone="muted" className={styles.statePanel}><a className={styles.backLink} href={'/rules/' + snapshotId + '/' + collection}>← Return to explorer</a></Panel>
+  </div>;
+}

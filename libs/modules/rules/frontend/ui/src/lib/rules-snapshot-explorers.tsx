@@ -153,9 +153,9 @@ export function RulesSnapshotRulesExplorer({
               </thead>
               <tbody>
                 {rules.map((rule) => (
-                  <tr key={rule.tenant + ':' + rule.id}>
+                  <tr key={rule.position}>
                     <td>
-                      <strong>{rule.id}</strong>
+                      <a className={styles.backLink} href={path + '/' + rule.position}><strong>{rule.id}</strong></a>
                       <small>{rule.description}</small>
                     </td>
                     <td>
@@ -245,9 +245,9 @@ export function RulesSnapshotDecodersExplorer({
               </thead>
               <tbody>
                 {decoders.map((decoder) => (
-                  <tr key={decoder.tenant + ':' + decoder.name}>
+                  <tr key={decoder.position}>
                     <td>
-                      <strong>{decoder.name}</strong>
+                      <a className={styles.backLink} href={path + '/' + decoder.position}><strong>{decoder.name}</strong></a>
                     </td>
                     <td>{decoder.parent ?? '—'}</td>
                     <td>{decoder.tenant}</td>
@@ -322,10 +322,10 @@ export function RulesSnapshotIssuesExplorer({
           <p className={styles.emptyInline}>No findings match the selected filters.</p>
         ) : (
           <ul className={styles.issueList}>
-            {issues.map((issue, index) => (
-              <li key={issue.type + ':' + (issue.ruleId ?? issue.decoderName ?? String(index))}>
+            {issues.map((issue) => (
+              <li key={issue.position}>
                 <div className={styles.issueTopline}>
-                  <strong>{issue.title}</strong>
+                  <a className={styles.backLink} href={path + '/' + issue.position}><strong>{issue.title}</strong></a>
                   <StatusBadge tone={issue.severity === 'error' ? 'accent' : 'neutral'}>
                     {issue.severity}
                   </StatusBadge>

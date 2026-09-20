@@ -1,13 +1,17 @@
 export { RulesSnapshotsController } from './lib/rules-snapshots.controller';
 export {
+  RulesSnapshotDecoderDocument,
   RulesSnapshotDecoderPageDocument,
   RulesSnapshotDecodersQueryDto,
   RulesSnapshotDocument,
+  RulesSnapshotIssueDocument,
   RulesSnapshotIssuePageDocument,
   RulesSnapshotIssuesQueryDto,
   RulesSnapshotListQueryDto,
   RulesSnapshotPageDocument,
   RulesSnapshotParamsDto,
+  RulesSnapshotRecordParamsDto,
+  RulesSnapshotRuleDocument,
   RulesSnapshotRulePageDocument,
   RulesSnapshotRulesQueryDto,
 } from './lib/rules-snapshots.dto';

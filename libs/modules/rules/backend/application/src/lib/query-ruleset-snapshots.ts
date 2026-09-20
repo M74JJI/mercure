@@ -41,6 +41,7 @@ export interface RulesetSnapshotSummary {
 }
 
 export interface RulesetSnapshotRuleView {
+  readonly position: number;
   readonly id: string;
   readonly level: number;
   readonly description: string;
@@ -64,6 +65,7 @@ export interface RulesetSnapshotRuleView {
 }
 
 export interface RulesetSnapshotDecoderView {
+  readonly position: number;
   readonly name: string;
   readonly parent?: string;
   readonly prematch: readonly string[];
@@ -74,6 +76,7 @@ export interface RulesetSnapshotDecoderView {
 }
 
 export interface RulesetSnapshotIssueView {
+  readonly position: number;
   readonly severity: ValidationSeverity;
   readonly type: string;
   readonly title: string;
@@ -110,14 +113,30 @@ export interface RulesetSnapshotQueryStore {
     snapshotId: string,
     request: RulesetSnapshotRuleQuery,
   ): Promise<PageResult<RulesetSnapshotRuleView>>;
+  getRule(snapshotId: string, position: number): Promise<RulesetSnapshotRuleView | null>;
   listDecoders(
     snapshotId: string,
     request: RulesetSnapshotDecoderQuery,
   ): Promise<PageResult<RulesetSnapshotDecoderView>>;
+  getDecoder(snapshotId: string, position: number): Promise<RulesetSnapshotDecoderView | null>;
   listIssues(
     snapshotId: string,
     request: RulesetSnapshotIssueQuery,
   ): Promise<PageResult<RulesetSnapshotIssueView>>;
+  getIssue(snapshotId: string, position: number): Promise<RulesetSnapshotIssueView | null>;
+}
+
+export type RulesetSnapshotRecordKind = 'rule' | 'decoder' | 'issue';
+
+export class RulesetSnapshotRecordNotFoundError extends Error {
+  constructor(
+    readonly snapshotId: string,
+    readonly kind: RulesetSnapshotRecordKind,
+    readonly position: number,
+  ) {
+    super(`Rules snapshot ${kind} record not found: ${snapshotId}#${position}`);
+    this.name = 'RulesetSnapshotRecordNotFoundError';
+  }
 }
 
 export class RulesetSnapshotNotFoundError extends Error {
@@ -150,6 +169,15 @@ export class QueryRulesetSnapshots {
     return this.store.listRules(snapshotId, request);
   }
 
+  async getRule(snapshotId: string, position: number): Promise<RulesetSnapshotRuleView> {
+    await this.requireSnapshot(snapshotId);
+    const rule = await this.store.getRule(snapshotId, position);
+    if (!rule) {
+      throw new RulesetSnapshotRecordNotFoundError(snapshotId, 'rule', position);
+    }
+    return rule;
+  }
+
   async listDecoders(
     snapshotId: string,
     request: RulesetSnapshotDecoderQuery,
@@ -158,12 +186,30 @@ export class QueryRulesetSnapshots {
     return this.store.listDecoders(snapshotId, request);
   }
 
+  async getDecoder(snapshotId: string, position: number): Promise<RulesetSnapshotDecoderView> {
+    await this.requireSnapshot(snapshotId);
+    const decoder = await this.store.getDecoder(snapshotId, position);
+    if (!decoder) {
+      throw new RulesetSnapshotRecordNotFoundError(snapshotId, 'decoder', position);
+    }
+    return decoder;
+  }
+
   async listIssues(
     snapshotId: string,
     request: RulesetSnapshotIssueQuery,
   ): Promise<PageResult<RulesetSnapshotIssueView>> {
     await this.requireSnapshot(snapshotId);
     return this.store.listIssues(snapshotId, request);
+  }
+
+  async getIssue(snapshotId: string, position: number): Promise<RulesetSnapshotIssueView> {
+    await this.requireSnapshot(snapshotId);
+    const issue = await this.store.getIssue(snapshotId, position);
+    if (!issue) {
+      throw new RulesetSnapshotRecordNotFoundError(snapshotId, 'issue', position);
+    }
+    return issue;
   }
 
   private async requireSnapshot(snapshotId: string): Promise<void> {

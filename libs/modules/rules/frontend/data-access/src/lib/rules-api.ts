@@ -10,13 +10,12 @@ type Schemas = ApiComponents['schemas'];
 
 export type RulesSnapshot = Schemas['RulesSnapshotDocument'];
 export type RulesSnapshotPage = Schemas['RulesSnapshotPageDocument'];
+export type RulesSnapshotRule = Schemas['RulesSnapshotRuleDocument'];
 export type RulesSnapshotRulePage = Schemas['RulesSnapshotRulePageDocument'];
+export type RulesSnapshotDecoder = Schemas['RulesSnapshotDecoderDocument'];
 export type RulesSnapshotDecoderPage = Schemas['RulesSnapshotDecoderPageDocument'];
+export type RulesSnapshotIssue = Schemas['RulesSnapshotIssueDocument'];
 export type RulesSnapshotIssuePage = Schemas['RulesSnapshotIssuePageDocument'];
-
-export type RulesSnapshotRule = RulesSnapshotRulePage['items'][number];
-export type RulesSnapshotDecoder = RulesSnapshotDecoderPage['items'][number];
-export type RulesSnapshotIssue = RulesSnapshotIssuePage['items'][number];
 
 export type RulesSnapshotListQuery = NonNullable<
   ApiPaths['/api/v1/rules/snapshots']['get']['parameters']['query']
@@ -125,6 +124,17 @@ export class RulesDataAccess {
     return requireData('list snapshot rules', data, response);
   }
 
+  async getRule(snapshotId: string, position: number): Promise<RulesSnapshotRule | null> {
+    const { data, response } = await safelyRequest('get snapshot rule', () =>
+      this.client.GET('/api/v1/rules/snapshots/{snapshotId}/rules/{position}', {
+        params: { path: { snapshotId, position } },
+      }),
+    );
+
+    if (response.status === 404) return null;
+    return requireData('get snapshot rule', data, response);
+  }
+
   async listDecoders(
     snapshotId: string,
     query: RulesSnapshotDecoderQuery = {},
@@ -141,6 +151,20 @@ export class RulesDataAccess {
     return requireData('list snapshot decoders', data, response);
   }
 
+  async getDecoder(
+    snapshotId: string,
+    position: number,
+  ): Promise<RulesSnapshotDecoder | null> {
+    const { data, response } = await safelyRequest('get snapshot decoder', () =>
+      this.client.GET('/api/v1/rules/snapshots/{snapshotId}/decoders/{position}', {
+        params: { path: { snapshotId, position } },
+      }),
+    );
+
+    if (response.status === 404) return null;
+    return requireData('get snapshot decoder', data, response);
+  }
+
   async listIssues(
     snapshotId: string,
     query: RulesSnapshotIssueQuery = {},
@@ -155,5 +179,16 @@ export class RulesDataAccess {
     );
 
     return requireData('list snapshot issues', data, response);
+  }
+
+  async getIssue(snapshotId: string, position: number): Promise<RulesSnapshotIssue | null> {
+    const { data, response } = await safelyRequest('get snapshot issue', () =>
+      this.client.GET('/api/v1/rules/snapshots/{snapshotId}/issues/{position}', {
+        params: { path: { snapshotId, position } },
+      }),
+    );
+
+    if (response.status === 404) return null;
+    return requireData('get snapshot issue', data, response);
   }
 }

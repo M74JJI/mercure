@@ -197,6 +197,54 @@ describe('RulesDataAccess', () => {
     });
   });
 
+  it('reads snapshot child records by immutable position', async () => {
+    const requests: Request[] = [];
+    const api = new RulesDataAccess({
+      baseUrl: 'https://api.mercure.test',
+      fetch: async (request) => {
+        requests.push(request);
+        const pathname = new URL(request.url).pathname;
+        if (pathname.endsWith('/rules/7')) return jsonResponse({
+          position: 7, id: '310001', level: 12, description: 'Test rule', groups: ['production'],
+          status: 'production', role: 'detection', severity: 'critical', jiraVisible: true,
+          tenant: 'manager-a', sourceFile: 'rules.xml', useCaseId: 'uc_test',
+          useCaseConfidence: 'confirmed', mitre: ['T1059.001'], dependencies: [], fields: [],
+          decodedAs: ['test_decoder'], options: [],
+        });
+        if (pathname.endsWith('/decoders/3')) return jsonResponse({
+          position: 3, name: 'test_decoder', prematch: ['test'], regex: ['src=(\\S+)'],
+          orderFields: ['srcip'], tenant: 'manager-a', sourceFile: 'decoders.xml',
+        });
+        return jsonResponse({
+          position: 5, severity: 'warning', type: 'external_or_missing_sid',
+          title: 'Dependency is external', detail: 'Rule references a SID outside this snapshot.',
+          ruleId: '310001', tenant: 'manager-a',
+        });
+      },
+    });
+
+    const snapshotId = '00000000-0000-4000-8000-000000000001';
+    await expect(api.getRule(snapshotId, 7)).resolves.toMatchObject({ position: 7, id: '310001' });
+    await expect(api.getDecoder(snapshotId, 3)).resolves.toMatchObject({ position: 3, name: 'test_decoder' });
+    await expect(api.getIssue(snapshotId, 5)).resolves.toMatchObject({ position: 5, type: 'external_or_missing_sid' });
+    expect(requests.map((request) => new URL(request.url).pathname)).toEqual([
+      '/api/v1/rules/snapshots/00000000-0000-4000-8000-000000000001/rules/7',
+      '/api/v1/rules/snapshots/00000000-0000-4000-8000-000000000001/decoders/3',
+      '/api/v1/rules/snapshots/00000000-0000-4000-8000-000000000001/issues/5',
+    ]);
+  });
+
+  it('returns null when an immutable snapshot child record does not exist', async () => {
+    const api = new RulesDataAccess({
+      baseUrl: 'https://api.mercure.test',
+      fetch: async () => new Response(null, { status: 404 }),
+    });
+    const snapshotId = '00000000-0000-4000-8000-000000000001';
+    await expect(api.getRule(snapshotId, 99)).resolves.toBeNull();
+    await expect(api.getDecoder(snapshotId, 99)).resolves.toBeNull();
+    await expect(api.getIssue(snapshotId, 99)).resolves.toBeNull();
+  });
+
   it('returns null when a snapshot does not exist', async () => {
     const api = new RulesDataAccess({
       baseUrl: 'https://api.mercure.test',

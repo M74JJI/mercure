@@ -44,6 +44,7 @@ const snapshotSchema = z
 
 const ruleSchema = z
   .object({
+    position: z.number().int().min(0),
     id: z.string(),
     level: z.number().int(),
     description: z.string(),
@@ -84,6 +85,7 @@ const ruleSchema = z
 
 const decoderSchema = z
   .object({
+    position: z.number().int().min(0),
     name: z.string(),
     parent: z.string().optional(),
     prematch: z.array(z.string()),
@@ -96,6 +98,7 @@ const decoderSchema = z
 
 const issueSchema = z
   .object({
+    position: z.number().int().min(0),
     severity: validationSeveritySchema,
     type: z.string(),
     title: z.string(),
@@ -113,6 +116,15 @@ export class RulesSnapshotParamsDto extends createZodDto(
   z
     .object({
       snapshotId: z.string().uuid(),
+    })
+    .strict(),
+) {}
+
+export class RulesSnapshotRecordParamsDto extends createZodDto(
+  z
+    .object({
+      snapshotId: z.string().uuid(),
+      position: z.coerce.number().int().min(0),
     })
     .strict(),
 ) {}
@@ -165,6 +177,12 @@ export class RulesSnapshotPageDocument extends createZodDto(
     })
     .strict(),
 ) {}
+
+export class RulesSnapshotRuleDocument extends createZodDto(ruleSchema) {}
+
+export class RulesSnapshotDecoderDocument extends createZodDto(decoderSchema) {}
+
+export class RulesSnapshotIssueDocument extends createZodDto(issueSchema) {}
 
 export class RulesSnapshotRulePageDocument extends createZodDto(
   z

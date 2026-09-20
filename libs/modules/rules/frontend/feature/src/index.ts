@@ -63,3 +63,10 @@ export {
   RulesSnapshotIssuesExplorerFeature,
   type RulesSnapshotIssuesExplorerFeatureProps,
 } from './lib/rules-snapshot-issues-explorer-feature';
+
+
+export {
+  RulesSnapshotDecoderDetailFeature,
+  RulesSnapshotIssueDetailFeature,
+  RulesSnapshotRuleDetailFeature,
+} from './lib/rules-snapshot-record-detail-feature';
