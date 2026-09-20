@@ -32,7 +32,7 @@ export class RulesetImportUnavailableError extends Error {
 }
 
 export class PersistImportedRuleset {
-  private inFlight?: Promise<PersistImportedRulesetResult>;
+  private inFlight: Promise<PersistImportedRulesetResult> | undefined;
 
   constructor(
     private readonly importer: ImportArchivedRuleset,
