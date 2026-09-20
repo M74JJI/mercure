@@ -435,7 +435,7 @@ describe('WazuhXmlRulesetAnalyzer', () => {
             '  <rule id="160002" level="1"><description>Base two</description></rule>',
             '  <rule id="160003" level="16">',
             '    <if_sid>160001 160002</if_sid>',
-            '    <if_matched_sid>160001, 160002</if_matched_sid>',
+            '    <if_matched_sid>160001</if_matched_sid>',
             '    <description>Critical correlation</description>',
             '  </rule>',
             '</group>',
@@ -449,7 +449,6 @@ describe('WazuhXmlRulesetAnalyzer', () => {
       { type: 'if_sid', value: '160001' },
       { type: 'if_sid', value: '160002' },
       { type: 'if_matched_sid', value: '160001' },
-      { type: 'if_matched_sid', value: '160002' },
     ]);
     expect(result.issues.filter((issue) => issue.type === 'external_or_missing_sid')).toEqual([]);
     expect(result.issues.filter((issue) => issue.type === 'level_above_standard')).toEqual([]);

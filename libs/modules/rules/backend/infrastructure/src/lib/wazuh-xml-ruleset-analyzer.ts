@@ -327,7 +327,7 @@ function parseRuleBlock(
   for (const value of splitCsv(tagValues(xml, 'if_group').join(','))) {
     dependencies.push({ type: 'if_group', value });
   }
-  for (const value of splitSidReferences(tagValues(xml, 'if_matched_sid').join(','))) {
+  for (const value of splitCsv(tagValues(xml, 'if_matched_sid').join(','))) {
     dependencies.push({ type: 'if_matched_sid', value });
   }
   for (const value of splitCsv(tagValues(xml, 'if_matched_group').join(','))) {
