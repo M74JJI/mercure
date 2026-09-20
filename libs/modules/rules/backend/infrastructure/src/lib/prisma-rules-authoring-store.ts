@@ -5,6 +5,8 @@ import {
   RulesAuthoringConflictError,
   RulesAuthoringDraftNotFoundError,
   type ApproveRulesAuthoringDraftInput,
+  type PageRequest,
+  type PageResult,
   type PersistRulesAuthoringValidationInput,
   type RulesAuthoringDraft,
   type RulesAuthoringDraftState,
@@ -260,11 +262,23 @@ export class PrismaRulesAuthoringStore implements RulesAuthoringDraftStore, Rule
     };
   }
 
-  async list(): Promise<readonly RulesAuthoringDraftSummary[]> {
-    const rows = await this.database.rulesAuthoringDraft.findMany({
-      orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
-    });
-    return rows.map((row) => summary(row));
+  async list(
+    request: PageRequest,
+  ): Promise<PageResult<RulesAuthoringDraftSummary>> {
+    const [total, rows] = await Promise.all([
+      this.database.rulesAuthoringDraft.count(),
+      this.database.rulesAuthoringDraft.findMany({
+        skip: request.offset,
+        take: request.limit,
+        orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+      }),
+    ]);
+
+    return {
+      ...request,
+      total,
+      items: rows.map((row) => summary(row)),
+    };
   }
 
   async get(id: string): Promise<RulesAuthoringDraft | null> {

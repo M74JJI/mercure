@@ -51,6 +51,7 @@ export {
   RulesAuthoringDraftCreateNewDto,
   RulesAuthoringDraftDocument,
   RulesAuthoringDraftListDocument,
+  RulesAuthoringDraftListQueryDto,
   RulesAuthoringDraftParamsDto,
   RulesAuthoringDraftSummaryDocument,
   RulesAuthoringDraftTransitionDto,

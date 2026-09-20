@@ -51,12 +51,13 @@ import {
   RulesAuthoringDraftCreateNewDto,
   RulesAuthoringDraftDocument,
   RulesAuthoringDraftListDocument,
+  RulesAuthoringDraftListQueryDto,
   RulesAuthoringDraftParamsDto,
   RulesAuthoringDraftTransitionDto,
   RulesAuthoringDraftUpdateDto,
   RulesAuthoringExportDocument,
 } from './rules-authoring.dto';
-import { ZodBody, ZodParam } from './zod-route-parameters';
+import { ZodBody, ZodParam, ZodQuery } from './zod-route-parameters';
 
 interface PrincipalRequest {
   readonly mercurePrincipal?: MercurePrincipal;
@@ -99,6 +100,7 @@ function translateAuthoringError(error: unknown): never {
 @ApiTags('rules-authoring')
 @ApiExtraModels(
   RulesAuthoringDraftParamsDto,
+  RulesAuthoringDraftListQueryDto,
   RulesAuthoringDraftCreateDto,
   RulesAuthoringDraftCreateNewDto,
   RulesAuthoringDraftUpdateDto,
@@ -152,8 +154,11 @@ export class RulesAuthoringController {
   @ApiOperation({ summary: 'List Rules authoring drafts' })
   @ApiOkResponse({ type: RulesAuthoringDraftListDocument })
   @ZodSerializerDto(RulesAuthoringDraftListDocument)
-  list() {
-    return this.listDrafts.execute();
+  list(@ZodQuery(RulesAuthoringDraftListQueryDto) query: RulesAuthoringDraftListQueryDto) {
+    return this.listDrafts.execute({
+      offset: query.offset,
+      limit: query.limit,
+    });
   }
 
   @Post()

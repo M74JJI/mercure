@@ -67,6 +67,15 @@ const draftBase = {
   approvedAt: z.string().optional(),
 };
 
+export class RulesAuthoringDraftListQueryDto extends createZodDto(
+  z
+    .object({
+      offset: z.coerce.number().int().min(0).default(0),
+      limit: z.coerce.number().int().min(1).max(100).default(25),
+    })
+    .strict(),
+) {}
+
 export class RulesAuthoringDraftParamsDto extends createZodDto(
   z.object({ draftId: z.string().uuid() }).strict(),
 ) {}
@@ -124,7 +133,14 @@ export class RulesAuthoringDraftDocument extends createZodDto(draftSchema) {}
 export class RulesAuthoringDraftSummaryDocument extends createZodDto(draftSummarySchema) {}
 
 export class RulesAuthoringDraftListDocument extends createZodDto(
-  z.array(draftSummarySchema),
+  z
+    .object({
+      offset: z.number().int().min(0),
+      limit: z.number().int().min(1).max(100),
+      total: z.number().int().min(0),
+      items: z.array(draftSummarySchema),
+    })
+    .strict(),
 ) {}
 
 export class RulesAuthoringExportDocument extends createZodDto(

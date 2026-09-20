@@ -4,6 +4,7 @@ import type {
 } from '@mercure/rules-backend-domain';
 
 import type { AnalyzeRuleset } from './analyze-ruleset';
+import type { PageRequest, PageResult } from './query-ruleset-snapshots';
 import type { RulesUseCaseCatalogReader } from './use-case-catalog';
 
 export const RULES_AUTHORING_DRAFT_STORE = Symbol('mercure.rules.authoring-draft-store');
@@ -112,7 +113,7 @@ export interface ApproveRulesAuthoringDraftInput {
 }
 
 export interface RulesAuthoringDraftStore {
-  list(): Promise<readonly RulesAuthoringDraftSummary[]>;
+  list(request: PageRequest): Promise<PageResult<RulesAuthoringDraftSummary>>;
   get(id: string): Promise<RulesAuthoringDraft | null>;
   createFromSnapshot(
     source: Omit<RulesAuthoringSourceFile, 'sourceType'> & {
@@ -241,8 +242,9 @@ async function requiredDraft(
 
 export class ListRulesAuthoringDrafts {
   constructor(private readonly store: RulesAuthoringDraftStore) {}
-  execute(): Promise<readonly RulesAuthoringDraftSummary[]> {
-    return this.store.list();
+
+  execute(request: PageRequest): Promise<PageResult<RulesAuthoringDraftSummary>> {
+    return this.store.list(request);
   }
 }
 
