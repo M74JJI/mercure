@@ -407,9 +407,7 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     });
 
     expect(result.decoders.map((decoder) => decoder.name)).toEqual(['cdata_decoder']);
-    expect(result.decoders[0]?.prematch).toEqual([
-      'prefix <decoder name="fake_decoder"> suffix',
-    ]);
+    expect(result.decoders[0]?.prematch).toEqual(['prefix <decoder name="fake_decoder"> suffix']);
     expect(result.decoders[0]?.regex).toEqual(['src=(<value>&raw)']);
     expect(result.issues.map((issue) => issue.type)).not.toContain('malformed_xml_structure');
   });

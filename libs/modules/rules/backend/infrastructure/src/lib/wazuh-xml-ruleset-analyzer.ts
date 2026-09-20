@@ -64,10 +64,7 @@ function semanticTagMatches(xml: string, tag: string): SemanticTagMatch[] {
     const absoluteStart = match.index;
     matches.push({
       openingTag: xml.slice(absoluteStart, absoluteStart + openingEnd + 1),
-      content: xml.slice(
-        absoluteStart + openingEnd + 1,
-        absoluteStart + closingStart,
-      ),
+      content: xml.slice(absoluteStart + openingEnd + 1, absoluteStart + closingStart),
     });
   }
 
@@ -284,7 +281,8 @@ function xmlFragmentStructureError(content: string): string | undefined {
 }
 
 function inferFileType(name: string, content: string): RulesetSourceType {
-  const sample = `${name}\n${maskNonSemanticMarkupPreservingOffsets(content).slice(0, 2_000)}`.toLowerCase();
+  const sample =
+    `${name}\n${maskNonSemanticMarkupPreservingOffsets(content).slice(0, 2_000)}`.toLowerCase();
   if (sample.includes('<decoder') || sample.includes('decoders')) return 'decoders';
   if (sample.includes('<rule') || sample.includes('rules')) return 'rules';
   return 'unknown';
