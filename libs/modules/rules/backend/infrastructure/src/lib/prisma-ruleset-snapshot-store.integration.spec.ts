@@ -107,16 +107,18 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
       analysis,
     };
 
-    let snapshotId: string | undefined;
+    const snapshotIds: string[] = [];
 
     try {
-      const [saved, concurrentDuplicate] = await Promise.all([
+      const [saved, repeatedObservation] = await Promise.all([
         store.persist(imported),
         store.persist(imported),
       ]);
-      snapshotId = saved.id;
+      snapshotIds.push(saved.id, repeatedObservation.id);
 
-      expect(concurrentDuplicate.id).toBe(saved.id);
+      expect(repeatedObservation.id).not.toBe(saved.id);
+      expect(repeatedObservation.sourceFingerprint).toBe(saved.sourceFingerprint);
+      expect(repeatedObservation.contentFingerprint).toBe(saved.contentFingerprint);
       expect(saved).toMatchObject({
         sourceFingerprint: 'a'.repeat(64),
         complete: false,
@@ -437,10 +439,10 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         originalCreatedAt: '2026-09-18T12:00:00.000Z',
       });
     } finally {
-      if (snapshotId) {
-        await database.rulesetSnapshot.delete({ where: { id: snapshotId } });
+      if (snapshotIds.length > 0) {
+        await database.rulesetSnapshot.deleteMany({ where: { id: { in: snapshotIds } } });
         const remainingFiles = await database.rulesetSnapshotFile.count({
-          where: { snapshotId },
+          where: { snapshotId: { in: snapshotIds } },
         });
         expect(remainingFiles).toBe(0);
       }

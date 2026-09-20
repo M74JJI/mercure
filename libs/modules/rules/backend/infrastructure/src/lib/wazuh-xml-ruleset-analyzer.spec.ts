@@ -365,6 +365,50 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     });
 
     expect(result.decoders).toHaveLength(2);
+    expect(result.decoders[1]?.prematch).toEqual(['second']);
+    expect(result.issues.map((issue) => issue.type)).not.toContain('malformed_xml_structure');
+  });
+
+  it('treats XML-looking CDATA text as values instead of semantic Rules markup', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-d/rules/1406-cdata_rules.xml',
+          content: [
+            '<group name="outer,production,">',
+            '  <rule id="140006" level="5">',
+            '    <description><![CDATA[Literal <rule id="999999" level="15"> text]]></description>',
+            '    <field name="event.message"><![CDATA[<group name="fake,"> & raw]]></field>',
+            '  </rule>',
+            '</group>',
+          ].join('\n'),
+        },
+        {
+          name: 'manager-d/decoders/1406-cdata_decoders.xml',
+          content: [
+            '<decoder name="cdata_decoder">',
+            '  <prematch><![CDATA[prefix <decoder name="fake_decoder"> suffix]]></prematch>',
+            '  <regex><![CDATA[src=(<value>&raw)]]></regex>',
+            '</decoder>',
+          ].join('\n'),
+        },
+      ],
+    });
+
+    expect(result.rules.map((rule) => rule.id)).toEqual(['140006']);
+    expect(result.rules[0]).toMatchObject({
+      description: 'Literal <rule id="999999" level="15"> text',
+      groups: ['outer', 'production'],
+    });
+    expect(result.rules[0]?.fields).toContainEqual({
+      name: 'event.message',
+      value: '<group name="fake,"> & raw',
+    });
+
+    expect(result.decoders.map((decoder) => decoder.name)).toEqual(['cdata_decoder']);
+    expect(result.decoders[0]?.prematch).toEqual(['prefix <decoder name="fake_decoder"> suffix']);
+    expect(result.decoders[0]?.regex).toEqual(['src=(<value>&raw)']);
     expect(result.issues.map((issue) => issue.type)).not.toContain('malformed_xml_structure');
   });
 
