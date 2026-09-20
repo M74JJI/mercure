@@ -28,7 +28,88 @@ request_status() {
   )
 
   if [[ -n "$token" ]]; then
-    args+=(--header "Authorization: Bearer $token")
+    if [[ "$token" == *
+
+expect_status() {
+  local label="$1"
+  local expected="$2"
+  local actual="$3"
+
+  if [[ "$actual" != "$expected" ]]; then
+    echo "$label failed: expected HTTP $expected, received HTTP $actual." >&2
+    exit 1
+  fi
+
+  echo "$label: HTTP $actual"
+}
+
+expect_status \
+  'Unauthenticated Rules read' \
+  '401' \
+  "$(request_status GET '/api/v1/rules/snapshots?offset=0&limit=1')"
+
+expect_status \
+  'Normal user Rules read' \
+  '200' \
+  "$(request_status GET '/api/v1/rules/snapshots?offset=0&limit=1' "$MERCURE_USER_ACCESS_TOKEN")"
+
+expect_status \
+  'Normal user authoring denial' \
+  '403' \
+  "$(request_status GET '/api/v1/rules/authoring/drafts?offset=0&limit=1' "$MERCURE_USER_ACCESS_TOKEN")"
+
+expect_status \
+  'Normal user snapshot-import denial' \
+  '403' \
+  "$(request_status POST '/api/v1/rules/snapshots/import' "$MERCURE_USER_ACCESS_TOKEN")"
+
+expect_status \
+  'Administrator Rules read' \
+  '200' \
+  "$(request_status GET '/api/v1/rules/snapshots?offset=0&limit=1' "$MERCURE_ADMIN_ACCESS_TOKEN")"
+
+expect_status \
+  'Administrator authoring read' \
+  '200' \
+  "$(request_status GET '/api/v1/rules/authoring/drafts?offset=0&limit=1' "$MERCURE_ADMIN_ACCESS_TOKEN")"
+
+echo 'Mercure production authorization smoke test passed.'
+\n'* || "$token" == *
+
+expect_status() {
+  local label="$1"
+  local expected="$2"
+  local actual="$3"
+
+  if [[ "$actual" != "$expected" ]]; then
+    echo "$label failed: expected HTTP $expected, received HTTP $actual." >&2
+    exit 1
+  fi
+
+  echo "$label: HTTP $actual"
+}
+
+expect_status   'Unauthenticated Rules read'   '401'   "$(request_status GET '/api/v1/rules/snapshots?offset=0&limit=1')"
+
+expect_status   'Normal user Rules read'   '200'   "$(request_status GET '/api/v1/rules/snapshots?offset=0&limit=1' "$MERCURE_USER_ACCESS_TOKEN")"
+
+expect_status   'Normal user authoring denial'   '403'   "$(request_status GET '/api/v1/rules/authoring/drafts?offset=0&limit=1' "$MERCURE_USER_ACCESS_TOKEN")"
+
+expect_status   'Normal user snapshot-import denial'   '403'   "$(request_status POST '/api/v1/rules/snapshots/import' "$MERCURE_USER_ACCESS_TOKEN")"
+
+expect_status   'Administrator Rules read'   '200'   "$(request_status GET '/api/v1/rules/snapshots?offset=0&limit=1' "$MERCURE_ADMIN_ACCESS_TOKEN")"
+
+expect_status   'Administrator authoring read'   '200'   "$(request_status GET '/api/v1/rules/authoring/drafts?offset=0&limit=1' "$MERCURE_ADMIN_ACCESS_TOKEN")"
+
+echo 'Mercure production authorization smoke test passed.'
+\r'* ]]; then
+      echo 'Access token contains an invalid newline.' >&2
+      exit 2
+    fi
+
+    printf 'Authorization: Bearer %s\n' "$token" |
+      curl "${args[@]}" --header @- "$api_base$path"
+    return
   fi
 
   curl "${args[@]}" "$api_base$path"
