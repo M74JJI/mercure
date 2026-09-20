@@ -3,6 +3,7 @@ model RulesetSnapshot {
   sourceRoot         String?  @map("source_root") @db.Text
   sourceFingerprint  String   @map("source_fingerprint") @db.Char(64)
   contentFingerprint String   @map("content_fingerprint") @db.Char(64)
+  deduplicationKey   String?  @unique @map("deduplication_key") @db.Char(64)
   loadedAt           DateTime @map("loaded_at") @db.Timestamptz(6)
   createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
