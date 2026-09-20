@@ -450,6 +450,37 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
           database.rulesAuthoringDraft.update({
             where: { id: standalone.id },
             data: {
+              state: 'validated',
+              validatedRevision: null,
+              validatedSha256: standalone.sha256,
+              validatedRuleCount: 0,
+              validatedDecoderCount: 0,
+              validationIssueCount: 0,
+              validationErrorCount: 0,
+              validationWarningCount: 0,
+              validationInfoCount: 0,
+              validatedAt: new Date(),
+            },
+          }),
+        ).rejects.toThrow();
+
+        await expect(
+          database.rulesAuthoringDraft.update({
+            where: { id: standalone.id },
+            data: {
+              state: 'approved',
+              approvedRevision: null,
+              approvedSha256: standalone.sha256,
+              approvedBy: 'constraint-test',
+              approvedAt: new Date(),
+            },
+          }),
+        ).rejects.toThrow();
+
+        await expect(
+          database.rulesAuthoringDraft.update({
+            where: { id: standalone.id },
+            data: {
               validatedRuleCount: -1,
             },
           }),

@@ -67,7 +67,9 @@ CREATE TABLE "rules_authoring_drafts" (
         )
         OR (
           "state" IN ('validated', 'approved')
+          AND "validated_revision" IS NOT NULL
           AND "validated_revision" = "revision"
+          AND "validated_sha256" IS NOT NULL
           AND "validated_sha256" = "sha256"
           AND "validated_rule_count" IS NOT NULL
           AND "validated_rule_count" >= 0
@@ -91,8 +93,11 @@ CREATE TABLE "rules_authoring_drafts" (
         )
         OR (
           "state" = 'approved'
+          AND "approved_revision" IS NOT NULL
           AND "approved_revision" = "revision"
+          AND "approved_sha256" IS NOT NULL
           AND "approved_sha256" = "sha256"
+          AND "approved_by" IS NOT NULL
           AND "approved_by" ~ '[^[:space:]]'
           AND "approved_at" IS NOT NULL
           AND "validation_error_count" = 0
