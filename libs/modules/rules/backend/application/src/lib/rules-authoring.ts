@@ -69,7 +69,8 @@ export interface RulesAuthoringDraft {
   readonly approvedAt?: string;
 }
 
-export interface RulesAuthoringDraftSummary extends Omit<RulesAuthoringDraft, 'content' | 'validation'> {
+export interface RulesAuthoringDraftSummary
+  extends Omit<RulesAuthoringDraft, 'content' | 'events' | 'validation'> {
   readonly validation?: Omit<RulesAuthoringValidationSummary, 'issues'>;
 }
 
