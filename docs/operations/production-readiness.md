@@ -56,7 +56,7 @@ At minimum configure:
 - `OIDC_CLIENT_ID`;
 - `RULES_MANAGER_ARCHIVE_DIR`.
 
-Review the bounded database, JWKS, HTTP body, and Rules archive limits in `.env.example` before deployment.
+Review the bounded database, JWKS, HTTP body, and Rules archive limits in `.env.example` before deployment. The Rules authoring domain remains capped at 1 MiB of XML, while the HTTP and Server Action transport envelope is 4 MiB so form/JSON framing and escaping cannot reject a valid near-limit draft before domain validation. Do not configure `API_BODY_LIMIT_BYTES` below 4 MiB.
 
 `OPENAPI_ENABLED` should normally be `false` in production unless the deployment explicitly intends to publish the OpenAPI document.
 

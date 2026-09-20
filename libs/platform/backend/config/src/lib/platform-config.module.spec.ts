@@ -13,11 +13,22 @@ describe('platform OIDC configuration', () => {
       NODE_ENV: 'test',
     });
 
+    expect(config.API_BODY_LIMIT_BYTES).toBe(4 * 1024 * 1024);
     expect(config.OIDC_ISSUER_URL).toBe('https://identity.example.test/realms/mercure');
     expect(config.OIDC_AUDIENCE).toBe('mercure-api');
     expect(config.OIDC_CLIENT_ID).toBe('mercure-api');
     expect(config.OIDC_ADMIN_AUTHORITIES).toEqual(['admin', '/security-admins']);
     expect(config.OIDC_USER_AUTHORITIES).toEqual(['user', '/security-users']);
+  });
+
+  it('rejects transport body limits that cannot carry a maximum authoring draft safely', () => {
+    expect(() =>
+      parsePlatformEnvironment({
+        ...baseEnvironment,
+        NODE_ENV: 'test',
+        API_BODY_LIMIT_BYTES: 2 * 1024 * 1024,
+      }),
+    ).toThrow();
   });
 
   it('requires explicit production OIDC identity settings', () => {

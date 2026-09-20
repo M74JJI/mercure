@@ -117,9 +117,9 @@ const platformEnvironmentSchema = z.object({
   API_BODY_LIMIT_BYTES: z.coerce
     .number()
     .int()
-    .min(1024)
+    .min(4 * 1024 * 1024)
     .max(10 * 1024 * 1024)
-    .default(1024 * 1024),
+    .default(4 * 1024 * 1024),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   OPENAPI_ENABLED: booleanFromEnvironment.default(false),
   OIDC_ISSUER_URL: httpUrl.default('https://identity.example.test/realms/mercure'),
