@@ -13,21 +13,31 @@ function safeFileName(value: string): string {
   return safe.toLowerCase().endsWith('.xml') ? safe : safe + '.xml';
 }
 
+function textResponse(message: string, status: number): Response {
+  return new Response(message, {
+    status,
+    headers: {
+      'cache-control': 'no-store',
+      'content-type': 'text/plain; charset=utf-8',
+      'x-content-type-options': 'nosniff',
+    },
+  });
+}
+
 const draftIdPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
 
 export async function GET(
   _request: Request,
   { params }: { readonly params: Promise<{ readonly draftId: string }> },
 ) {
   const identity = await getServerMercureIdentity();
-  if (!identity) return new Response('Authentication required.', { status: 401 });
-  if (identity.role !== 'admin') return new Response('Forbidden.', { status: 403 });
+  if (!identity) return textResponse('Authentication required.', 401);
+  if (identity.role !== 'admin') return textResponse('Forbidden.', 403);
 
   const { draftId } = await params;
   if (!draftIdPattern.test(draftId)) {
-    return new Response('Invalid draft ID.', { status: 400 });
+    return textResponse('Invalid draft ID.', 400);
   }
 
   try {
@@ -69,7 +79,7 @@ export async function GET(
                   ? 'Draft is not exportable.'
                   : 'Authoring export unavailable.';
 
-      return new Response(message, { status });
+      return textResponse(message, status);
     }
     throw error;
   }
