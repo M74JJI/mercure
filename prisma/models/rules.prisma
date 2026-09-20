@@ -26,7 +26,6 @@ model RulesetSnapshot {
   sourceErrors RulesetSnapshotSourceError[]
   useCases     RulesetSnapshotUseCase[]
   issues       RulesetSnapshotIssue[]
-  authoringDrafts RulesAuthoringDraft[]
 
   @@index([createdAt])
   @@index([sourceFingerprint])
@@ -59,9 +58,10 @@ model RulesetSnapshotFile {
   content    String @db.Text
   sha256     String @db.Char(64)
 
-  snapshot RulesetSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
-  rules    RulesetSnapshotRule[]
-  decoders RulesetSnapshotDecoder[]
+  snapshot        RulesetSnapshot      @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  rules           RulesetSnapshotRule[]
+  decoders        RulesetSnapshotDecoder[]
+  authoringDrafts RulesAuthoringDraft[] @relation("RulesAuthoringSourceFile")
 
   @@id([snapshotId, position])
   @@unique([snapshotId, name])
@@ -347,7 +347,7 @@ model RulesAuthoringDraft {
   approvedBy       String?   @map("approved_by") @db.Text
   approvedAt       DateTime? @map("approved_at") @db.Timestamptz(6)
 
-  sourceSnapshot   RulesetSnapshot? @relation(fields: [sourceSnapshotId], references: [id], onDelete: Restrict)
+  sourceFile       RulesetSnapshotFile? @relation("RulesAuthoringSourceFile", fields: [sourceSnapshotId, sourceFilePosition], references: [snapshotId, position], onDelete: Restrict)
   events           RulesAuthoringDraftEvent[]
   validationIssues RulesAuthoringDraftValidationIssue[]
 

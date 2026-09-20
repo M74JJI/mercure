@@ -28,9 +28,6 @@ CREATE TABLE "rules_authoring_drafts" (
     "approved_at" TIMESTAMPTZ(6),
 
     CONSTRAINT "rules_authoring_drafts_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "rules_authoring_drafts_source_snapshot_id_fkey"
-      FOREIGN KEY ("source_snapshot_id") REFERENCES "ruleset_snapshots"("id")
-      ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "rules_authoring_drafts_source_file_fkey"
       FOREIGN KEY ("source_snapshot_id", "source_file_position")
       REFERENCES "ruleset_snapshot_files"("snapshot_id", "position")
