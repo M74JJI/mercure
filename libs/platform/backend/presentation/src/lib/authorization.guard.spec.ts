@@ -68,6 +68,12 @@ describe('AuthorizationGuard', () => {
     expect(guard.canActivate(executionContext(adminRequest))).toBe(true);
   });
 
+  it('fails closed when an authenticated route has no authorization policy', () => {
+    const guard = new AuthorizationGuard(reflector([]));
+
+    expect(() => guard.canActivate(executionContext(userRequest))).toThrow(ForbiddenException);
+  });
+
   it('allows explicitly public routes without capability evaluation', () => {
     const guard = new AuthorizationGuard(reflector([], true));
 

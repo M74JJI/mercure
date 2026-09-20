@@ -98,6 +98,8 @@ export function parseWebIdentityEnvironment(
       'AUTH_KEYCLOAK_SECRET',
       'AUTH_KEYCLOAK_ISSUER',
       'WEB_AUTH_AUTHORITY_CLIENT_ID',
+      'WEB_AUTH_ADMIN_AUTHORITIES',
+      'WEB_AUTH_USER_AUTHORITIES',
     ] as const;
 
     for (const key of required) {

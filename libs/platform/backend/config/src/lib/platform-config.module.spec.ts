@@ -40,6 +40,18 @@ describe('platform OIDC configuration', () => {
     ).toThrow('OIDC_ISSUER_URL must be explicitly configured in production.');
   });
 
+  it('requires explicit production authority mappings', () => {
+    expect(() =>
+      parsePlatformEnvironment({
+        ...baseEnvironment,
+        NODE_ENV: 'production',
+        OIDC_ISSUER_URL: 'https://identity.example.test/realms/mercure',
+        OIDC_AUDIENCE: 'mercure-api',
+        OIDC_CLIENT_ID: 'mercure-api',
+      }),
+    ).toThrow('OIDC_ADMIN_AUTHORITIES must be explicitly configured in production.');
+  });
+
   it('requires HTTPS issuer and explicit audience/client in production', () => {
     expect(() =>
       parsePlatformEnvironment({
@@ -48,6 +60,8 @@ describe('platform OIDC configuration', () => {
         OIDC_ISSUER_URL: 'http://identity.internal/realms/mercure',
         OIDC_AUDIENCE: 'mercure-api',
         OIDC_CLIENT_ID: 'mercure-api',
+        OIDC_ADMIN_AUTHORITIES: 'mercure-admin',
+        OIDC_USER_AUTHORITIES: 'mercure-user',
       }),
     ).toThrow('OIDC_ISSUER_URL must use https:// in production.');
   });
@@ -95,6 +109,8 @@ describe('platform OIDC configuration', () => {
         OIDC_ISSUER_URL: 'https://identity.example.test/realms/mercure',
         OIDC_AUDIENCE: 'mercure-api',
         OIDC_CLIENT_ID: 'mercure-api',
+        OIDC_ADMIN_AUTHORITIES: 'mercure-admin',
+        OIDC_USER_AUTHORITIES: 'mercure-user',
       }).API_CORS_ORIGINS,
     ).toEqual(['https://mercure.example.test']);
   });

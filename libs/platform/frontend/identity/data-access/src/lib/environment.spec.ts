@@ -35,8 +35,25 @@ describe('web identity environment', () => {
         AUTH_KEYCLOAK_SECRET: 'not-a-real-secret',
         AUTH_KEYCLOAK_ISSUER: 'https://identity.example.test/realms/mercure',
         WEB_AUTH_AUTHORITY_CLIENT_ID: 'mercure-api',
+        WEB_AUTH_ADMIN_AUTHORITIES: 'mercure-admin',
+        WEB_AUTH_USER_AUTHORITIES: 'mercure-user',
       }),
     ).toThrow('AUTH_URL must use https:// in production.');
+  });
+
+  it('requires explicit production authority mappings', () => {
+    expect(() =>
+      parseWebIdentityEnvironment({
+        NODE_ENV: 'production',
+        AUTH_SECRET: 'x'.repeat(32),
+        AUTH_URL: 'https://mercure.example.test',
+        AUTH_TRUST_HOST: 'true',
+        AUTH_KEYCLOAK_ID: 'mercure-web',
+        AUTH_KEYCLOAK_SECRET: 'not-a-real-secret',
+        AUTH_KEYCLOAK_ISSUER: 'https://identity.example.test/realms/mercure',
+        WEB_AUTH_AUTHORITY_CLIENT_ID: 'mercure-api',
+      }),
+    ).toThrow('WEB_AUTH_ADMIN_AUTHORITIES must be explicitly configured in production.');
   });
 
   it('normalizes authority lists and secure session-cookie behavior', () => {
