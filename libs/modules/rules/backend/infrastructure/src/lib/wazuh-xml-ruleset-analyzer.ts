@@ -36,19 +36,64 @@ function attribute(xml: string, name: string): string | undefined {
   return match?.[1] ? decodeEntities(match[1]) : undefined;
 }
 
-function tagValues(xml: string, tag: string): string[] {
-  const values: string[] = [];
+function maskNonSemanticMarkupPreservingOffsets(content: string): string {
+  return content.replace(
+    /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>/g,
+    (markup) => markup.replace(/[^\r\n]/g, ' '),
+  );
+}
+
+interface SemanticTagMatch {
+  readonly openingTag: string;
+  readonly content: string;
+}
+
+function semanticTagMatches(xml: string, tag: string): SemanticTagMatch[] {
+  const matches: SemanticTagMatch[] = [];
+  const semantic = maskNonSemanticMarkupPreservingOffsets(xml);
   const expression = new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'gi');
   let match: RegExpExecArray | null;
 
-  while ((match = expression.exec(xml))) {
-    const value = match[1];
-    if (value !== undefined) {
-      values.push(decodeEntities(value.trim()));
-    }
+  while ((match = expression.exec(semantic))) {
+    const fullMatch = match[0];
+    const openingEnd = fullMatch.indexOf('>');
+    const closingStart = fullMatch.toLowerCase().lastIndexOf(`</${tag.toLowerCase()}`);
+
+    if (openingEnd < 0 || closingStart < openingEnd) continue;
+
+    const absoluteStart = match.index;
+    matches.push({
+      openingTag: xml.slice(absoluteStart, absoluteStart + openingEnd + 1),
+      content: xml.slice(
+        absoluteStart + openingEnd + 1,
+        absoluteStart + closingStart,
+      ),
+    });
   }
 
-  return values;
+  return matches;
+}
+
+function xmlTextValue(value: string): string {
+  let result = '';
+  let cursor = 0;
+  const specialMarkup = /<!--[\s\S]*?-->|<!\[CDATA\[([\s\S]*?)\]\]>|<\?[\s\S]*?\?>/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = specialMarkup.exec(value))) {
+    result += decodeEntities(value.slice(cursor, match.index));
+    if (match[0].startsWith('<![CDATA[')) {
+      result += match[1] ?? '';
+    }
+    cursor = specialMarkup.lastIndex;
+  }
+
+  result += decodeEntities(value.slice(cursor));
+  return result.trim();
+}
+
+function tagValues(xml: string, tag: string): string[] {
+  return semanticTagMatches(xml, tag).map((match) => xmlTextValue(match.content));
 }
 
 function splitCsv(value: string | undefined): string[] {
@@ -63,10 +108,6 @@ function splitSidReferences(value: string | undefined): string[] {
     .split(/[\s,]+/)
     .map((item) => item.trim())
     .filter(Boolean);
-}
-
-function maskXmlCommentsPreservingOffsets(content: string): string {
-  return content.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/[^\r\n]/g, ' '));
 }
 
 const XML_NAME = /^[A-Za-z_][A-Za-z0-9_.:-]*/;
@@ -243,7 +284,7 @@ function xmlFragmentStructureError(content: string): string | undefined {
 }
 
 function inferFileType(name: string, content: string): RulesetSourceType {
-  const sample = `${name}\n${content.slice(0, 2_000)}`.toLowerCase();
+  const sample = `${name}\n${maskNonSemanticMarkupPreservingOffsets(content).slice(0, 2_000)}`.toLowerCase();
   if (sample.includes('<decoder') || sample.includes('decoders')) return 'decoders';
   if (sample.includes('<rule') || sample.includes('rules')) return 'rules';
   return 'unknown';
@@ -319,19 +360,12 @@ function parseRuleBlock(
   }
 
   const fields: RuleField[] = [];
-  const fieldExpression = /<field\s+([^>]*)>([\s\S]*?)<\/field>/gi;
-  let fieldMatch: RegExpExecArray | null;
-
-  while ((fieldMatch = fieldExpression.exec(xml))) {
-    const attributes = fieldMatch[1];
-    const value = fieldMatch[2];
-    if (attributes === undefined || value === undefined) continue;
-
-    const fieldType = attribute(attributes, 'type');
+  for (const fieldMatch of semanticTagMatches(xml, 'field')) {
+    const fieldType = attribute(fieldMatch.openingTag, 'type');
     fields.push({
-      name: attribute(attributes, 'name') ?? 'field',
+      name: attribute(fieldMatch.openingTag, 'name') ?? 'field',
       ...(fieldType ? { type: fieldType } : {}),
-      value: decodeEntities(value.trim()),
+      value: xmlTextValue(fieldMatch.content),
     });
   }
 
@@ -383,7 +417,7 @@ function parseRuleBlock(
 
 function parseRules(source: RulesetSourceFile): RuleRecord[] {
   const rules: RuleRecord[] = [];
-  const semanticContent = maskXmlCommentsPreservingOffsets(source.content);
+  const semanticContent = maskNonSemanticMarkupPreservingOffsets(source.content);
   const ruleExpression = /<rule\b[\s\S]*?<\/rule>/gi;
   const groupExpression = /<\/?group\b[^>]*>/gi;
   const groupStack: string[][] = [];
@@ -408,7 +442,7 @@ function parseRules(source: RulesetSourceFile): RuleRecord[] {
 
     const rawXml = source.content.slice(ruleMatch.index, ruleMatch.index + block.length);
     const enclosingGroups = [...new Set(groupStack.flat())];
-    const rule = parseRuleBlock(block, source, ruleMatch.index, enclosingGroups, rawXml);
+    const rule = parseRuleBlock(rawXml, source, ruleMatch.index, enclosingGroups, rawXml);
     if (rule) rules.push(rule);
   }
 
@@ -417,20 +451,21 @@ function parseRules(source: RulesetSourceFile): RuleRecord[] {
 
 function parseDecoders(source: RulesetSourceFile): DecoderRecord[] {
   const decoders: DecoderRecord[] = [];
-  const semanticContent = maskXmlCommentsPreservingOffsets(source.content);
+  const semanticContent = maskNonSemanticMarkupPreservingOffsets(source.content);
   const expression = /<decoder\b[\s\S]*?<\/decoder>/gi;
   let match: RegExpExecArray | null;
 
   while ((match = expression.exec(semanticContent))) {
-    const xml = match[0];
-    if (!xml) continue;
-    const rawXml = source.content.slice(match.index, match.index + xml.length);
+    const semanticXml = match[0];
+    if (!semanticXml) continue;
+    const rawXml = source.content.slice(match.index, match.index + semanticXml.length);
 
-    const name = attribute(xml, 'name') ?? tagValues(xml, 'name')[0] ?? 'unnamed_decoder';
-    const regex = tagValues(xml, 'regex');
-    const parent = tagValues(xml, 'parent')[0];
-    const prematch = tagValues(xml, 'prematch');
-    const orderFields = tagValues(xml, 'order').flatMap(splitCsv);
+    const name =
+      attribute(rawXml, 'name') ?? tagValues(rawXml, 'name')[0] ?? 'unnamed_decoder';
+    const regex = tagValues(rawXml, 'regex');
+    const parent = tagValues(rawXml, 'parent')[0];
+    const prematch = tagValues(rawXml, 'prematch');
+    const orderFields = tagValues(rawXml, 'order').flatMap(splitCsv);
 
     if (name === 'unnamed_decoder' && regex.length === 0 && !parent) continue;
 
