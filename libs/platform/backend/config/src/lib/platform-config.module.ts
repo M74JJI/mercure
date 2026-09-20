@@ -180,6 +180,10 @@ export function parsePlatformEnvironment(
     if (parsed.OIDC_JWKS_URL && !parsed.OIDC_JWKS_URL.startsWith('https://')) {
       throw new Error('OIDC_JWKS_URL must use https:// in production.');
     }
+
+    if (parsed.API_CORS_ORIGINS.some((origin) => !origin.startsWith('https://'))) {
+      throw new Error('API_CORS_ORIGINS must use https:// origins in production.');
+    }
   }
 
   return parsed;

@@ -41,6 +41,30 @@ describe('platform OIDC configuration', () => {
     ).toThrow('OIDC_ISSUER_URL must use https:// in production.');
   });
 
+  it('requires HTTPS CORS origins in production', () => {
+    expect(() =>
+      parsePlatformEnvironment({
+        ...baseEnvironment,
+        NODE_ENV: 'production',
+        API_CORS_ORIGINS: 'http://mercure.example.test',
+        OIDC_ISSUER_URL: 'https://identity.example.test/realms/mercure',
+        OIDC_AUDIENCE: 'mercure-api',
+        OIDC_CLIENT_ID: 'mercure-api',
+      }),
+    ).toThrow('API_CORS_ORIGINS must use https:// origins in production.');
+
+    expect(
+      parsePlatformEnvironment({
+        ...baseEnvironment,
+        NODE_ENV: 'production',
+        API_CORS_ORIGINS: 'https://mercure.example.test',
+        OIDC_ISSUER_URL: 'https://identity.example.test/realms/mercure',
+        OIDC_AUDIENCE: 'mercure-api',
+        OIDC_CLIENT_ID: 'mercure-api',
+      }).API_CORS_ORIGINS,
+    ).toEqual(['https://mercure.example.test']);
+  });
+
   it('normalizes configured role authorities without permitting an empty mapping', () => {
     const config = parsePlatformEnvironment({
       ...baseEnvironment,
