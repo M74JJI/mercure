@@ -206,30 +206,7 @@ export class PrismaRulesetSnapshotStore implements RulesetSnapshotStore {
 
     const stats = imported.analysis.stats;
 
-    const existing = await this.database.rulesetSnapshot.findFirst({
-      where: {
-        sourceFingerprint,
-        contentFingerprint: fingerprint,
-      },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        sourceFingerprint: true,
-        contentFingerprint: true,
-        complete: true,
-        sourceErrorCount: true,
-        loadedAt: true,
-        createdAt: true,
-      },
-    });
-    if (existing) {
-      return snapshotIdentity(existing);
-    }
-
     const snapshotId = randomUUID();
-    const deduplicationKey = createHash('sha256')
-      .update(`${sourceFingerprint}:${fingerprint}`)
-      .digest('hex');
 
     const operations = [
       this.database.rulesetSnapshot.create({
@@ -238,7 +215,6 @@ export class PrismaRulesetSnapshotStore implements RulesetSnapshotStore {
           sourceRoot: imported.source.sourceRoot,
           sourceFingerprint,
           contentFingerprint: fingerprint,
-          deduplicationKey,
           loadedAt,
           complete: sourceErrors.length === 0,
           sourceErrorCount: sourceErrors.length,
@@ -338,34 +314,7 @@ export class PrismaRulesetSnapshotStore implements RulesetSnapshotStore {
       ),
     ];
 
-    try {
-      await this.database.$transaction(operations);
-    } catch (error) {
-      const code =
-        typeof error === 'object' && error !== null && 'code' in error
-          ? String(error.code)
-          : undefined;
-      if (code !== 'P2002') {
-        throw error;
-      }
-
-      const duplicate = await this.database.rulesetSnapshot.findUnique({
-        where: { deduplicationKey },
-        select: {
-          id: true,
-          sourceFingerprint: true,
-          contentFingerprint: true,
-          complete: true,
-          sourceErrorCount: true,
-          loadedAt: true,
-          createdAt: true,
-        },
-      });
-      if (!duplicate) {
-        throw error;
-      }
-      return snapshotIdentity(duplicate);
-    }
+    await this.database.$transaction(operations);
 
     const snapshot = await this.database.rulesetSnapshot.findUniqueOrThrow({
       where: { id: snapshotId },

@@ -32,7 +32,7 @@ export class RulesetImportUnavailableError extends Error {
 }
 
 export class PersistImportedRuleset {
-  private inFlight: Promise<PersistImportedRulesetResult> | undefined;
+  private tail: Promise<void> = Promise.resolve();
 
   constructor(
     private readonly importer: ImportArchivedRuleset,
@@ -40,18 +40,12 @@ export class PersistImportedRuleset {
   ) {}
 
   execute(request: ImportArchivedRulesetRequest = {}): Promise<PersistImportedRulesetResult> {
-    if (this.inFlight) {
-      return this.inFlight;
-    }
-
-    const operation = this.persist(request);
-    this.inFlight = operation;
-
-    return operation.finally(() => {
-      if (this.inFlight === operation) {
-        this.inFlight = undefined;
-      }
-    });
+    const operation = this.tail.then(() => this.persist(request));
+    this.tail = operation.then(
+      () => undefined,
+      () => undefined,
+    );
+    return operation;
   }
 
   private async persist(
