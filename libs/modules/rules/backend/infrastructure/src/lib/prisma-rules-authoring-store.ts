@@ -118,6 +118,9 @@ function issue(row: ValidationIssueRow): ValidationIssue {
   };
 }
 
+const MAX_VISIBLE_VALIDATION_ISSUES = 500;
+const MAX_VISIBLE_AUTHORING_EVENTS = 200;
+
 function contentSha256(content: string): string {
   return createHash('sha256').update(content).digest('hex');
 }
@@ -126,6 +129,7 @@ function detail(
   row: DraftRow,
   issues: readonly ValidationIssueRow[],
   events: readonly DraftEventRow[],
+  eventCount: number,
 ): RulesAuthoringDraft {
   const validation =
     row.validatedRevision === null ||
@@ -166,6 +170,7 @@ function detail(
     updatedBy: row.updatedBy,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
+    eventCount,
     events: events.map(event),
     ...(validation === undefined ? {} : { validation }),
     ...(row.approvedRevision === null ? {} : { approvedRevision: row.approvedRevision }),
@@ -285,16 +290,18 @@ export class PrismaRulesAuthoringStore implements RulesAuthoringDraftStore, Rule
     const row = await this.database.rulesAuthoringDraft.findUnique({ where: { id } });
     if (!row) return null;
 
-    const [issues, events] = await Promise.all([
+    const [issues, newestEvents, eventCount] = await Promise.all([
       row.validatedRevision === null
         ? Promise.resolve([])
         : this.database.rulesAuthoringDraftValidationIssue.findMany({
             where: { draftId: id, revision: row.validatedRevision },
             orderBy: { position: 'asc' },
+            take: MAX_VISIBLE_VALIDATION_ISSUES,
           }),
       this.database.rulesAuthoringDraftEvent.findMany({
         where: { draftId: id },
-        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        take: MAX_VISIBLE_AUTHORING_EVENTS,
         select: {
           eventType: true,
           state: true,
@@ -303,9 +310,12 @@ export class PrismaRulesAuthoringStore implements RulesAuthoringDraftStore, Rule
           createdAt: true,
         },
       }),
+      this.database.rulesAuthoringDraftEvent.count({
+        where: { draftId: id },
+      }),
     ]);
 
-    return detail(row, issues, events);
+    return detail(row, issues, [...newestEvents].reverse(), eventCount);
   }
 
   async createFromSnapshot(
@@ -442,6 +452,7 @@ export class PrismaRulesAuthoringStore implements RulesAuthoringDraftStore, Rule
     input: PersistRulesAuthoringValidationInput,
   ): Promise<RulesAuthoringDraft> {
     const counts = issueCounts(input.issues);
+    const visibleIssues = input.issues.slice(0, MAX_VISIBLE_VALIDATION_ISSUES);
     const validatedAt = new Date();
 
     await this.database.$transaction(async (transaction) => {
@@ -474,9 +485,9 @@ export class PrismaRulesAuthoringStore implements RulesAuthoringDraftStore, Rule
       await transaction.rulesAuthoringDraftValidationIssue.deleteMany({
         where: { draftId: input.draftId, revision: input.expectedRevision },
       });
-      if (input.issues.length > 0) {
+      if (visibleIssues.length > 0) {
         await transaction.rulesAuthoringDraftValidationIssue.createMany({
-          data: input.issues.map((item, position) => ({
+          data: visibleIssues.map((item, position) => ({
             draftId: input.draftId,
             revision: input.expectedRevision,
             position,

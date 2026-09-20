@@ -62,6 +62,7 @@ export interface RulesAuthoringDraft {
   readonly updatedBy: string;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly eventCount: number;
   readonly events: readonly RulesAuthoringEvent[];
   readonly validation?: RulesAuthoringValidationSummary;
   readonly approvedRevision?: number;
@@ -71,7 +72,7 @@ export interface RulesAuthoringDraft {
 }
 
 export interface RulesAuthoringDraftSummary
-  extends Omit<RulesAuthoringDraft, 'content' | 'events' | 'validation'> {
+  extends Omit<RulesAuthoringDraft, 'content' | 'eventCount' | 'events' | 'validation'> {
   readonly validation?: Omit<RulesAuthoringValidationSummary, 'issues'>;
 }
 
