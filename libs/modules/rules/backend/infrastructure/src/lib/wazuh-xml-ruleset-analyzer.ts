@@ -58,6 +58,99 @@ function splitCsv(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
+function findMarkupEnd(content: string, start: number): number {
+  let quote: '"' | "'" | undefined;
+
+  for (let index = start; index < content.length; index += 1) {
+    const character = content[index];
+
+    if (quote) {
+      if (character === quote) quote = undefined;
+      continue;
+    }
+
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+
+    if (character === '<') return -1;
+    if (character === '>') return index;
+  }
+
+  return -1;
+}
+
+function xmlFragmentStructureError(content: string): string | undefined {
+  const stack: string[] = [];
+  let cursor = 0;
+
+  while (cursor < content.length) {
+    const start = content.indexOf('<', cursor);
+    if (start === -1) break;
+
+    if (content.startsWith('<!--', start)) {
+      const end = content.indexOf('-->', start + 4);
+      if (end === -1) return 'XML comment is not terminated.';
+      cursor = end + 3;
+      continue;
+    }
+
+    if (content.startsWith('<![CDATA[', start)) {
+      const end = content.indexOf(']]>', start + 9);
+      if (end === -1) return 'XML CDATA section is not terminated.';
+      cursor = end + 3;
+      continue;
+    }
+
+    if (content.startsWith('<?', start)) {
+      const end = content.indexOf('?>', start + 2);
+      if (end === -1) return 'XML processing instruction is not terminated.';
+      cursor = end + 2;
+      continue;
+    }
+
+    if (content.startsWith('<!', start)) {
+      return 'XML declaration markup such as DOCTYPE is not allowed.';
+    }
+
+    const end = findMarkupEnd(content, start + 1);
+    if (end === -1) return 'XML tag is not terminated correctly.';
+
+    const markup = content.slice(start + 1, end).trim();
+    if (!markup) return 'XML tag name is missing.';
+
+    if (markup.startsWith('/')) {
+      const closingName = markup.slice(1).trim();
+      if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(closingName)) {
+        return 'XML closing tag is invalid.';
+      }
+
+      const openingName = stack.pop();
+      if (openingName !== closingName) {
+        return openingName
+          ? `XML closing tag </${closingName}> does not match <${openingName}>.`
+          : `XML closing tag </${closingName}> has no matching opening tag.`;
+      }
+
+      cursor = end + 1;
+      continue;
+    }
+
+    const selfClosing = /\/\s*$/.test(markup);
+    const body = selfClosing ? markup.replace(/\/\s*$/, '').trim() : markup;
+    const opening = /^([A-Za-z_][A-Za-z0-9_.:-]*)(?:\s|$)/.exec(body);
+    const openingName = opening?.[1];
+
+    if (!openingName) return 'XML opening tag is invalid.';
+    if (!selfClosing) stack.push(openingName);
+    cursor = end + 1;
+  }
+
+  const unclosed = stack.at(-1);
+  return unclosed ? `XML tag <${unclosed}> is not closed.` : undefined;
+}
+
 function inferFileType(name: string, content: string): RulesetSourceType {
   const sample = `${name}\n${content.slice(0, 2_000)}`.toLowerCase();
   if (sample.includes('<decoder') || sample.includes('decoders')) return 'decoders';
@@ -250,6 +343,21 @@ function validateRuleset(
   useCases: readonly RulesUseCase[],
 ): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
+
+  for (const file of files) {
+    const structureError = xmlFragmentStructureError(file.content);
+    if (!structureError) continue;
+
+    issues.push({
+      severity: 'error',
+      type: 'malformed_xml_structure',
+      title: `Malformed XML structure in ${file.name}`,
+      detail: structureError,
+      fileName: file.name,
+      tenant: file.tenant,
+    });
+  }
+
   const knownUseCases = new Set(useCases.map((useCase) => useCase.id));
   const ruleGroups = new Map<string, RuleRecord[]>();
 
