@@ -77,6 +77,7 @@ export {
 } from './lib/rules-authoring-feature';
 export {
   approveRulesAuthoringDraftAction,
+  createNewRulesAuthoringDraftAction,
   createRulesAuthoringDraftAction,
   updateRulesAuthoringDraftAction,
   validateRulesAuthoringDraftAction,

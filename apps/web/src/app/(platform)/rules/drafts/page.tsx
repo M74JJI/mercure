@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   description: 'Controlled Mercure Rules draft authoring.',
 };
 
-export default async function Page() {
-  return <RulesAuthoringDraftListFeature />;
+export default async function Page({
+  searchParams,
+}: {
+  readonly searchParams: Promise<Readonly<Record<string, string | readonly string[] | undefined>>>;
+}) {
+  return <RulesAuthoringDraftListFeature searchParams={await searchParams} />;
 }

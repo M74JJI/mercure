@@ -48,6 +48,30 @@ function failure(path: string, error: RulesFrontendApiError): never {
   redirect(path + '?error=' + code);
 }
 
+export async function createNewRulesAuthoringDraftAction(formData: FormData): Promise<void> {
+  await requireRulesAdminIdentity();
+  const fileName = value(formData, 'fileName')?.trim();
+  const tenant = value(formData, 'tenant')?.trim();
+  const sourceTypeValue = value(formData, 'sourceType');
+  const sourceType =
+    sourceTypeValue === 'rules' || sourceTypeValue === 'decoders'
+      ? sourceTypeValue
+      : null;
+
+  if (!fileName || !tenant || !sourceType) {
+    redirect('/rules/drafts?error=validation');
+  }
+
+  try {
+    const draft = await api().createNew({ fileName, tenant, sourceType });
+    revalidatePath('/rules/drafts');
+    redirect('/rules/drafts/' + draft.id);
+  } catch (error) {
+    if (error instanceof RulesFrontendApiError) failure('/rules/drafts', error);
+    throw error;
+  }
+}
+
 export async function createRulesAuthoringDraftAction(formData: FormData): Promise<void> {
   await requireRulesAdminIdentity();
   const sourceSnapshotId = id(formData, 'sourceSnapshotId');

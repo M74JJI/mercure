@@ -12,6 +12,7 @@ import {
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 import {
   approveRulesAuthoringDraftAction,
+  createNewRulesAuthoringDraftAction,
   updateRulesAuthoringDraftAction,
   validateRulesAuthoringDraftAction,
 } from './rules-authoring-actions';
@@ -25,11 +26,22 @@ function errorCode(value: string | readonly string[] | undefined): ErrorCode | u
   return errorCodes.find((code) => code === candidate);
 }
 
-export async function RulesAuthoringDraftListFeature() {
+export async function RulesAuthoringDraftListFeature({
+  searchParams,
+}: {
+  readonly searchParams: Readonly<Record<string, string | readonly string[] | undefined>>;
+}) {
   await requireRulesAdminIdentity();
   const api = new RulesAuthoringDataAccess({ fetch: authenticatedMercureFetch });
   try {
-    return <RulesAuthoringDraftList drafts={await api.list()} />;
+    const error = errorCode(searchParams.error);
+    return (
+      <RulesAuthoringDraftList
+        drafts={await api.list()}
+        createNewAction={createNewRulesAuthoringDraftAction}
+        {...(error === undefined ? {} : { error })}
+      />
+    );
   } catch (error) {
     if (error instanceof RulesFrontendApiError) {
       redirectRulesAuthorizationFailure(error);
