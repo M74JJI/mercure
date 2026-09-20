@@ -98,6 +98,8 @@ describe('platform OIDC configuration', () => {
         OIDC_ISSUER_URL: 'https://identity.example.test/realms/mercure',
         OIDC_AUDIENCE: 'mercure-api',
         OIDC_CLIENT_ID: 'mercure-api',
+        OIDC_ADMIN_AUTHORITIES: 'mercure-admin',
+        OIDC_USER_AUTHORITIES: 'mercure-user',
       }),
     ).toThrow('API_CORS_ORIGINS must use https:// origins in production.');
 
