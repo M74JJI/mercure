@@ -31,7 +31,7 @@ function bearerToken(header: string | readonly string[] | undefined): string | n
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
   constructor(
-    private readonly reflector: Reflector,
+    @Inject(Reflector) private readonly reflector: Reflector,
     @Inject(ACCESS_TOKEN_VERIFIER) private readonly verifier: AccessTokenVerifier,
   ) {}
 
