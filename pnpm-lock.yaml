@@ -431,16 +431,6 @@ importers:
         specifier: 19.3.0
         version: 19.3.0
 
-      '@mercure/rules-frontend-data-access':
-        specifier: workspace:*
-        version: link:../data-access
-      '@mercure/rules-frontend-ui':
-        specifier: workspace:*
-        version: link:../ui
-      react:
-        specifier: 19.3.0
-        version: 19.3.0
-
   libs/modules/rules/frontend/ui:
     dependencies:
       '@mercure/platform-frontend-design-system':
