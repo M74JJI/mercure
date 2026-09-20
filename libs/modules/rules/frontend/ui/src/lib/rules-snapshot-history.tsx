@@ -25,7 +25,17 @@ export function RulesSnapshotHistory({ snapshots, total }: RulesSnapshotHistoryP
         eyebrow="Rules"
         title="Configuration snapshots"
         description="Immutable views of normalized Wazuh rules, decoders, and validation findings imported from configured manager archives."
-        actions={<StatusBadge tone="accent">{`${total} snapshots`}</StatusBadge>}
+        actions={
+          <div className={styles.headerActions}>
+            <a className={styles.actionLink} href="/rules/compare">
+              Compare
+            </a>
+            <a className={styles.actionLink} href="/rules/use-cases">
+              Use cases
+            </a>
+            <StatusBadge tone="accent">{String(total) + ' snapshots'}</StatusBadge>
+          </div>
+        }
       />
 
       {snapshots.length === 0 ? (

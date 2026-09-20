@@ -1,4 +1,5 @@
 import { PageHeader, Panel, StatusBadge } from '@mercure/platform-frontend-design-system';
+import type { ReactNode } from 'react';
 
 import type {
   RulesDecoderPreviewView,
@@ -16,6 +17,7 @@ export interface RulesSnapshotDetailProps {
   readonly decodersTotal: number;
   readonly issues: readonly RulesIssuePreviewView[];
   readonly issuesTotal: number;
+  readonly intelligence?: ReactNode;
 }
 
 const dateFormatter = new Intl.DateTimeFormat('en', {
@@ -42,6 +44,7 @@ export function RulesSnapshotDetail({
   decodersTotal,
   issues,
   issuesTotal,
+  intelligence,
   rules,
   rulesTotal,
   snapshot,
@@ -182,6 +185,8 @@ export function RulesSnapshotDetail({
           )}
         </Panel>
       </section>
+
+      {intelligence}
 
       <Panel tone="muted" className={styles.provenance}>
         <div>

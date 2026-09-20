@@ -3,12 +3,22 @@
   "name": "rules-frontend-feature",
   "projectType": "library",
   "sourceRoot": "libs/modules/rules/frontend/feature/src",
-  "tags": ["scope:rules", "side:frontend", "type:feature"],
+  "tags": [
+    "scope:rules",
+    "side:frontend",
+    "type:feature"
+  ],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
         "command": "tsc --noEmit -p libs/modules/rules/frontend/feature/tsconfig.lib.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config libs/modules/rules/frontend/feature/vitest.config.ts"
       }
     }
   }

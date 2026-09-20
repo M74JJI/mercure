@@ -3,12 +3,22 @@
   "name": "rules-backend-presentation",
   "projectType": "library",
   "sourceRoot": "libs/modules/rules/backend/presentation/src",
-  "tags": ["scope:rules", "side:backend", "type:presentation"],
+  "tags": [
+    "scope:rules",
+    "side:backend",
+    "type:presentation"
+  ],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
         "command": "tsc --noEmit -p libs/modules/rules/backend/presentation/tsconfig.lib.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config libs/modules/rules/backend/presentation/vitest.config.ts"
       }
     }
   }

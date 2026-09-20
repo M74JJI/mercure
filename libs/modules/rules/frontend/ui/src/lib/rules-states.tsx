@@ -36,3 +36,33 @@ export function RulesSnapshotNotFoundState() {
     </div>
   );
 }
+
+export function RulesIntelligenceUnavailableState() {
+  return (
+    <Panel tone="muted" className={styles.statePanel}>
+      <h2>Intelligence is temporarily unavailable</h2>
+      <p>
+        Core snapshot data remains available. Derived quality, field, graph, and diagnostic
+        analysis could not be loaded for this request.
+      </p>
+    </Panel>
+  );
+}
+
+export function RulesUseCaseNotFoundState() {
+  return (
+    <div className={styles.page}>
+      <PageHeader
+        eyebrow="Rules use case"
+        title="Use case not found"
+        description="This canonical Rules use-case entry does not exist or is no longer available."
+        actions={<StatusBadge>Not found</StatusBadge>}
+      />
+      <Panel tone="muted" className={styles.statePanel}>
+        <a className={styles.backLink} href="/rules/use-cases">
+          ← Return to use-case catalog
+        </a>
+      </Panel>
+    </div>
+  );
+}
