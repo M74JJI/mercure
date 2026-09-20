@@ -9,6 +9,14 @@ export const metadata: Metadata = {
   description: 'Inspect immutable Mercure Rules configuration snapshots.',
 };
 
-export default function RulesPage() {
-  return <RulesOverviewFeature />;
+interface RulesPageProps {
+  readonly searchParams: Promise<
+    Readonly<Record<string, string | readonly string[] | undefined>>
+  >;
+}
+
+export default async function RulesPage({ searchParams }: RulesPageProps) {
+  const query = await searchParams;
+
+  return <RulesOverviewFeature searchParams={query} />;
 }

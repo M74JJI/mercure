@@ -1,11 +1,17 @@
 import { PageHeader, Panel, StatusBadge } from '@mercure/platform-frontend-design-system';
 
 import type { RulesSnapshotSummaryView } from './models';
+import { RulesSnapshotImportForm } from './rules-snapshot-import-form';
 import styles from './rules.module.css';
+
+export type RulesSnapshotImportStatus = 'unavailable' | 'failed';
 
 export interface RulesSnapshotHistoryProps {
   readonly snapshots: readonly RulesSnapshotSummaryView[];
   readonly total: number;
+  readonly canImport: boolean;
+  readonly importAction?: (formData: FormData) => Promise<void>;
+  readonly importStatus?: RulesSnapshotImportStatus;
 }
 
 const dateFormatter = new Intl.DateTimeFormat('en', {
@@ -18,15 +24,38 @@ function formatDate(value: string): string {
   return dateFormatter.format(new Date(value));
 }
 
-export function RulesSnapshotHistory({ snapshots, total }: RulesSnapshotHistoryProps) {
+function importStatusMessage(status: RulesSnapshotImportStatus | undefined): string | undefined {
+  if (status === 'unavailable') {
+    return 'No usable configured Rules manager source is currently available to import.';
+  }
+
+  if (status === 'failed') {
+    return 'The Rules snapshot import could not be completed.';
+  }
+
+  return undefined;
+}
+
+export function RulesSnapshotHistory({
+  canImport,
+  importAction,
+  importStatus,
+  snapshots,
+  total,
+}: RulesSnapshotHistoryProps) {
+  const importMessage = importStatusMessage(importStatus);
+
   return (
     <div className={styles.page}>
       <PageHeader
         eyebrow="Rules"
         title="Configuration snapshots"
-        description="Immutable views of normalized Wazuh rules, decoders, and validation findings imported from configured manager archives."
+        description="Immutable views of normalized Wazuh rules, decoders, and validation findings imported from the server-configured manager archive source."
         actions={
           <div className={styles.headerActions}>
+            {canImport && importAction ? (
+              <RulesSnapshotImportForm action={importAction} />
+            ) : null}
             <a className={styles.actionLink} href="/rules/compare">
               Compare
             </a>
@@ -38,17 +67,25 @@ export function RulesSnapshotHistory({ snapshots, total }: RulesSnapshotHistoryP
         }
       />
 
+      {importMessage ? (
+        <Panel tone="muted" className={styles.formNotice}>
+          <strong>{importMessage}</strong>
+        </Panel>
+      ) : null}
+
       {snapshots.length === 0 ? (
         <Panel tone="muted" className={styles.empty}>
           <h2>No Rules snapshots yet</h2>
           <p>
-            The backend is ready, but no imported configuration snapshot is available to inspect.
+            {canImport
+              ? 'Import the configured manager archive source to create the first immutable snapshot.'
+              : 'No imported configuration snapshot is currently available to inspect.'}
           </p>
         </Panel>
       ) : (
         <section className={styles.snapshotList} aria-label="Rules snapshot history">
           {snapshots.map((snapshot) => (
-            <a className={styles.snapshotLink} href={`/rules/${snapshot.id}`} key={snapshot.id}>
+            <a className={styles.snapshotLink} href={'/rules/' + snapshot.id} key={snapshot.id}>
               <Panel tone="raised" className={styles.snapshotCard}>
                 <div className={styles.snapshotHeading}>
                   <div>
