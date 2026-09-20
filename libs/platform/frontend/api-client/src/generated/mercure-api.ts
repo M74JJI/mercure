@@ -231,7 +231,8 @@ export interface paths {
     /** List the canonical Rules use-case catalog */
     get: operations['RulesUseCasesController_list'];
     put?: never;
-    post?: never;
+    /** Create a custom Rules use case */
+    post: operations['RulesUseCaseAdministrationController_create'];
     delete?: never;
     options?: never;
     head?: never;
@@ -247,9 +248,11 @@ export interface paths {
     };
     /** Read one canonical Rules use case */
     get: operations['RulesUseCasesController_get'];
-    put?: never;
+    /** Update a custom Rules use case */
+    put: operations['RulesUseCaseAdministrationController_update'];
     post?: never;
-    delete?: never;
+    /** Delete a custom Rules use case */
+    delete: operations['RulesUseCaseAdministrationController_delete'];
     options?: never;
     head?: never;
     patch?: never;
@@ -824,6 +827,30 @@ export interface components {
       createdBy: string;
       createdAt?: string;
     };
+    RulesUseCaseCreateDto: {
+      id: string;
+      name: string;
+      shortName: string;
+      description: string;
+      component: string;
+      vendor: string;
+      product: string;
+      domain: string;
+      category: string;
+    };
+    RulesUseCaseUpdateDto: {
+      name: string;
+      shortName: string;
+      description: string;
+      component: string;
+      vendor: string;
+      product: string;
+      domain: string;
+      category: string;
+    };
+    RulesUseCaseAdministrationParamsDto: {
+      useCaseId: string;
+    };
 
   };
   responses: never;
@@ -1275,6 +1302,122 @@ export interface operations {
       };
       /** @description Rules use case not found. */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesUseCaseAdministrationController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RulesUseCaseCreateDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesUseCaseDocument'];
+        };
+      };
+      /** @description The use-case payload is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The use-case ID already exists. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesUseCaseAdministrationController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        useCaseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RulesUseCaseUpdateDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesUseCaseDocument'];
+        };
+      };
+      /** @description The use-case payload is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Rules use case not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description System Rules use cases are read-only. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesUseCaseAdministrationController_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        useCaseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Rules use case not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description System Rules use cases are read-only. */
+      409: {
         headers: {
           [name: string]: unknown;
         };

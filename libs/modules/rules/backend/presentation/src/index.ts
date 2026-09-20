@@ -33,3 +33,10 @@ export {
   RulesUseCasePageDocument,
   RulesUseCaseParamsDto,
 } from './lib/rules-intelligence.dto';
+
+export { RulesUseCaseAdministrationController } from './lib/rules-use-case-administration.controller';
+export {
+  RulesUseCaseAdministrationParamsDto,
+  RulesUseCaseCreateDto,
+  RulesUseCaseUpdateDto,
+} from './lib/rules-use-case-administration.dto';

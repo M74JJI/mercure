@@ -68,3 +68,10 @@ export {
   type RulesUseCaseDetailProps,
 } from './lib/rules-use-case-detail';
 export type { RulesUseCaseDetailView } from './lib/models';
+
+export {
+  RulesUseCaseAdministrationForm,
+  type RulesUseCaseAdministrationFormProps,
+  type RulesUseCaseAdminErrorCode,
+  type RulesUseCaseAdminField,
+} from './lib/rules-use-case-administration-form';

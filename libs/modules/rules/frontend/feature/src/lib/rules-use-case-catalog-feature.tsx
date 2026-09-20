@@ -1,4 +1,7 @@
-import { authenticatedMercureFetch } from '@mercure/platform-frontend-identity-data-access/server';
+import {
+  authenticatedMercureFetch,
+  getServerMercureIdentity,
+} from '@mercure/platform-frontend-identity-data-access/server';
 import {
   RulesFrontendApiError,
   RulesIntelligenceDataAccess,
@@ -30,6 +33,13 @@ export async function RulesUseCaseCatalogFeature({
   const offset = boundedIntegerSearchParam(searchParams, 'offset', 0, 0, 1_000_000);
   const selectedQuery = trimmedSearchParam(searchParams, 'q', 256);
   const selectedSource = enumSearchParam(searchParams, 'source', sourceValues);
+  const deletedCandidate = trimmedSearchParam(searchParams, 'deleted', 255);
+  const deletedUseCaseId =
+    deletedCandidate && /^uc_[a-z0-9_]+$/.test(deletedCandidate)
+      ? deletedCandidate
+      : undefined;
+  const identity = await getServerMercureIdentity();
+  const canAdminister = identity?.role === 'admin';
 
   try {
     const useCases = await api.listUseCases({
@@ -61,6 +71,8 @@ export async function RulesUseCaseCatalogFeature({
       <RulesUseCaseCatalog
         useCases={useCases.items}
         total={useCases.total}
+        canAdminister={canAdminister}
+        {...(deletedUseCaseId === undefined ? {} : { deletedUseCaseId })}
         {...(selectedQuery === undefined ? {} : { selectedQuery })}
         {...(selectedSource === undefined ? {} : { selectedSource })}
         {...(previousHref === undefined ? {} : { previousHref })}

@@ -1,27 +1,25 @@
-import {
-  authenticatedMercureFetch,
-  getServerMercureIdentity,
-} from '@mercure/platform-frontend-identity-data-access/server';
+import { redirect } from 'next/navigation';
+
+import { authenticatedMercureFetch } from '@mercure/platform-frontend-identity-data-access/server';
 import {
   RulesFrontendApiError,
   RulesIntelligenceDataAccess,
 } from '@mercure/rules-frontend-data-access';
 import {
   RulesUnavailableState,
-  RulesUseCaseDetail,
+  RulesUseCaseAdministrationForm,
   RulesUseCaseNotFoundState,
   type RulesUseCaseAdminErrorCode,
   type RulesUseCaseAdminField,
 } from '@mercure/rules-frontend-ui';
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
-import { deleteRulesUseCaseAction } from './rules-use-case-administration-actions';
+import { updateRulesUseCaseAction } from './rules-use-case-administration-actions';
+import { requireRulesAdminIdentity } from './rules-use-case-admin-boundary';
 import {
   enumSearchParam,
   type RulesSearchParams,
 } from './rules-search-params';
-
-const canonicalUseCaseId = /^uc_[a-z0-9_]+$/;
 
 const errorCodes = [
   'validation',
@@ -42,18 +40,21 @@ const errorFields = [
   'product',
   'domain',
   'category',
-  'confirmation',
 ] as const satisfies readonly RulesUseCaseAdminField[];
 
-export interface RulesUseCaseDetailFeatureProps {
+const canonicalUseCaseId = /^uc_[a-z0-9_]+$/;
+
+export interface RulesUseCaseEditFeatureProps {
   readonly useCaseId: string;
   readonly searchParams: RulesSearchParams;
 }
 
-export async function RulesUseCaseDetailFeature({
+export async function RulesUseCaseEditFeature({
   searchParams,
   useCaseId,
-}: RulesUseCaseDetailFeatureProps) {
+}: RulesUseCaseEditFeatureProps) {
+  await requireRulesAdminIdentity();
+
   if (!canonicalUseCaseId.test(useCaseId)) {
     return <RulesUseCaseNotFoundState />;
   }
@@ -63,26 +64,24 @@ export async function RulesUseCaseDetailFeature({
   });
 
   try {
-    const [useCase, identity] = await Promise.all([
-      api.getUseCase(useCaseId),
-      getServerMercureIdentity(),
-    ]);
+    const useCase = await api.getUseCase(useCaseId);
 
     if (!useCase) {
       return <RulesUseCaseNotFoundState />;
     }
 
-    const canAdminister = identity?.role === 'admin';
+    if (useCase.source === 'system') {
+      redirect('/rules/use-cases/' + useCase.id + '?error=protected');
+    }
+
     const errorCode = enumSearchParam(searchParams, 'error', errorCodes);
     const errorField = enumSearchParam(searchParams, 'field', errorFields);
 
     return (
-      <RulesUseCaseDetail
+      <RulesUseCaseAdministrationForm
+        mode="edit"
         useCase={useCase}
-        canAdminister={canAdminister}
-        {...(canAdminister && useCase.source === 'custom'
-          ? { deleteAction: deleteRulesUseCaseAction }
-          : {})}
+        action={updateRulesUseCaseAction}
         {...(errorCode === undefined ? {} : { errorCode })}
         {...(errorField === undefined ? {} : { errorField })}
       />

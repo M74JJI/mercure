@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
 
-import { RulesUseCaseDetailFeature } from '@mercure/rules-frontend-feature';
+import { RulesUseCaseEditFeature } from '@mercure/rules-frontend-feature';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Rules use case',
-  description: 'Inspect one canonical Mercure Rules use case.',
+  title: 'Edit Rules use case',
+  description: 'Edit a custom Mercure Rules use case.',
 };
 
-interface RulesUseCaseDetailPageProps {
+interface RulesUseCaseEditPageProps {
   readonly params: Promise<{
     readonly useCaseId: string;
   }>;
@@ -18,11 +18,11 @@ interface RulesUseCaseDetailPageProps {
   >;
 }
 
-export default async function RulesUseCaseDetailPage({
+export default async function RulesUseCaseEditPage({
   params,
   searchParams,
-}: RulesUseCaseDetailPageProps) {
+}: RulesUseCaseEditPageProps) {
   const [{ useCaseId }, query] = await Promise.all([params, searchParams]);
 
-  return <RulesUseCaseDetailFeature useCaseId={useCaseId} searchParams={query} />;
+  return <RulesUseCaseEditFeature useCaseId={useCaseId} searchParams={query} />;
 }
