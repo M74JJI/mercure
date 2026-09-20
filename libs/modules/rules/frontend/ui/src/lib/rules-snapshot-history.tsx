@@ -12,6 +12,8 @@ export interface RulesSnapshotHistoryProps {
   readonly canImport: boolean;
   readonly importAction?: (formData: FormData) => Promise<void>;
   readonly importStatus?: RulesSnapshotImportStatus;
+  readonly previousHref?: string;
+  readonly nextHref?: string;
 }
 
 const dateFormatter = new Intl.DateTimeFormat('en', {
@@ -40,6 +42,8 @@ export function RulesSnapshotHistory({
   canImport,
   importAction,
   importStatus,
+  nextHref,
+  previousHref,
   snapshots,
   total,
 }: RulesSnapshotHistoryProps) {
@@ -75,11 +79,13 @@ export function RulesSnapshotHistory({
 
       {snapshots.length === 0 ? (
         <Panel tone="muted" className={styles.empty}>
-          <h2>No Rules snapshots yet</h2>
+          <h2>{total > 0 ? 'No snapshots on this page' : 'No Rules snapshots yet'}</h2>
           <p>
-            {canImport
-              ? 'Import the configured manager archive source to create the first immutable snapshot.'
-              : 'No imported configuration snapshot is currently available to inspect.'}
+            {total > 0
+              ? 'Use the previous page to return to available snapshot history.'
+              : canImport
+                ? 'Import the configured manager archive source to create the first immutable snapshot.'
+                : 'No imported configuration snapshot is currently available to inspect.'}
           </p>
         </Panel>
       ) : (
@@ -122,6 +128,21 @@ export function RulesSnapshotHistory({
           ))}
         </section>
       )}
+
+      <div className={styles.pagination}>
+        {previousHref ? (
+          <a className={styles.actionLink} href={previousHref}>
+            ← Previous
+          </a>
+        ) : (
+          <span />
+        )}
+        {nextHref ? (
+          <a className={styles.actionLink} href={nextHref}>
+            Next →
+          </a>
+        ) : null}
+      </div>
     </div>
   );
 }

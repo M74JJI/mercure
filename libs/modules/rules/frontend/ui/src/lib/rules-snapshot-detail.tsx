@@ -84,7 +84,12 @@ export function RulesSnapshotDetail({
               <p className={styles.eyebrow}>Rules</p>
               <h2>Normalized detections</h2>
             </div>
-            <span>{rulesTotal} total</span>
+            <div className={styles.sectionMetaActions}>
+              <span>{rulesTotal} total</span>
+              <a className={styles.actionLink} href={'/rules/' + snapshot.id + '/rules'}>
+                View all
+              </a>
+            </div>
           </div>
 
           {rules.length === 0 ? (
@@ -129,7 +134,12 @@ export function RulesSnapshotDetail({
               <p className={styles.eyebrow}>Validation</p>
               <h2>Issues</h2>
             </div>
-            <span>{issuesTotal} total</span>
+            <div className={styles.sectionMetaActions}>
+              <span>{issuesTotal} total</span>
+              <a className={styles.actionLink} href={'/rules/' + snapshot.id + '/issues'}>
+                View all
+              </a>
+            </div>
           </div>
 
           {issues.length === 0 ? (
@@ -162,7 +172,12 @@ export function RulesSnapshotDetail({
               <p className={styles.eyebrow}>Decoders</p>
               <h2>Normalized decoder inventory</h2>
             </div>
-            <span>{decodersTotal} total</span>
+            <div className={styles.sectionMetaActions}>
+              <span>{decodersTotal} total</span>
+              <a className={styles.actionLink} href={'/rules/' + snapshot.id + '/decoders'}>
+                View all
+              </a>
+            </div>
           </div>
 
           {decoders.length === 0 ? (
