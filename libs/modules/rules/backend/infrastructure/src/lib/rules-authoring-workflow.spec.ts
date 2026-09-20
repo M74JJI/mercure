@@ -385,6 +385,37 @@ describe('controlled Rules authoring workflow', () => {
     ).rejects.toBeInstanceOf(RulesAuthoringInvalidStateError);
   });
 
+  it('blocks approval when malformed XML still contains a parseable rule', async () => {
+    const store = new TestAuthoringStore(
+      [
+        '<group name="broken,">',
+        '  <rule id="410000" level="5">',
+        '    <description>Parseable rule in malformed XML</description>',
+        '    <group>production,</group>',
+        '  </rule>',
+      ].join('\n'),
+    );
+    const flow = workflow(store);
+    const draft = await flow.create.execute({
+      sourceSnapshotId,
+      sourceFilePosition: 0,
+      actorSubject: actor,
+    });
+
+    const validated = await flow.validate.execute(draft.id, draft.revision, actor);
+
+    expect(validated.validation?.ruleCount).toBe(1);
+    expect(validated.validation?.issues).toContainEqual(
+      expect.objectContaining({
+        severity: 'error',
+        type: 'malformed_xml_structure',
+      }),
+    );
+    await expect(
+      flow.approve.execute(validated.id, validated.revision, actor),
+    ).rejects.toBeInstanceOf(RulesAuthoringInvalidStateError);
+  });
+
   it('approves and exports only the exact error-free validated revision', async () => {
     const store = new TestAuthoringStore([
       '<group name="authoring,">',
