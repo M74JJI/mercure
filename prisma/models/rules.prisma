@@ -19,7 +19,7 @@ model RulesetSnapshot {
   criticalCount      Int @map("critical_count")
   mitreMappedCount   Int @map("mitre_mapped_count")
   missingUseCaseCount Int @map("missing_use_case_count")
-  brokenDependencyCount Int @map("broken_dependency_count")
+  unresolvedDependencyCount Int @map("unresolved_dependency_count")
 
   archives     RulesetSnapshotArchive[]
   files        RulesetSnapshotFile[]
