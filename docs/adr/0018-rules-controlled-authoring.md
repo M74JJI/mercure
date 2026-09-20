@@ -1,4 +1,4 @@
-# ADR-0016: Controlled Rules authoring and export boundary
+# ADR-0018: Controlled Rules authoring and export boundary
 
 - Status: Accepted
 - Date: 2026-09-20

@@ -46,7 +46,7 @@ Mercure uses Keycloak/OIDC with a server-side web session and backend-enforced c
 
 Rules architecture and migration decisions are documented under `docs/adr` and `docs/migrations/rules-migration-inventory.md`.
 
-Controlled authoring is defined by `docs/adr/0016-rules-controlled-authoring.md`.
+Controlled authoring is defined by `docs/adr/0018-rules-controlled-authoring.md`.
 
 ## Production readiness
 

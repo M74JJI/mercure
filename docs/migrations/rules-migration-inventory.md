@@ -58,5 +58,5 @@ Post-migration state:
 
 1. the approved non-AI Rules migration scope is implemented across backend, persistence, authenticated presentation, and frontend exploration;
 2. Keycloak/OIDC identity and capability enforcement, intelligence presentation, PostgreSQL-backed use-case administration, authenticated snapshot import, and record-level exploration are implemented;
-3. controlled Rules authoring is implemented within ADR-0016 as a PostgreSQL-backed draft → validate → approve → export workflow;
+3. controlled Rules authoring is implemented within ADR-0018 as a PostgreSQL-backed draft → validate → approve → export workflow;
 4. direct Wazuh manager mutation/deployment and AI-assisted authoring remain outside the approved boundary and require separate decisions.
