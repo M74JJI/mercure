@@ -24,6 +24,8 @@ import { requireRulesAdminIdentity } from './rules-use-case-admin-boundary';
 
 const errorCodes = ['validation', 'conflict', 'not-found', 'unavailable'] as const;
 const AUTHORING_PAGE_SIZE = 25;
+const uuid =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 type ErrorCode = (typeof errorCodes)[number];
 
 function errorCode(value: string | readonly string[] | undefined): ErrorCode | undefined {
@@ -84,7 +86,7 @@ export async function RulesAuthoringDraftDetailFeature({
   readonly searchParams: Readonly<Record<string, string | readonly string[] | undefined>>;
 }) {
   await requireRulesAdminIdentity();
-  if (!/^[0-9a-f-]{36}$/i.test(draftId)) return <RulesUnavailableState />;
+  if (!uuid.test(draftId)) return <RulesUnavailableState />;
 
   const api = new RulesAuthoringDataAccess({ fetch: authenticatedMercureFetch });
   try {
