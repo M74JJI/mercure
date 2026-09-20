@@ -76,6 +76,8 @@ Every successful content edit increments the revision, clears prior approval, an
 
 Validation reuses Mercure's existing deterministic `AnalyzeRuleset` path. The server does not trust browser-side XML checks.
 
+Before record analysis, the deterministic analyzer validates XML-fragment structure. It accepts Wazuh's legitimate multi-root decoder fragments but reports malformed/unclosed markup, invalid or duplicated attributes, unescaped entities, invalid comments/CDATA/processing instructions, and declaration markup such as `DOCTYPE` as error-severity findings. A file can therefore not become approvable merely because regex extraction still finds a rule or decoder inside malformed surrounding XML.
+
 Validation operates on the exact persisted revision and stores a bounded summary plus the validated content fingerprint. Approval is allowed only when:
 
 - the draft still matches the validated revision and fingerprint;

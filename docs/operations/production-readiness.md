@@ -219,12 +219,13 @@ For at least one rules draft and one decoder draft:
 2. save an edit and note the revision increment;
 3. attempt a stale update and confirm it is rejected;
 4. validate the exact current revision;
-5. confirm validation errors block approval;
-6. correct the content and validate again;
-7. approve the error-free revision;
-8. export it and verify the SHA-256 matches the approved draft;
-9. edit the draft again and verify export is blocked until the new revision is validated and approved;
-10. inspect the audit timeline and confirm create/edit/validate/approve actor attribution.
+5. confirm malformed XML structure (for example an unclosed/mismatched tag) is reported as an error and blocks approval;
+6. confirm other validation errors block approval;
+7. correct the content and validate again;
+8. approve the error-free revision;
+9. export it and verify the SHA-256 matches the approved draft;
+10. edit the draft again and verify export is blocked until the new revision is validated and approved;
+11. inspect the audit timeline and confirm create/edit/validate/approve actor attribution.
 
 Export is an artifact handoff only. Do not copy the artifact to a Wazuh manager as part of this runbook.
 
