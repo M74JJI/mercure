@@ -233,16 +233,24 @@ function scoreRule(rule: RuleRecord, context: TenantQualityContext): RuleQuality
       (dependency.type === 'if_sid' || dependency.type === 'if_matched_sid') &&
       !context.ruleIds.has(dependency.value)
     ) {
-      dependencyHealth -= 20;
-      warnings.push(`Missing tenant dependency SID ${dependency.value}.`);
+      warnings.push(
+        `Dependency SID ${dependency.value} is unresolved in this snapshot; it may be provided by stock or external rules.`,
+      );
+      recommendations.push(
+        `Resolve SID ${dependency.value} against the target Wazuh ruleset before treating it as broken.`,
+      );
     }
 
     if (
       (dependency.type === 'if_group' || dependency.type === 'if_matched_group') &&
       !context.groupProducers.has(dependency.value)
     ) {
-      dependencyHealth -= 15;
-      warnings.push(`No tenant producer found for dependency group ${dependency.value}.`);
+      warnings.push(
+        `Dependency group ${dependency.value} is unresolved in this snapshot; it may be produced by stock or external rules.`,
+      );
+      recommendations.push(
+        `Resolve group ${dependency.value} against the target Wazuh ruleset before treating it as broken.`,
+      );
     }
   }
   if (rule.dependencies.length === 0 && rule.role !== 'helper') dependencyHealth -= 5;
