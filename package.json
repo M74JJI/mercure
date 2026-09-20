@@ -26,7 +26,8 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:status": "prisma migrate status",
     "api:client:generate": "pnpm db:generate && node tools/openapi/generate-client.mjs",
-    "api:client:check": "pnpm db:generate && node tools/openapi/generate-client.mjs --check"
+    "api:client:check": "pnpm db:generate && node tools/openapi/generate-client.mjs --check",
+    "ops:verify-auth": "bash scripts/ops/verify-production-auth.sh"
   },
   "dependencies": {
     "@fastify/cors": "11.3.0",

@@ -159,6 +159,18 @@ Also verify a protected Rules endpoint without authentication returns 401. Authe
 
 Use real Keycloak-issued sessions/tokens in the target environment.
 
+For a read-only API capability smoke test, set the API origin and short-lived real access tokens without printing them:
+
+~~~bash
+export MERCURE_API_BASE_URL=https://api.mercure.example
+export MERCURE_USER_ACCESS_TOKEN='<normal-user-access-token>'
+export MERCURE_ADMIN_ACCESS_TOKEN='<administrator-access-token>'
+pnpm ops:verify-auth
+unset MERCURE_USER_ACCESS_TOKEN MERCURE_ADMIN_ACCESS_TOKEN
+~~~
+
+The script verifies unauthenticated denial, normal-user read access, normal-user denial of import/authoring capabilities, and administrator read access to the protected authoring surface. It does not perform an administrator import or any authoring mutation.
+
 ### Normal user
 
 Confirm a mapped normal user can:
