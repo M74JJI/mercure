@@ -384,6 +384,77 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
         ).rejects.toThrow();
 
         await expect(
+          database.rulesAuthoringDraft.create({
+            data: {
+              fileName: 'invalid-empty-actor.xml',
+              tenant: 'manager-invalid',
+              sourceType: 'rules',
+              content: '<group name="invalid,"></group>',
+              sha256: 'a'.repeat(64),
+              createdBy: ' ',
+              updatedBy: 'constraint-test',
+            },
+          }),
+        ).rejects.toThrow();
+
+        await expect(
+          database.rulesAuthoringDraft.create({
+            data: {
+              fileName: 'invalid-sha.xml',
+              tenant: 'manager-invalid',
+              sourceType: 'rules',
+              content: '<group name="invalid,"></group>',
+              sha256: 'not-a-valid-sha'.padEnd(64, 'x'),
+              createdBy: 'constraint-test',
+              updatedBy: 'constraint-test',
+            },
+          }),
+        ).rejects.toThrow();
+
+        await expect(
+          database.rulesAuthoringDraft.create({
+            data: {
+              fileName: 'invalid-empty-content.xml',
+              tenant: 'manager-invalid',
+              sourceType: 'rules',
+              content: '   ',
+              sha256: 'a'.repeat(64),
+              createdBy: 'constraint-test',
+              updatedBy: 'constraint-test',
+            },
+          }),
+        ).rejects.toThrow();
+
+        await expect(
+          database.rulesAuthoringDraft.update({
+            where: { id: standalone.id },
+            data: {
+              validatedRevision: standalone.revision,
+              validatedSha256: standalone.sha256,
+              validatedRuleCount: 0,
+              validatedDecoderCount: 0,
+              validationIssueCount: 0,
+              validationErrorCount: 0,
+              validationWarningCount: 0,
+              validationInfoCount: 0,
+              validatedAt: new Date(),
+            },
+          }),
+        ).rejects.toThrow();
+
+        await expect(
+          database.rulesAuthoringDraft.update({
+            where: { id: standalone.id },
+            data: {
+              approvedRevision: standalone.revision,
+              approvedSha256: standalone.sha256,
+              approvedBy: 'constraint-test',
+              approvedAt: new Date(),
+            },
+          }),
+        ).rejects.toThrow();
+
+        await expect(
           database.rulesAuthoringDraftEvent.create({
             data: {
               draftId: standalone.id,
