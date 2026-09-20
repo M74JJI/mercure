@@ -44,6 +44,7 @@ export {
   type RulesAuthoringCreateInput,
   type RulesAuthoringCreateNewInput,
   type RulesAuthoringDraft,
+  type RulesAuthoringDraftPage,
   type RulesAuthoringDraftSummary,
   type RulesAuthoringExport,
   type RulesAuthoringUpdateInput,

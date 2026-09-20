@@ -16,9 +16,12 @@ import {
   updateRulesAuthoringDraftAction,
   validateRulesAuthoringDraftAction,
 } from './rules-authoring-actions';
+import { boundedIntegerSearchParam } from './rules-search-params';
+import { snapshotExplorerPagination } from './rules-snapshot-explorer-pagination';
 import { requireRulesAdminIdentity } from './rules-use-case-admin-boundary';
 
 const errorCodes = ['validation', 'conflict', 'not-found', 'unavailable'] as const;
+const AUTHORING_PAGE_SIZE = 25;
 type ErrorCode = (typeof errorCodes)[number];
 
 function errorCode(value: string | readonly string[] | undefined): ErrorCode | undefined {
@@ -33,13 +36,28 @@ export async function RulesAuthoringDraftListFeature({
 }) {
   await requireRulesAdminIdentity();
   const api = new RulesAuthoringDataAccess({ fetch: authenticatedMercureFetch });
+  const offset = boundedIntegerSearchParam(searchParams, 'offset', 0, 0, 1_000_000);
+
   try {
-    const error = errorCode(searchParams.error);
+    const [page, error] = await Promise.all([
+      api.list({ offset, limit: AUTHORING_PAGE_SIZE }),
+      Promise.resolve(errorCode(searchParams.error)),
+    ]);
+    const pagination = snapshotExplorerPagination(
+      '/rules/drafts',
+      offset,
+      page.total,
+      {},
+      AUTHORING_PAGE_SIZE,
+    );
+
     return (
       <RulesAuthoringDraftList
-        drafts={await api.list()}
+        drafts={page.items}
+        total={page.total}
         createNewAction={createNewRulesAuthoringDraftAction}
         {...(error === undefined ? {} : { error })}
+        {...pagination}
       />
     );
   } catch (error) {

@@ -16,17 +16,28 @@ export function RulesAuthoringDraftList({
   createNewAction,
   drafts,
   error,
+  nextHref,
+  previousHref,
+  total,
 }: {
   readonly createNewAction: FormAction;
   readonly drafts: readonly RulesAuthoringDraftSummaryView[];
   readonly error?: 'validation' | 'conflict' | 'not-found' | 'unavailable';
+  readonly nextHref?: string;
+  readonly previousHref?: string;
+  readonly total: number;
 }) {
   return <div className={styles.page}>
     <PageHeader
       eyebrow="Rules administration"
       title="Authoring drafts"
       description="Controlled XML authoring with deterministic validation and explicit approval. Export never writes to a Wazuh manager."
-      actions={<a className={styles.actionLink} href="/rules">Rules snapshots</a>}
+      actions={
+        <div className={styles.headerActions}>
+          <a className={styles.actionLink} href="/rules">Rules snapshots</a>
+          <StatusBadge tone="accent">{String(total) + ' drafts'}</StatusBadge>
+        </div>
+      }
     />
 
     {error ? (
@@ -108,6 +119,17 @@ export function RulesAuthoringDraftList({
         ))}
       </div>
     )}
+
+    <div className={styles.pagination}>
+      {previousHref ? (
+        <a className={styles.actionLink} href={previousHref}>← Previous</a>
+      ) : (
+        <span />
+      )}
+      {nextHref ? (
+        <a className={styles.actionLink} href={nextHref}>Next →</a>
+      ) : null}
+    </div>
   </div>;
 }
 
