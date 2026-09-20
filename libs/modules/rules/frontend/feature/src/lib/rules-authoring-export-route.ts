@@ -45,7 +45,8 @@ export async function exportRulesAuthoringDraftResponse(draftId: string): Promis
       status: 200,
       headers: {
         'cache-control': 'no-store',
-        'content-disposition': 'attachment; filename="' + safeFileName(artifact.fileName) + '"',
+        'content-disposition':
+          'attachment; filename="' + safeFileName(artifact.fileName) + '"',
         'content-type': 'application/xml; charset=utf-8',
         'x-content-type-options': 'nosniff',
         'x-mercure-draft-revision': String(artifact.revision),
