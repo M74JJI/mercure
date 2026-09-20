@@ -689,7 +689,8 @@ export class WazuhXmlRulesetAnalyzer implements RulesetAnalyzer {
         critical: rules.filter((rule) => rule.severity === 'critical').length,
         mitreMapped: rules.filter((rule) => rule.mitre.length > 0).length,
         missingUseCase: rules.filter((rule) => rule.useCaseId === 'unassigned').length,
-        unresolvedDependencies: issues.filter((issue) => unresolvedDependencyTypes.has(issue.type)).length,
+        unresolvedDependencies: issues.filter((issue) => unresolvedDependencyTypes.has(issue.type))
+          .length,
       },
     };
   }

@@ -190,7 +190,9 @@ describe('Rules intelligence', () => {
     expect(managerA).toBeDefined();
     expect(managerB).toBeDefined();
     expect(managerA?.key).not.toBe(managerB?.key);
-    expect(managerA?.warnings).toContain('Dependency SID 999 is unresolved in this snapshot; it may be provided by stock or external rules.');
+    expect(managerA?.warnings).toContain(
+      'Dependency SID 999 is unresolved in this snapshot; it may be provided by stock or external rules.',
+    );
     expect(managerA?.warnings).toContain(
       'Dependency group missing_group is unresolved in this snapshot; it may be produced by stock or external rules.',
     );
