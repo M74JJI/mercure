@@ -1,8 +1,5 @@
 import { authenticatedMercureFetch } from '@mercure/platform-frontend-identity-data-access/server';
-import {
-  RulesDataAccess,
-  RulesFrontendApiError,
-} from '@mercure/rules-frontend-data-access';
+import { RulesDataAccess, RulesFrontendApiError } from '@mercure/rules-frontend-data-access';
 import {
   RulesSnapshotIssuesExplorer,
   RulesSnapshotNotFoundState,

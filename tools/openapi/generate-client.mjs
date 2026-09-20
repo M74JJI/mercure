@@ -97,7 +97,7 @@ async function main() {
       API_HOST: '127.0.0.1',
       API_PORT: String(port),
       API_CORS_ORIGINS: 'http://localhost:3000',
-      API_BODY_LIMIT_BYTES: '1048576',
+      API_BODY_LIMIT_BYTES: '4194304',
       LOG_LEVEL: 'error',
       OPENAPI_ENABLED: 'true',
       DATABASE_URL: 'postgresql://mercure:unused@127.0.0.1:1/mercure',

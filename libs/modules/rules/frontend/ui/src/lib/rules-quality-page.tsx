@@ -82,7 +82,11 @@ export function RulesQualityPage({
       </section>
 
       <Panel tone="raised" className={styles.compareControls}>
-        <form action={'/rules/' + snapshotId + '/quality'} method="get" className={styles.filterForm}>
+        <form
+          action={'/rules/' + snapshotId + '/quality'}
+          method="get"
+          className={styles.filterForm}
+        >
           <label>
             <span>Mode</span>
             <select name="kind" defaultValue={selectedKind}>
@@ -92,7 +96,11 @@ export function RulesQualityPage({
           </label>
           <label>
             <span>Search</span>
-            <input name="q" defaultValue={selectedQuery} placeholder="Rule, description, signal..." />
+            <input
+              name="q"
+              defaultValue={selectedQuery}
+              placeholder="Rule, description, signal..."
+            />
           </label>
           <label>
             <span>Tenant</span>

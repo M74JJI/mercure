@@ -3,11 +3,7 @@
   "name": "rules-frontend-feature",
   "projectType": "library",
   "sourceRoot": "libs/modules/rules/frontend/feature/src",
-  "tags": [
-    "scope:rules",
-    "side:frontend",
-    "type:feature"
-  ],
+  "tags": ["scope:rules", "side:frontend", "type:feature"],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",

@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  NotFoundException,
-  SetMetadata,
-} from '@nestjs/common';
+import { Controller, Get, Inject, NotFoundException, SetMetadata } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiExtraModels,
@@ -89,10 +84,11 @@ const rulesReadRequirement = ['rules:read'] satisfies readonly MercureCapability
 @Controller('rules/intelligence')
 export class RulesIntelligenceController {
   constructor(
-    private readonly fields: AnalyzeRulesetSnapshotFields,
-    private readonly quality: ScoreRulesetSnapshotQuality,
-    private readonly graph: BuildRulesetSnapshotGraph,
-    private readonly comparison: CompareRulesetSnapshots,
+    @Inject(AnalyzeRulesetSnapshotFields) private readonly fields: AnalyzeRulesetSnapshotFields,
+    @Inject(ScoreRulesetSnapshotQuality) private readonly quality: ScoreRulesetSnapshotQuality,
+    @Inject(BuildRulesetSnapshotGraph) private readonly graph: BuildRulesetSnapshotGraph,
+    @Inject(CompareRulesetSnapshots) private readonly comparison: CompareRulesetSnapshots,
+    @Inject(AnalyzeRulesetSnapshotRoundtrip)
     private readonly roundtrip: AnalyzeRulesetSnapshotRoundtrip,
   ) {}
 
@@ -195,8 +191,8 @@ export class RulesIntelligenceController {
 @Controller('rules/use-cases')
 export class RulesUseCasesController {
   constructor(
-    private readonly listUseCases: ListRulesUseCases,
-    private readonly getUseCase: GetRulesUseCase,
+    @Inject(ListRulesUseCases) private readonly listUseCases: ListRulesUseCases,
+    @Inject(GetRulesUseCase) private readonly getUseCase: GetRulesUseCase,
   ) {}
 
   @Get()

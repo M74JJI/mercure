@@ -58,9 +58,10 @@ model RulesetSnapshotFile {
   content    String @db.Text
   sha256     String @db.Char(64)
 
-  snapshot RulesetSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
-  rules    RulesetSnapshotRule[]
-  decoders RulesetSnapshotDecoder[]
+  snapshot        RulesetSnapshot      @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  rules           RulesetSnapshotRule[]
+  decoders        RulesetSnapshotDecoder[]
+  authoringDrafts RulesAuthoringDraft[] @relation("RulesAuthoringSourceFile")
 
   @@id([snapshotId, position])
   @@unique([snapshotId, name])
@@ -312,4 +313,81 @@ model RulesetSnapshotSourceError {
 
   @@id([snapshotId, position])
   @@map("ruleset_snapshot_source_errors")
+}
+
+
+model RulesAuthoringDraft {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceSnapshotId   String?  @map("source_snapshot_id") @db.Uuid
+  sourceFilePosition Int?     @map("source_file_position")
+  fileName           String   @map("file_name") @db.Text
+  tenant             String   @db.VarChar(255)
+  sourceType         String   @map("source_type") @db.VarChar(32)
+  content            String   @db.Text
+  sha256             String   @db.Char(64)
+  revision           Int      @default(1)
+  state              String   @default("draft") @db.VarChar(32)
+  createdBy          String   @map("created_by") @db.Text
+  updatedBy          String   @map("updated_by") @db.Text
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  validatedRevision  Int?      @map("validated_revision")
+  validatedSha256    String?   @map("validated_sha256") @db.Char(64)
+  validatedRuleCount Int?      @map("validated_rule_count")
+  validatedDecoderCount Int?   @map("validated_decoder_count")
+  validationIssueCount Int?    @map("validation_issue_count")
+  validationErrorCount Int?    @map("validation_error_count")
+  validationWarningCount Int?  @map("validation_warning_count")
+  validationInfoCount Int?     @map("validation_info_count")
+  validatedAt        DateTime? @map("validated_at") @db.Timestamptz(6)
+
+  approvedRevision Int?      @map("approved_revision")
+  approvedSha256   String?   @map("approved_sha256") @db.Char(64)
+  approvedBy       String?   @map("approved_by") @db.Text
+  approvedAt       DateTime? @map("approved_at") @db.Timestamptz(6)
+
+  sourceFile       RulesetSnapshotFile? @relation("RulesAuthoringSourceFile", fields: [sourceSnapshotId, sourceFilePosition], references: [snapshotId, position], onDelete: Restrict)
+  events           RulesAuthoringDraftEvent[]
+  validationIssues RulesAuthoringDraftValidationIssue[]
+
+  @@index([updatedAt])
+  @@index([state, updatedAt])
+  @@index([sourceSnapshotId, sourceFilePosition])
+  @@map("rules_authoring_drafts")
+}
+
+model RulesAuthoringDraftEvent {
+  id           BigInt   @id @default(autoincrement())
+  draftId      String   @map("draft_id") @db.Uuid
+  eventType    String   @map("event_type") @db.VarChar(32)
+  state        String   @db.VarChar(32)
+  revision     Int
+  actorSubject String   @map("actor_subject") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  draft RulesAuthoringDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  @@index([draftId, createdAt])
+  @@map("rules_authoring_draft_events")
+}
+
+model RulesAuthoringDraftValidationIssue {
+  draftId      String  @map("draft_id") @db.Uuid
+  revision     Int
+  position     Int
+  severity     String  @db.VarChar(32)
+  type         String  @db.VarChar(128)
+  title        String  @db.Text
+  detail       String  @db.Text
+  ruleId       String? @map("rule_id") @db.VarChar(64)
+  decoderName  String? @map("decoder_name") @db.Text
+  fileName     String? @map("file_name") @db.Text
+  tenant       String? @db.VarChar(255)
+
+  draft RulesAuthoringDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  @@id([draftId, revision, position])
+  @@index([draftId, revision, severity])
+  @@map("rules_authoring_draft_validation_issues")
 }

@@ -3,10 +3,7 @@ import {
   RulesFrontendApiError,
   RulesIntelligenceDataAccess,
 } from '@mercure/rules-frontend-data-access';
-import {
-  RulesFieldIntelligencePage,
-  RulesUnavailableState,
-} from '@mercure/rules-frontend-ui';
+import { RulesFieldIntelligencePage, RulesUnavailableState } from '@mercure/rules-frontend-ui';
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 import {
@@ -45,11 +42,7 @@ export async function RulesFieldIntelligenceFeature({
   const selectedTenant = trimmedSearchParam(searchParams, 'tenant', 255);
   const selectedFamily = trimmedSearchParam(searchParams, 'family', 128);
   const selectedHealth = enumSearchParam(searchParams, 'health', healthValues);
-  const selectedCriticality = enumSearchParam(
-    searchParams,
-    'criticality',
-    criticalityValues,
-  );
+  const selectedCriticality = enumSearchParam(searchParams, 'criticality', criticalityValues);
 
   const query = {
     offset,
@@ -58,9 +51,7 @@ export async function RulesFieldIntelligenceFeature({
     ...(selectedTenant === undefined ? {} : { tenant: selectedTenant }),
     ...(selectedFamily === undefined ? {} : { family: selectedFamily }),
     ...(selectedHealth === undefined ? {} : { health: selectedHealth }),
-    ...(selectedCriticality === undefined
-      ? {}
-      : { criticality: selectedCriticality }),
+    ...(selectedCriticality === undefined ? {} : { criticality: selectedCriticality }),
   };
 
   try {
@@ -71,9 +62,7 @@ export async function RulesFieldIntelligenceFeature({
       ...(selectedTenant === undefined ? {} : { tenant: selectedTenant }),
       ...(selectedFamily === undefined ? {} : { family: selectedFamily }),
       ...(selectedHealth === undefined ? {} : { health: selectedHealth }),
-      ...(selectedCriticality === undefined
-        ? {}
-        : { criticality: selectedCriticality }),
+      ...(selectedCriticality === undefined ? {} : { criticality: selectedCriticality }),
     };
 
     const previousHref =

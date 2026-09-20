@@ -1,8 +1,5 @@
 import { authenticatedMercureFetch } from '@mercure/platform-frontend-identity-data-access/server';
-import {
-  RulesDataAccess,
-  RulesFrontendApiError,
-} from '@mercure/rules-frontend-data-access';
+import { RulesDataAccess, RulesFrontendApiError } from '@mercure/rules-frontend-data-access';
 import {
   RulesSnapshotNotFoundState,
   RulesSnapshotRulesExplorer,
@@ -40,11 +37,7 @@ export async function RulesSnapshotRulesExplorerFeature({
   const selectedStatus = trimmedSearchParam(searchParams, 'status', 64);
   const selectedUseCaseId = trimmedSearchParam(searchParams, 'useCaseId', 255);
   const selectedRuleId = trimmedSearchParam(searchParams, 'ruleId', 255);
-  const selectedJiraVisible = enumSearchParam(
-    searchParams,
-    'jiraVisible',
-    jiraVisibility,
-  );
+  const selectedJiraVisible = enumSearchParam(searchParams, 'jiraVisible', jiraVisibility);
 
   try {
     const snapshot = await api.getSnapshot(snapshotId);
@@ -60,9 +53,7 @@ export async function RulesSnapshotRulesExplorerFeature({
       ...(selectedStatus === undefined ? {} : { status: selectedStatus }),
       ...(selectedUseCaseId === undefined ? {} : { useCaseId: selectedUseCaseId }),
       ...(selectedRuleId === undefined ? {} : { ruleId: selectedRuleId }),
-      ...(selectedJiraVisible === undefined
-        ? {}
-        : { jiraVisible: selectedJiraVisible }),
+      ...(selectedJiraVisible === undefined ? {} : { jiraVisible: selectedJiraVisible }),
     });
 
     const pagination = snapshotExplorerPagination(
@@ -75,9 +66,7 @@ export async function RulesSnapshotRulesExplorerFeature({
         ...(selectedStatus === undefined ? {} : { status: selectedStatus }),
         ...(selectedUseCaseId === undefined ? {} : { useCaseId: selectedUseCaseId }),
         ...(selectedRuleId === undefined ? {} : { ruleId: selectedRuleId }),
-        ...(selectedJiraVisible === undefined
-          ? {}
-          : { jiraVisible: selectedJiraVisible }),
+        ...(selectedJiraVisible === undefined ? {} : { jiraVisible: selectedJiraVisible }),
       },
     );
 

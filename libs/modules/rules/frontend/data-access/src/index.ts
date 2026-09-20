@@ -38,3 +38,14 @@ export {
   type RulesUseCaseCreateInput,
   type RulesUseCaseUpdateInput,
 } from './lib/rules-use-case-administration-api';
+
+export {
+  RulesAuthoringDataAccess,
+  type RulesAuthoringCreateInput,
+  type RulesAuthoringCreateNewInput,
+  type RulesAuthoringDraft,
+  type RulesAuthoringDraftPage,
+  type RulesAuthoringDraftSummary,
+  type RulesAuthoringExport,
+  type RulesAuthoringUpdateInput,
+} from './lib/rules-authoring-api';

@@ -5,6 +5,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Inject,
   Logger,
   NotFoundException,
   Post,
@@ -87,25 +88,18 @@ function translateMutationError(error: unknown): never {
   throw error;
 }
 
-@SetMetadata(
-  REQUIRED_CAPABILITIES_METADATA,
-  ['rules:admin'] satisfies readonly MercureCapability[],
-)
+@SetMetadata(REQUIRED_CAPABILITIES_METADATA, ['rules:admin'] satisfies readonly MercureCapability[])
 @ApiBearerAuth('keycloak')
 @ApiTags('rules-use-case-administration')
-@ApiExtraModels(
-  RulesUseCaseAdministrationParamsDto,
-  RulesUseCaseCreateDto,
-  RulesUseCaseUpdateDto,
-)
+@ApiExtraModels(RulesUseCaseAdministrationParamsDto, RulesUseCaseCreateDto, RulesUseCaseUpdateDto)
 @Controller('rules/use-cases')
 export class RulesUseCaseAdministrationController {
   private readonly logger = new Logger(RulesUseCaseAdministrationController.name);
 
   constructor(
-    private readonly createUseCase: CreateCustomRulesUseCase,
-    private readonly updateUseCase: UpdateCustomRulesUseCase,
-    private readonly deleteUseCase: DeleteCustomRulesUseCase,
+    @Inject(CreateCustomRulesUseCase) private readonly createUseCase: CreateCustomRulesUseCase,
+    @Inject(UpdateCustomRulesUseCase) private readonly updateUseCase: UpdateCustomRulesUseCase,
+    @Inject(DeleteCustomRulesUseCase) private readonly deleteUseCase: DeleteCustomRulesUseCase,
   ) {}
 
   private async executeMutation<T>(

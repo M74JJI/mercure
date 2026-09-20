@@ -52,6 +52,7 @@ export interface RulesetSnapshotRuleView {
   readonly jiraVisible: boolean;
   readonly tenant: string;
   readonly sourceFile: string;
+  readonly sourceFilePosition: number;
   readonly sourceSection?: string;
   readonly useCaseId: string;
   readonly useCaseConfidence: UseCaseConfidence;
@@ -73,6 +74,7 @@ export interface RulesetSnapshotDecoderView {
   readonly orderFields: readonly string[];
   readonly tenant: string;
   readonly sourceFile: string;
+  readonly sourceFilePosition: number;
 }
 
 export interface RulesetSnapshotIssueView {

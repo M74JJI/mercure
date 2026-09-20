@@ -1,5 +1,16 @@
 const BLOCKED_PATH_PREFIXES = ['/api/auth', '/auth', '/_next'];
 
+function hasControlCharacters(value: string): boolean {
+  for (const character of value) {
+    const codePoint = character.codePointAt(0);
+    if (codePoint !== undefined && (codePoint <= 0x1f || codePoint === 0x7f)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function isBlockedPath(pathname: string): boolean {
   let decoded: string;
 
@@ -9,11 +20,7 @@ function isBlockedPath(pathname: string): boolean {
     return true;
   }
 
-  if (
-    decoded.includes('\\') ||
-    decoded.startsWith('//') ||
-    /[\u0000-\u001f\u007f]/.test(decoded)
-  ) {
+  if (decoded.includes('\\') || decoded.startsWith('//') || hasControlCharacters(decoded)) {
     return true;
   }
 
@@ -30,7 +37,7 @@ export function sanitizeCallbackPath(
   const base = new URL(trustedOrigin);
   const value = candidate?.trim();
 
-  if (!value || value.includes('\\') || /[\u0000-\u001f\u007f]/.test(value)) {
+  if (!value || value.includes('\\') || hasControlCharacters(value)) {
     return fallback;
   }
 

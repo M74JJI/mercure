@@ -22,9 +22,7 @@ function first(value: string | readonly string[] | undefined): string | undefine
   return typeof value === 'string' ? value : value?.[0];
 }
 
-export default async function RulesComparisonPage({
-  searchParams,
-}: RulesComparisonPageProps) {
+export default async function RulesComparisonPage({ searchParams }: RulesComparisonPageProps) {
   const query = await searchParams;
 
   const beforeSnapshotId = first(query.before);

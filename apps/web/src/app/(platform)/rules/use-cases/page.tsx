@@ -10,14 +10,10 @@ export const metadata: Metadata = {
 };
 
 interface RulesUseCasesPageProps {
-  readonly searchParams: Promise<
-    Readonly<Record<string, string | readonly string[] | undefined>>
-  >;
+  readonly searchParams: Promise<Readonly<Record<string, string | readonly string[] | undefined>>>;
 }
 
-export default async function RulesUseCasesPage({
-  searchParams,
-}: RulesUseCasesPageProps) {
+export default async function RulesUseCasesPage({ searchParams }: RulesUseCasesPageProps) {
   const query = await searchParams;
 
   return <RulesUseCaseCatalogFeature searchParams={query} />;

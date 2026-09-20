@@ -67,6 +67,15 @@ function statusCode(status: number): string {
   }
 }
 
+export function safeErrorTrace(error: Error): string | undefined {
+  const frames = error.stack
+    ?.split('\n')
+    .filter((line) => /^\s*at\s/.test(line))
+    .join('\n');
+
+  return frames?.trim() ? frames : undefined;
+}
+
 function detailFromResponse(response: unknown, fallback: string): string {
   if (typeof response === 'string') {
     return response;
@@ -93,7 +102,7 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const context = host.switchToHttp();
     const request = context.getRequest<FastifyRequest>();
     const reply = context.getResponse<FastifyReply>();
-    const requestId = String(request.id ?? request.headers['x-request-id'] ?? 'unknown');
+    const requestId = String(request.id ?? 'unknown');
     const instance = request.url.split('?')[0] || request.url;
 
     if (exception instanceof ZodValidationException) {
@@ -125,14 +134,16 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const code = statusCode(status);
     const fallbackDetail = status >= 500 ? 'An unexpected error occurred.' : statusTitle(status);
     const detail =
-      exception instanceof HttpException
-        ? detailFromResponse(exception.getResponse(), fallbackDetail)
-        : fallbackDetail;
+      status >= 500
+        ? fallbackDetail
+        : exception instanceof HttpException
+          ? detailFromResponse(exception.getResponse(), fallbackDetail)
+          : fallbackDetail;
 
     if (status >= 500) {
       this.logger.error(
         'Unhandled request exception',
-        exception instanceof Error ? exception.stack : undefined,
+        exception instanceof Error ? safeErrorTrace(exception) : undefined,
       );
     }
 

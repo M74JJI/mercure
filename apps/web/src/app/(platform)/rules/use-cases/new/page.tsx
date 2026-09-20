@@ -10,9 +10,7 @@ export const metadata: Metadata = {
 };
 
 interface RulesUseCaseCreatePageProps {
-  readonly searchParams: Promise<
-    Readonly<Record<string, string | readonly string[] | undefined>>
-  >;
+  readonly searchParams: Promise<Readonly<Record<string, string | readonly string[] | undefined>>>;
 }
 
 export default async function RulesUseCaseCreatePage({

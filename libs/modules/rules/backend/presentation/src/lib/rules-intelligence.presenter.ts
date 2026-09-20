@@ -147,9 +147,7 @@ export function presentGraph(result: BuildRulesetSnapshotGraphResult, nodeLimit:
   const allowedNodeIds = new Set(nodes.map((node) => node.id));
   const edgeLimit = Math.min(nodeLimit * 4, 2_000);
   const edges = result.graph.edges
-    .filter(
-      (edge) => allowedNodeIds.has(edge.source) && allowedNodeIds.has(edge.target),
-    )
+    .filter((edge) => allowedNodeIds.has(edge.source) && allowedNodeIds.has(edge.target))
     .slice(0, edgeLimit);
 
   return {
@@ -433,10 +431,7 @@ export function presentRoundtrip(
 
 type RulesUseCase = Awaited<ReturnType<ListRulesUseCases['execute']>>[number];
 
-export function presentUseCases(
-  items: readonly RulesUseCase[],
-  query: RulesUseCaseListQueryDto,
-) {
+export function presentUseCases(items: readonly RulesUseCase[], query: RulesUseCaseListQueryDto) {
   const filtered = items
     .filter((item) => !query.source || item.source === query.source)
     .filter((item) =>

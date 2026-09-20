@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  AuthenticatedMercureRequestError,
-  withMercureAccessToken,
-} from './server-request';
+import { AuthenticatedMercureRequestError, withMercureAccessToken } from './server-request';
 
 describe('server-to-server Mercure authentication', () => {
   it('injects the Keycloak bearer token while stripping browser cookies', () => {

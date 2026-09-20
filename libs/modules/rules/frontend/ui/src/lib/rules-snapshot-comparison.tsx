@@ -1,9 +1,6 @@
 import { PageHeader, Panel, StatusBadge } from '@mercure/platform-frontend-design-system';
 
-import type {
-  RulesComparisonSnapshotOptionView,
-  RulesSnapshotComparisonView,
-} from './models';
+import type { RulesComparisonSnapshotOptionView, RulesSnapshotComparisonView } from './models';
 import styles from './rules.module.css';
 
 export interface RulesSnapshotComparisonProps {
@@ -107,7 +104,10 @@ export function RulesSnapshotComparison({
 
           {comparison ? (
             <>
-              <section className={styles.comparisonMetrics} aria-label="Snapshot comparison summary">
+              <section
+                className={styles.comparisonMetrics}
+                aria-label="Snapshot comparison summary"
+              >
                 <Panel tone="muted" className={styles.metric}>
                   <strong>{comparison.summary.rulesAdded}</strong>
                   <span>Rules added</span>

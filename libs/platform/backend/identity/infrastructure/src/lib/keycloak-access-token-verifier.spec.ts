@@ -1,8 +1,11 @@
 import { createServer, type Server } from 'node:http';
 
+import type {
+  SignJWT as JoseSignJWT,
+  exportJWK as joseExportJWK,
+  generateKeyPair as joseGenerateKeyPair,
+} from 'jose';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-
-type JoseModule = typeof import('jose');
 
 import { KeycloakAccessTokenVerifier } from './keycloak-access-token-verifier';
 
@@ -11,9 +14,9 @@ const audience = 'mercure-api';
 const clientId = 'mercure-api';
 
 let server: Server;
-let SignJWT: JoseModule['SignJWT'];
-let exportJWK: JoseModule['exportJWK'];
-let generateKeyPair: JoseModule['generateKeyPair'];
+let SignJWT: typeof JoseSignJWT;
+let exportJWK: typeof joseExportJWK;
+let generateKeyPair: typeof joseGenerateKeyPair;
 let jwksUrl = '';
 let signingKey: CryptoKey;
 let alternateSigningKey: CryptoKey;

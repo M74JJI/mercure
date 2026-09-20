@@ -31,7 +31,7 @@ export async function configureApiHttp(
     origin: config.corsOrigins,
     credentials: false,
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['content-type', 'x-request-id'],
+    allowedHeaders: ['content-type'],
     exposedHeaders: ['x-request-id'],
     strictPreflight: true,
   });

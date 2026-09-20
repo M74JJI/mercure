@@ -23,10 +23,7 @@ export interface RulesQualityFeatureProps {
   readonly searchParams: RulesSearchParams;
 }
 
-export async function RulesQualityFeature({
-  searchParams,
-  snapshotId,
-}: RulesQualityFeatureProps) {
+export async function RulesQualityFeature({ searchParams, snapshotId }: RulesQualityFeatureProps) {
   const api = new RulesIntelligenceDataAccess({
     fetch: authenticatedMercureFetch,
   });

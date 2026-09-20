@@ -1,7 +1,4 @@
-import {
-  ForbiddenException,
-  type ExecutionContext,
-} from '@nestjs/common';
+import { ForbiddenException, type ExecutionContext } from '@nestjs/common';
 import type { Reflector } from '@nestjs/core';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -22,10 +19,7 @@ function executionContext(request: MercureAuthenticatedRequest): ExecutionContex
 
 function reflector(required: readonly string[], isPublic = false): Reflector {
   return {
-    getAllAndOverride: vi
-      .fn()
-      .mockReturnValueOnce(isPublic)
-      .mockReturnValueOnce(required),
+    getAllAndOverride: vi.fn().mockReturnValueOnce(isPublic).mockReturnValueOnce(required),
   } as unknown as Reflector;
 }
 
@@ -36,6 +30,16 @@ const userRequest: MercureAuthenticatedRequest = {
     roles: ['user'],
     capabilities: ['platform:read', 'rules:read'],
     authorities: ['user'],
+  },
+};
+
+const adminRequest: MercureAuthenticatedRequest = {
+  headers: {},
+  mercurePrincipal: {
+    subject: 'admin-subject-1',
+    roles: ['admin', 'user'],
+    capabilities: ['platform:read', 'rules:read', 'rules:import', 'rules:admin'],
+    authorities: ['admin'],
   },
 };
 
@@ -50,6 +54,18 @@ describe('AuthorizationGuard', () => {
     const guard = new AuthorizationGuard(reflector(['rules:import']));
 
     expect(() => guard.canActivate(executionContext(userRequest))).toThrow(ForbiddenException);
+  });
+
+  it('returns 403 when a normal Rules reader attempts rules:admin', () => {
+    const guard = new AuthorizationGuard(reflector(['rules:admin']));
+
+    expect(() => guard.canActivate(executionContext(userRequest))).toThrow(ForbiddenException);
+  });
+
+  it('allows an admin principal with rules:admin', () => {
+    const guard = new AuthorizationGuard(reflector(['rules:admin']));
+
+    expect(guard.canActivate(executionContext(adminRequest))).toBe(true);
   });
 
   it('allows explicitly public routes without capability evaluation', () => {

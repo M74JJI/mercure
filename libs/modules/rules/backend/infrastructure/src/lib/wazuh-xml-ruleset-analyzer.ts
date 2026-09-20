@@ -58,6 +58,179 @@ function splitCsv(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
+const XML_NAME = /^[A-Za-z_][A-Za-z0-9_.:-]*/;
+const XML_ENTITY = /&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9A-Fa-f]+;)/;
+
+function textStructureError(value: string): string | undefined {
+  if (value.includes(']]>')) return 'XML text contains an invalid CDATA terminator.';
+  if (XML_ENTITY.test(value)) return 'XML text contains an unescaped ampersand.';
+  return undefined;
+}
+
+function fragmentTextStructureError(value: string, depth: number): string | undefined {
+  const textError = textStructureError(value);
+  if (textError) return textError;
+  if (depth === 0 && /\S/.test(value)) {
+    return 'XML fragment contains text outside top-level elements.';
+  }
+  return undefined;
+}
+
+function openingTagStructureError(body: string, elementName: string): string | undefined {
+  let cursor = elementName.length;
+  const attributes = new Set<string>();
+
+  while (cursor < body.length) {
+    while (/\s/.test(body[cursor] ?? '')) cursor += 1;
+    if (cursor >= body.length) break;
+
+    const attributeMatch = XML_NAME.exec(body.slice(cursor));
+    const attributeName = attributeMatch?.[0];
+    if (!attributeName) return 'XML attribute name is invalid.';
+    if (attributes.has(attributeName)) {
+      return `XML attribute ${attributeName} is duplicated on <${elementName}>.`;
+    }
+    attributes.add(attributeName);
+    cursor += attributeName.length;
+
+    while (/\s/.test(body[cursor] ?? '')) cursor += 1;
+    if (body[cursor] !== '=') return `XML attribute ${attributeName} is missing '='.`;
+    cursor += 1;
+
+    while (/\s/.test(body[cursor] ?? '')) cursor += 1;
+    const quote = body[cursor];
+    if (quote !== '"' && quote !== "'") {
+      return `XML attribute ${attributeName} must use quotes.`;
+    }
+    cursor += 1;
+
+    const valueStart = cursor;
+    while (cursor < body.length && body[cursor] !== quote) cursor += 1;
+    if (cursor >= body.length) return `XML attribute ${attributeName} is not terminated.`;
+
+    const attributeValue = body.slice(valueStart, cursor);
+    if (attributeValue.includes('<')) {
+      return `XML attribute ${attributeName} contains an invalid '<' character.`;
+    }
+
+    const valueError = textStructureError(attributeValue);
+    if (valueError) return valueError;
+    cursor += 1;
+  }
+
+  return undefined;
+}
+
+function findMarkupEnd(content: string, start: number): number {
+  let quote: '"' | "'" | undefined;
+
+  for (let index = start; index < content.length; index += 1) {
+    const character = content[index];
+
+    if (quote) {
+      if (character === quote) quote = undefined;
+      continue;
+    }
+
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+
+    if (character === '<') return -1;
+    if (character === '>') return index;
+  }
+
+  return -1;
+}
+
+function xmlFragmentStructureError(content: string): string | undefined {
+  const stack: string[] = [];
+  let cursor = 0;
+
+  while (cursor < content.length) {
+    const start = content.indexOf('<', cursor);
+    if (start === -1) {
+      const tailError = fragmentTextStructureError(content.slice(cursor), stack.length);
+      if (tailError) return tailError;
+      break;
+    }
+
+    const textError = fragmentTextStructureError(content.slice(cursor, start), stack.length);
+    if (textError) return textError;
+
+    if (content.startsWith('<!--', start)) {
+      const end = content.indexOf('-->', start + 4);
+      if (end === -1) return 'XML comment is not terminated.';
+      if (content.slice(start + 4, end).includes('--')) {
+        return 'XML comment contains an invalid double-hyphen sequence.';
+      }
+      cursor = end + 3;
+      continue;
+    }
+
+    if (content.startsWith('<![CDATA[', start)) {
+      if (stack.length === 0) {
+        return 'XML CDATA section is not allowed outside a top-level element.';
+      }
+      const end = content.indexOf(']]>', start + 9);
+      if (end === -1) return 'XML CDATA section is not terminated.';
+      cursor = end + 3;
+      continue;
+    }
+
+    if (content.startsWith('<?', start)) {
+      const end = content.indexOf('?>', start + 2);
+      if (end === -1) return 'XML processing instruction is not terminated.';
+      cursor = end + 2;
+      continue;
+    }
+
+    if (content.startsWith('<!', start)) {
+      return 'XML declaration markup such as DOCTYPE is not allowed.';
+    }
+
+    const end = findMarkupEnd(content, start + 1);
+    if (end === -1) return 'XML tag is not terminated correctly.';
+
+    const markup = content.slice(start + 1, end).trim();
+    if (!markup) return 'XML tag name is missing.';
+
+    if (markup.startsWith('/')) {
+      const closingName = markup.slice(1).trim();
+      if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(closingName)) {
+        return 'XML closing tag is invalid.';
+      }
+
+      const openingName = stack.pop();
+      if (openingName !== closingName) {
+        return openingName
+          ? `XML closing tag </${closingName}> does not match <${openingName}>.`
+          : `XML closing tag </${closingName}> has no matching opening tag.`;
+      }
+
+      cursor = end + 1;
+      continue;
+    }
+
+    const selfClosing = /\/\s*$/.test(markup);
+    const body = selfClosing ? markup.replace(/\/\s*$/, '').trim() : markup;
+    const openingName = XML_NAME.exec(body)?.[0];
+
+    if (!openingName) return 'XML opening tag is invalid.';
+    const remainder = body.slice(openingName.length);
+    if (remainder && !/^\s/.test(remainder)) return 'XML opening tag is invalid.';
+
+    const attributeError = openingTagStructureError(body, openingName);
+    if (attributeError) return attributeError;
+    if (!selfClosing) stack.push(openingName);
+    cursor = end + 1;
+  }
+
+  const unclosed = stack.at(-1);
+  return unclosed ? `XML tag <${unclosed}> is not closed.` : undefined;
+}
+
 function inferFileType(name: string, content: string): RulesetSourceType {
   const sample = `${name}\n${content.slice(0, 2_000)}`.toLowerCase();
   if (sample.includes('<decoder') || sample.includes('decoders')) return 'decoders';
@@ -250,6 +423,21 @@ function validateRuleset(
   useCases: readonly RulesUseCase[],
 ): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
+
+  for (const file of files) {
+    const structureError = xmlFragmentStructureError(file.content);
+    if (!structureError) continue;
+
+    issues.push({
+      severity: 'error',
+      type: 'malformed_xml_structure',
+      title: `Malformed XML structure in ${file.name}`,
+      detail: structureError,
+      fileName: file.name,
+      tenant: file.tenant,
+    });
+  }
+
   const knownUseCases = new Set(useCases.map((useCase) => useCase.id));
   const ruleGroups = new Map<string, RuleRecord[]>();
 

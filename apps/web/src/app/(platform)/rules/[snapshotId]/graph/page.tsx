@@ -13,15 +13,10 @@ interface RulesGraphPageProps {
   readonly params: Promise<{
     readonly snapshotId: string;
   }>;
-  readonly searchParams: Promise<
-    Readonly<Record<string, string | readonly string[] | undefined>>
-  >;
+  readonly searchParams: Promise<Readonly<Record<string, string | readonly string[] | undefined>>>;
 }
 
-export default async function RulesGraphRoute({
-  params,
-  searchParams,
-}: RulesGraphPageProps) {
+export default async function RulesGraphRoute({ params, searchParams }: RulesGraphPageProps) {
   const [{ snapshotId }, query] = await Promise.all([params, searchParams]);
 
   return <RulesGraphFeature snapshotId={snapshotId} searchParams={query} />;

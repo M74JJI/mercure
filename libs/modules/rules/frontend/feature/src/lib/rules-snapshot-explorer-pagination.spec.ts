@@ -13,10 +13,8 @@ describe('snapshotExplorerPagination', () => {
         severity: 'high',
       }),
     ).toEqual({
-      previousHref:
-        '/rules/snapshot/rules?tenant=manager-a&severity=high&offset=0',
-      nextHref:
-        '/rules/snapshot/rules?tenant=manager-a&severity=high&offset=100',
+      previousHref: '/rules/snapshot/rules?tenant=manager-a&severity=high&offset=0',
+      nextHref: '/rules/snapshot/rules?tenant=manager-a&severity=high&offset=100',
     });
   });
 
@@ -36,16 +34,13 @@ describe('snapshotExplorerPagination', () => {
         severity: 'warning',
       }),
     ).toEqual({
-      previousHref:
-        '/rules/snapshot/issues?severity=warning&offset=50',
+      previousHref: '/rules/snapshot/issues?severity=warning&offset=50',
     });
   });
 
   it('supports a smaller bounded history page without changing explorer defaults', () => {
     expect(SNAPSHOT_EXPLORER_PAGE_SIZE).toBe(50);
-    expect(
-      snapshotExplorerPagination('/rules', 25, 80, {}, 25),
-    ).toEqual({
+    expect(snapshotExplorerPagination('/rules', 25, 80, {}, 25)).toEqual({
       previousHref: '/rules?offset=0',
       nextHref: '/rules?offset=50',
     });

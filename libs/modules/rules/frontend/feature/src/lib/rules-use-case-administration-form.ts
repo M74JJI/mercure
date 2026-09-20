@@ -69,9 +69,7 @@ function text(
   return { ok: true, value };
 }
 
-function editableFields(
-  formData: FormData,
-): RulesUseCaseFormResult<RulesUseCaseUpdateInput> {
+function editableFields(formData: FormData): RulesUseCaseFormResult<RulesUseCaseUpdateInput> {
   const name = text(formData, 'name');
   if (!name.ok) return name;
   const shortName = text(formData, 'shortName');
@@ -115,7 +113,8 @@ export function parseCreateRulesUseCaseForm(
       ok: false,
       error: {
         field: 'id',
-        message: 'Use-case ID must start with uc_ and use lowercase letters, digits, or underscores.',
+        message:
+          'Use-case ID must start with uc_ and use lowercase letters, digits, or underscores.',
       },
     };
   }

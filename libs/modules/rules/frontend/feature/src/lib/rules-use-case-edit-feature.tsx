@@ -16,10 +16,7 @@ import {
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 import { updateRulesUseCaseAction } from './rules-use-case-administration-actions';
 import { requireRulesAdminIdentity } from './rules-use-case-admin-boundary';
-import {
-  enumSearchParam,
-  type RulesSearchParams,
-} from './rules-search-params';
+import { enumSearchParam, type RulesSearchParams } from './rules-search-params';
 
 const errorCodes = [
   'validation',

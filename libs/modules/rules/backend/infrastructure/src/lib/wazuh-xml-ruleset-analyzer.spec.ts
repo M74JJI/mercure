@@ -242,6 +242,156 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     );
   });
 
+  it('reports malformed XML fragments as approval-blocking validation errors', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-d/rules/1400-broken_rules.xml',
+          content: [
+            '<?xml version="1.0"?>',
+            '<group name="broken,">',
+            '  <rule id="140001" level="5">',
+            '    <description>Broken nesting</description>',
+            '</group>',
+          ].join('\n'),
+        },
+      ],
+    });
+
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({
+        severity: 'error',
+        type: 'malformed_xml_structure',
+        fileName: 'manager-d/rules/1400-broken_rules.xml',
+      }),
+    );
+    expect(
+      result.issues.find((issue) => issue.type === 'malformed_xml_structure')?.detail,
+    ).toContain('does not match');
+  });
+
+  it('reports an unclosed element even when trailing text follows it', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-d/rules/1403-unclosed_rules.xml',
+          content: '<group name="custom,">trailing text',
+        },
+      ],
+    });
+
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({
+        severity: 'error',
+        type: 'malformed_xml_structure',
+        detail: 'XML tag <group> is not closed.',
+      }),
+    );
+  });
+
+  it('reports invalid entities and duplicate XML attributes', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-d/rules/1402-invalid-attributes.xml',
+          content: [
+            '<group name="custom,">',
+            '  <rule id="140002" id="140003" level="5">',
+            '    <description>A & B</description>',
+            '  </rule>',
+            '</group>',
+          ].join('\n'),
+        },
+      ],
+    });
+
+    const structuralIssue = result.issues.find((issue) => issue.type === 'malformed_xml_structure');
+    expect(structuralIssue?.severity).toBe('error');
+    expect(structuralIssue?.detail).toMatch(/duplicated|unescaped ampersand/);
+  });
+
+  it('rejects text outside top-level elements and invalid attribute values', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-d/rules/1404-outside-text.xml',
+          content: ['unexpected text', '<group name="custom,"></group>'].join('\n'),
+        },
+        {
+          name: 'manager-d/rules/1405-invalid-attribute.xml',
+          content: '<group name="custom<bad,"></group>',
+        },
+      ],
+    });
+
+    const structuralIssues = result.issues.filter(
+      (issue) => issue.type === 'malformed_xml_structure',
+    );
+
+    expect(structuralIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          fileName: 'manager-d/rules/1404-outside-text.xml',
+          detail: 'XML fragment contains text outside top-level elements.',
+        }),
+        expect.objectContaining({
+          fileName: 'manager-d/rules/1405-invalid-attribute.xml',
+          detail: expect.stringContaining("contains an invalid '<' character"),
+        }),
+      ]),
+    );
+  });
+
+  it('allows valid multi-root decoder XML fragments', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-d/decoders/1400-fragment_decoders.xml',
+          content: [
+            '<!-- Wazuh decoder fragments do not require one document root. -->',
+            '<decoder name="first_decoder">',
+            '  <prematch>first</prematch>',
+            '</decoder>',
+            '<decoder name="second_decoder">',
+            '  <prematch><![CDATA[second]]></prematch>',
+            '</decoder>',
+          ].join('\n'),
+        },
+      ],
+    });
+
+    expect(result.decoders).toHaveLength(2);
+    expect(result.issues.map((issue) => issue.type)).not.toContain('malformed_xml_structure');
+  });
+
+  it('rejects DOCTYPE declarations in Rules XML fragments', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-d/rules/1401-doctype_rules.xml',
+          content: [
+            '<!DOCTYPE group SYSTEM "file:///etc/passwd">',
+            '<group name="custom,"></group>',
+          ].join('\n'),
+        },
+      ],
+    });
+
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({
+        severity: 'error',
+        type: 'malformed_xml_structure',
+        detail: 'XML declaration markup such as DOCTYPE is not allowed.',
+      }),
+    );
+  });
+
   it('uses SHA-256 source fingerprints and deterministic source classification', async () => {
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const source = await fixture('baseline/manager-a/rules/1000-sample_rules.xml');

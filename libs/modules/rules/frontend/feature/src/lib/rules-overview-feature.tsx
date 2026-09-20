@@ -21,9 +21,7 @@ export interface RulesOverviewFeatureProps {
   readonly searchParams: RulesSearchParams;
 }
 
-export async function RulesOverviewFeature({
-  searchParams,
-}: RulesOverviewFeatureProps) {
+export async function RulesOverviewFeature({ searchParams }: RulesOverviewFeatureProps) {
   const api = new RulesDataAccess({ fetch: authenticatedMercureFetch });
   const identity = await getServerMercureIdentity();
   const canImport = identity?.role === 'admin';
@@ -47,6 +45,7 @@ export async function RulesOverviewFeature({
       <RulesSnapshotHistory
         snapshots={snapshots.items}
         total={snapshots.total}
+        canAuthor={canImport}
         canImport={canImport}
         {...(canImport ? { importAction: importRulesSnapshotAction } : {})}
         {...(importStatus === undefined ? {} : { importStatus })}

@@ -151,10 +151,7 @@ export class RulesDataAccess {
     return requireData('list snapshot decoders', data, response);
   }
 
-  async getDecoder(
-    snapshotId: string,
-    position: number,
-  ): Promise<RulesSnapshotDecoder | null> {
+  async getDecoder(snapshotId: string, position: number): Promise<RulesSnapshotDecoder | null> {
     const { data, response } = await safelyRequest('get snapshot decoder', () =>
       this.client.GET('/api/v1/rules/snapshots/{snapshotId}/decoders/{position}', {
         params: { path: { snapshotId, position } },

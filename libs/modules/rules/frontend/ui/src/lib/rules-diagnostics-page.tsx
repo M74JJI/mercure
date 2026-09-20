@@ -139,7 +139,8 @@ export function RulesDiagnosticsPage({
                       {flow.status.replace('_', ' ')}
                     </StatusBadge>
                     <span>
-                      {flow.producedByRules.length} producers · {flow.consumedByRules.length} consumers
+                      {flow.producedByRules.length} producers · {flow.consumedByRules.length}{' '}
+                      consumers
                     </span>
                   </div>
                 </li>

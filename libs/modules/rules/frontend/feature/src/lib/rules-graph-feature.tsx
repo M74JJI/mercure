@@ -6,11 +6,7 @@ import {
 import { RulesGraphPage, RulesUnavailableState } from '@mercure/rules-frontend-ui';
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
-import {
-  enumSearchParam,
-  trimmedSearchParam,
-  type RulesSearchParams,
-} from './rules-search-params';
+import { enumSearchParam, trimmedSearchParam, type RulesSearchParams } from './rules-search-params';
 
 const modeValues = [
   'all',
@@ -30,10 +26,7 @@ export interface RulesGraphFeatureProps {
   readonly searchParams: RulesSearchParams;
 }
 
-export async function RulesGraphFeature({
-  searchParams,
-  snapshotId,
-}: RulesGraphFeatureProps) {
+export async function RulesGraphFeature({ searchParams, snapshotId }: RulesGraphFeatureProps) {
   const api = new RulesIntelligenceDataAccess({
     fetch: authenticatedMercureFetch,
   });
@@ -45,14 +38,8 @@ export async function RulesGraphFeature({
   const selectedStatus = trimmedSearchParam(searchParams, 'status', 64);
   const selectedRole = trimmedSearchParam(searchParams, 'role', 64);
   const selectedJiraOnly = enumSearchParam(searchParams, 'jiraOnly', jiraOnlyValues);
-  const selectedIncludeExternal = enumSearchParam(
-    searchParams,
-    'includeExternal',
-    booleanValues,
-  );
-  const selectedLimit = Number(
-    enumSearchParam(searchParams, 'limit', limitValues) ?? '200',
-  );
+  const selectedIncludeExternal = enumSearchParam(searchParams, 'includeExternal', booleanValues);
+  const selectedLimit = Number(enumSearchParam(searchParams, 'limit', limitValues) ?? '200');
 
   const query = {
     mode: selectedMode,
@@ -63,9 +50,7 @@ export async function RulesGraphFeature({
     ...(selectedStatus === undefined ? {} : { status: selectedStatus }),
     ...(selectedRole === undefined ? {} : { role: selectedRole }),
     ...(selectedJiraOnly === undefined ? {} : { jiraOnly: selectedJiraOnly }),
-    ...(selectedIncludeExternal === undefined
-      ? {}
-      : { includeExternal: selectedIncludeExternal }),
+    ...(selectedIncludeExternal === undefined ? {} : { includeExternal: selectedIncludeExternal }),
   };
 
   try {
@@ -83,9 +68,7 @@ export async function RulesGraphFeature({
         {...(selectedStatus === undefined ? {} : { selectedStatus })}
         {...(selectedRole === undefined ? {} : { selectedRole })}
         {...(selectedJiraOnly === undefined ? {} : { selectedJiraOnly })}
-        {...(selectedIncludeExternal === undefined
-          ? {}
-          : { selectedIncludeExternal })}
+        {...(selectedIncludeExternal === undefined ? {} : { selectedIncludeExternal })}
       />
     );
   } catch (error) {

@@ -3,11 +3,7 @@
   "name": "platform-backend-config",
   "projectType": "library",
   "sourceRoot": "libs/platform/backend/config/src",
-  "tags": [
-    "scope:platform",
-    "side:backend",
-    "type:infrastructure"
-  ],
+  "tags": ["scope:platform", "side:backend", "type:infrastructure"],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",

@@ -5,6 +5,22 @@ import { LoggerModule, type Params } from 'nestjs-pino';
 
 import { PlatformConfig, PlatformConfigModule } from '@mercure/platform-backend-config';
 
+export const PLATFORM_LOG_REDACTION_PATHS = [
+  'req.headers.authorization',
+  'req.headers.cookie',
+  'req.headers.x-request-id',
+  'res.headers.set-cookie',
+  'req.body.password',
+  'req.body.token',
+  'req.body.accessToken',
+  'req.body.refreshToken',
+  'req.body.secret',
+  'req.body.apiKey',
+  'req.body.content',
+  'req.body.xml',
+  'req.body.rawXml',
+] as const;
+
 @Module({
   imports: [
     LoggerModule.forRootAsync({
@@ -25,17 +41,7 @@ import { PlatformConfig, PlatformConfigModule } from '@mercure/platform-backend-
             return requestId;
           },
           redact: {
-            paths: [
-              'req.headers.authorization',
-              'req.headers.cookie',
-              'res.headers.set-cookie',
-              'req.body.password',
-              'req.body.token',
-              'req.body.accessToken',
-              'req.body.refreshToken',
-              'req.body.secret',
-              'req.body.apiKey',
-            ],
+            paths: [...PLATFORM_LOG_REDACTION_PATHS],
             remove: true,
           },
         },

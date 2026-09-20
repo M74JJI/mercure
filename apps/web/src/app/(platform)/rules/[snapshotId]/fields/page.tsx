@@ -13,9 +13,7 @@ interface RulesFieldIntelligencePageProps {
   readonly params: Promise<{
     readonly snapshotId: string;
   }>;
-  readonly searchParams: Promise<
-    Readonly<Record<string, string | readonly string[] | undefined>>
-  >;
+  readonly searchParams: Promise<Readonly<Record<string, string | readonly string[] | undefined>>>;
 }
 
 export default async function RulesFieldIntelligenceRoute({
@@ -24,10 +22,5 @@ export default async function RulesFieldIntelligenceRoute({
 }: RulesFieldIntelligencePageProps) {
   const [{ snapshotId }, query] = await Promise.all([params, searchParams]);
 
-  return (
-    <RulesFieldIntelligenceFeature
-      snapshotId={snapshotId}
-      searchParams={query}
-    />
-  );
+  return <RulesFieldIntelligenceFeature snapshotId={snapshotId} searchParams={query} />;
 }

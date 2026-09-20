@@ -1,5 +1,1 @@
-export {
-  createIdentityAuthConfig,
-  identityAuthHandlers,
-  identityProxy,
-} from './lib/auth';
+export { createIdentityAuthConfig, identityAuthHandlers, identityProxy } from './lib/auth';

@@ -1,9 +1,6 @@
 import 'server-only';
 
-import {
-  parseWebIdentityEnvironment,
-  type WebIdentityEnvironment,
-} from './environment';
+import { parseWebIdentityEnvironment, type WebIdentityEnvironment } from './environment';
 
 let cachedEnvironment: WebIdentityEnvironment | undefined;
 

@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodSerializerInterceptor } from 'nestjs-zod';
 
-import { PlatformConfigModule } from '@mercure/platform-backend-config';
+import { PlatformConfig, PlatformConfigModule } from '@mercure/platform-backend-config';
 import { PlatformDatabaseModule, PrismaService } from '@mercure/platform-backend-database';
 import { READINESS_SERVICE, ReadinessService } from '@mercure/platform-backend-health';
 import { ACCESS_TOKEN_VERIFIER } from '@mercure/platform-backend-identity-application';

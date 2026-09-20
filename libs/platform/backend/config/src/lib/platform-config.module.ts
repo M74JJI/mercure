@@ -42,6 +42,15 @@ const corsOrigins = z
         if (url.protocol !== 'http:' && url.protocol !== 'https:') {
           throw new Error('unsupported protocol');
         }
+        if (
+          url.username ||
+          url.password ||
+          url.search ||
+          url.hash ||
+          (url.pathname !== '/' && url.pathname !== '')
+        ) {
+          throw new Error('not an origin');
+        }
         normalized.add(url.origin);
       } catch {
         context.addIssue({
@@ -117,9 +126,9 @@ const platformEnvironmentSchema = z.object({
   API_BODY_LIMIT_BYTES: z.coerce
     .number()
     .int()
-    .min(1024)
+    .min(4 * 1024 * 1024)
     .max(10 * 1024 * 1024)
-    .default(1024 * 1024),
+    .default(4 * 1024 * 1024),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   OPENAPI_ENABLED: booleanFromEnvironment.default(false),
   OIDC_ISSUER_URL: httpUrl.default('https://identity.example.test/realms/mercure'),
@@ -130,12 +139,7 @@ const platformEnvironmentSchema = z.object({
   OIDC_USER_AUTHORITIES: commaSeparatedValues.default(['user', '/security-users']),
   OIDC_JWKS_TIMEOUT_MS: z.coerce.number().int().min(100).max(30_000).default(5_000),
   OIDC_JWKS_COOLDOWN_MS: z.coerce.number().int().min(1_000).max(600_000).default(30_000),
-  OIDC_JWKS_CACHE_MAX_AGE_MS: z.coerce
-    .number()
-    .int()
-    .min(10_000)
-    .max(86_400_000)
-    .default(600_000),
+  OIDC_JWKS_CACHE_MAX_AGE_MS: z.coerce.number().int().min(10_000).max(86_400_000).default(600_000),
   DATABASE_URL: postgresUrl,
   DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
   DATABASE_CONNECTION_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(5_000),
@@ -179,6 +183,10 @@ export function parsePlatformEnvironment(
 
     if (parsed.OIDC_JWKS_URL && !parsed.OIDC_JWKS_URL.startsWith('https://')) {
       throw new Error('OIDC_JWKS_URL must use https:// in production.');
+    }
+
+    if (parsed.API_CORS_ORIGINS.some((origin) => !origin.startsWith('https://'))) {
+      throw new Error('API_CORS_ORIGINS must use https:// origins in production.');
     }
   }
 

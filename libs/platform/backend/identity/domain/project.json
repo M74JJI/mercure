@@ -3,11 +3,7 @@
   "name": "platform-backend-identity-domain",
   "projectType": "library",
   "sourceRoot": "libs/platform/backend/identity/domain/src",
-  "tags": [
-    "scope:platform",
-    "side:backend",
-    "type:domain"
-  ],
+  "tags": ["scope:platform", "side:backend", "type:domain"],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",

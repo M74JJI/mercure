@@ -188,6 +188,110 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/rules/authoring/drafts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Rules authoring drafts */
+    get: operations['RulesAuthoringController_list'];
+    put?: never;
+    /** Create a Rules authoring draft from an immutable snapshot file */
+    post: operations['RulesAuthoringController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/rules/authoring/drafts/new': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create a new bounded logical Rules XML draft */
+    post: operations['RulesAuthoringController_createNew'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/rules/authoring/drafts/{draftId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get one Rules authoring draft */
+    get: operations['RulesAuthoringController_get'];
+    /** Update Rules authoring draft XML using optimistic concurrency */
+    put: operations['RulesAuthoringController_update'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/rules/authoring/drafts/{draftId}/validate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Validate the exact current Rules authoring draft revision */
+    post: operations['RulesAuthoringController_validate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/rules/authoring/drafts/{draftId}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Approve an error-free validated Rules authoring draft revision */
+    post: operations['RulesAuthoringController_approve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/rules/authoring/drafts/{draftId}/export': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Export the unchanged approved Rules authoring draft revision */
+    get: operations['RulesAuthoringController_export'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/rules/intelligence/snapshots/{snapshotId}/fields': {
     parameters: {
       query?: never;
@@ -310,7 +414,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -421,61 +524,6 @@ export interface components {
         brokenDependencyCount: number;
       }[];
     };
-    RulesSnapshotRuleDocument: {
-      position: number;
-      id: string;
-      level: number;
-      description: string;
-      groups: string[];
-      status: string;
-      role: string;
-      /** @enum {string} */
-      severity: 'informational' | 'low' | 'medium' | 'high' | 'critical';
-      jiraVisible: boolean;
-      tenant: string;
-      sourceFile: string;
-      sourceSection?: string;
-      useCaseId: string;
-      /** @enum {string} */
-      useCaseConfidence: 'confirmed' | 'inferred' | 'unassigned';
-      mitre: string[];
-      dependencies: {
-        /** @enum {string} */
-        type: 'if_sid' | 'if_group' | 'if_matched_sid' | 'if_matched_group' | 'decoded_as';
-        value: string;
-      }[];
-      fields: {
-        name: string;
-        type?: string;
-        value: string;
-      }[];
-      frequency?: string;
-      timeframe?: string;
-      decodedAs: string[];
-      options: string[];
-    };
-    RulesSnapshotDecoderDocument: {
-      position: number;
-      name: string;
-      parent?: string;
-      prematch: string[];
-      regex: string[];
-      orderFields: string[];
-      tenant: string;
-      sourceFile: string;
-    };
-    RulesSnapshotIssueDocument: {
-      position: number;
-      /** @enum {string} */
-      severity: 'error' | 'warning' | 'info';
-      type: string;
-      title: string;
-      detail: string;
-      ruleId?: string;
-      decoderName?: string;
-      fileName?: string;
-      tenant?: string;
-    };
     RulesSnapshotRulePageDocument: {
       offset: number;
       limit: number;
@@ -493,6 +541,7 @@ export interface components {
         jiraVisible: boolean;
         tenant: string;
         sourceFile: string;
+        sourceFilePosition: number;
         sourceSection?: string;
         useCaseId: string;
         /** @enum {string} */
@@ -514,6 +563,40 @@ export interface components {
         options: string[];
       }[];
     };
+    RulesSnapshotRuleDocument: {
+      position: number;
+      id: string;
+      level: number;
+      description: string;
+      groups: string[];
+      status: string;
+      role: string;
+      /** @enum {string} */
+      severity: 'informational' | 'low' | 'medium' | 'high' | 'critical';
+      jiraVisible: boolean;
+      tenant: string;
+      sourceFile: string;
+      sourceFilePosition: number;
+      sourceSection?: string;
+      useCaseId: string;
+      /** @enum {string} */
+      useCaseConfidence: 'confirmed' | 'inferred' | 'unassigned';
+      mitre: string[];
+      dependencies: {
+        /** @enum {string} */
+        type: 'if_sid' | 'if_group' | 'if_matched_sid' | 'if_matched_group' | 'decoded_as';
+        value: string;
+      }[];
+      fields: {
+        name: string;
+        type?: string;
+        value: string;
+      }[];
+      frequency?: string;
+      timeframe?: string;
+      decodedAs: string[];
+      options: string[];
+    };
     RulesSnapshotDecoderPageDocument: {
       offset: number;
       limit: number;
@@ -527,7 +610,19 @@ export interface components {
         orderFields: string[];
         tenant: string;
         sourceFile: string;
+        sourceFilePosition: number;
       }[];
+    };
+    RulesSnapshotDecoderDocument: {
+      position: number;
+      name: string;
+      parent?: string;
+      prematch: string[];
+      regex: string[];
+      orderFields: string[];
+      tenant: string;
+      sourceFile: string;
+      sourceFilePosition: number;
     };
     RulesSnapshotIssuePageDocument: {
       offset: number;
@@ -545,7 +640,153 @@ export interface components {
         fileName?: string;
         tenant?: string;
       }[];
-    };    RulesIntelligenceSnapshotParamsDto: {
+    };
+    RulesSnapshotIssueDocument: {
+      position: number;
+      /** @enum {string} */
+      severity: 'error' | 'warning' | 'info';
+      type: string;
+      title: string;
+      detail: string;
+      ruleId?: string;
+      decoderName?: string;
+      fileName?: string;
+      tenant?: string;
+    };
+    RulesAuthoringDraftParamsDto: {
+      /** Format: uuid */
+      draftId: string;
+    };
+    RulesAuthoringDraftListQueryDto: {
+      /** @default 0 */
+      offset: number;
+      /** @default 25 */
+      limit: number;
+    };
+    RulesAuthoringDraftCreateDto: {
+      /** Format: uuid */
+      sourceSnapshotId: string;
+      sourceFilePosition: number;
+    };
+    RulesAuthoringDraftCreateNewDto: {
+      fileName: string;
+      tenant: string;
+      /** @enum {string} */
+      sourceType: 'rules' | 'decoders';
+    };
+    RulesAuthoringDraftUpdateDto: {
+      expectedRevision: number;
+      content: string;
+    };
+    RulesAuthoringDraftTransitionDto: {
+      expectedRevision: number;
+    };
+    RulesAuthoringDraftListDocument: {
+      offset: number;
+      limit: number;
+      total: number;
+      items: {
+        /** Format: uuid */
+        id: string;
+        /** Format: uuid */
+        sourceSnapshotId?: string;
+        sourceFilePosition?: number;
+        fileName: string;
+        tenant: string;
+        /** @enum {string} */
+        sourceType: 'rules' | 'decoders';
+        sha256: string;
+        revision: number;
+        /** @enum {string} */
+        state: 'draft' | 'validated' | 'approved';
+        createdBy: string;
+        updatedBy: string;
+        createdAt: string;
+        updatedAt: string;
+        approvedRevision?: number;
+        approvedSha256?: string;
+        approvedBy?: string;
+        approvedAt?: string;
+        validation?: {
+          revision: number;
+          sha256: string;
+          ruleCount: number;
+          decoderCount: number;
+          issueCount: number;
+          errorCount: number;
+          warningCount: number;
+          infoCount: number;
+          validatedAt: string;
+        };
+      }[];
+    };
+    RulesAuthoringDraftDocument: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      sourceSnapshotId?: string;
+      sourceFilePosition?: number;
+      fileName: string;
+      tenant: string;
+      /** @enum {string} */
+      sourceType: 'rules' | 'decoders';
+      sha256: string;
+      revision: number;
+      /** @enum {string} */
+      state: 'draft' | 'validated' | 'approved';
+      createdBy: string;
+      updatedBy: string;
+      createdAt: string;
+      updatedAt: string;
+      approvedRevision?: number;
+      approvedSha256?: string;
+      approvedBy?: string;
+      approvedAt?: string;
+      content: string;
+      eventCount: number;
+      events: {
+        /** @enum {string} */
+        eventType: 'create' | 'edit' | 'validate' | 'approve';
+        /** @enum {string} */
+        state: 'draft' | 'validated' | 'approved';
+        revision: number;
+        actorSubject: string;
+        createdAt: string;
+      }[];
+      validation?: {
+        revision: number;
+        sha256: string;
+        ruleCount: number;
+        decoderCount: number;
+        issueCount: number;
+        errorCount: number;
+        warningCount: number;
+        infoCount: number;
+        validatedAt: string;
+        issues: {
+          /** @enum {string} */
+          severity: 'error' | 'warning' | 'info';
+          type: string;
+          title: string;
+          detail: string;
+          ruleId?: string;
+          decoderName?: string;
+          fileName?: string;
+          tenant?: string;
+        }[];
+      };
+    };
+    RulesAuthoringExportDocument: {
+      /** Format: uuid */
+      draftId: string;
+      revision: number;
+      fileName: string;
+      /** @enum {string} */
+      sourceType: 'rules' | 'decoders';
+      sha256: string;
+      content: string;
+    };
+    RulesIntelligenceSnapshotParamsDto: {
       /** Format: uuid */
       snapshotId: string;
     };
@@ -567,7 +808,10 @@ export interface components {
       offset: number;
       /** @default 50 */
       limit: number;
-      /** @default rules */
+      /**
+       * @default rules
+       * @enum {string}
+       */
       kind: 'rules' | 'use_cases';
       tenant?: string;
       /** @enum {string} */
@@ -576,14 +820,19 @@ export interface components {
       query?: string;
     };
     RulesGraphQueryDto: {
-      /** @default all */
+      /**
+       * @default all
+       * @enum {string}
+       */
       mode: 'rules' | 'decoders' | 'decoder_rules' | 'use_cases' | 'mitre' | 'fields' | 'all';
       query?: string;
       tenant?: string;
       useCaseId?: string;
       status?: string;
       role?: string;
+      /** @enum {string} */
       jiraOnly?: 'true' | 'false';
+      /** @enum {string} */
       includeExternal?: 'true' | 'false';
       /** @default 200 */
       limit: number;
@@ -593,7 +842,10 @@ export interface components {
       beforeSnapshotId: string;
       /** Format: uuid */
       afterSnapshotId: string;
-      /** @default rules */
+      /**
+       * @default rules
+       * @enum {string}
+       */
       kind: 'rules' | 'decoders' | 'files' | 'use_cases' | 'issues';
       /** @default 0 */
       offset: number;
@@ -605,18 +857,6 @@ export interface components {
       offset: number;
       /** @default 50 */
       limit: number;
-    };
-    RulesUseCaseParamsDto: {
-      useCaseId: string;
-    };
-    RulesUseCaseListQueryDto: {
-      /** @default 0 */
-      offset: number;
-      /** @default 50 */
-      limit: number;
-      /** @enum {string} */
-      source?: 'system' | 'custom';
-      query?: string;
     };
     RulesFieldIntelligenceDocument: {
       /** Format: uuid */
@@ -792,50 +1032,6 @@ export interface components {
         };
       };
     };
-    RulesSnapshotCompareDocument: {
-      /** Format: uuid */
-      beforeSnapshotId: string;
-      /** Format: uuid */
-      afterSnapshotId: string;
-      /** @enum {string} */
-      kind: 'rules' | 'decoders' | 'files' | 'use_cases' | 'issues';
-      summary: {
-        rulesAdded: number;
-        rulesRemoved: number;
-        rulesChanged: number;
-        decodersAdded: number;
-        decodersRemoved: number;
-        decodersChanged: number;
-        filesAdded: number;
-        filesRemoved: number;
-        filesChanged: number;
-        useCasesAdded: number;
-        useCasesRemoved: number;
-        newIssues: number;
-        resolvedIssues: number;
-        jiraVisibilityChanged: number;
-        severityChanged: number;
-        mitreChanged: number;
-        useCaseChanged: number;
-      };
-      page: {
-        offset: number;
-        limit: number;
-        total: number;
-        items: {
-          key: string;
-          /** @enum {string} */
-          state: 'added' | 'removed' | 'changed' | 'resolved';
-          changes: string[];
-          before?: {
-            [key: string]: unknown;
-          };
-          after?: {
-            [key: string]: unknown;
-          };
-        }[];
-      };
-    };
     RulesRoundtripDocument: {
       /** Format: uuid */
       snapshotId: string;
@@ -907,6 +1103,62 @@ export interface components {
         }[];
       };
     };
+    RulesSnapshotCompareDocument: {
+      /** Format: uuid */
+      beforeSnapshotId: string;
+      /** Format: uuid */
+      afterSnapshotId: string;
+      /** @enum {string} */
+      kind: 'rules' | 'decoders' | 'files' | 'use_cases' | 'issues';
+      summary: {
+        rulesAdded: number;
+        rulesRemoved: number;
+        rulesChanged: number;
+        decodersAdded: number;
+        decodersRemoved: number;
+        decodersChanged: number;
+        filesAdded: number;
+        filesRemoved: number;
+        filesChanged: number;
+        useCasesAdded: number;
+        useCasesRemoved: number;
+        newIssues: number;
+        resolvedIssues: number;
+        jiraVisibilityChanged: number;
+        severityChanged: number;
+        mitreChanged: number;
+        useCaseChanged: number;
+      };
+      page: {
+        offset: number;
+        limit: number;
+        total: number;
+        items: {
+          key: string;
+          /** @enum {string} */
+          state: 'added' | 'removed' | 'changed' | 'resolved';
+          changes: string[];
+          before?: {
+            [key: string]: unknown;
+          };
+          after?: {
+            [key: string]: unknown;
+          };
+        }[];
+      };
+    };
+    RulesUseCaseParamsDto: {
+      useCaseId: string;
+    };
+    RulesUseCaseListQueryDto: {
+      /** @default 0 */
+      offset: number;
+      /** @default 50 */
+      limit: number;
+      /** @enum {string} */
+      source?: 'system' | 'custom';
+      query?: string;
+    };
     RulesUseCasePageDocument: {
       offset: number;
       limit: number;
@@ -942,6 +1194,9 @@ export interface components {
       createdBy: string;
       createdAt?: string;
     };
+    RulesUseCaseAdministrationParamsDto: {
+      useCaseId: string;
+    };
     RulesUseCaseCreateDto: {
       id: string;
       name: string;
@@ -963,10 +1218,6 @@ export interface components {
       domain: string;
       category: string;
     };
-    RulesUseCaseAdministrationParamsDto: {
-      useCaseId: string;
-    };
-
   };
   responses: never;
   parameters: never;
@@ -1287,6 +1538,282 @@ export interface operations {
       };
     };
   };
+  RulesAuthoringController_list: {
+    parameters: {
+      query?: {
+        offset?: number;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftListDocument'];
+        };
+      };
+    };
+  };
+  RulesAuthoringController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RulesAuthoringDraftCreateDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftDocument'];
+        };
+      };
+      /** @description The source is not authorable. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The source snapshot file was not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesAuthoringController_createNew: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RulesAuthoringDraftCreateNewDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftDocument'];
+        };
+      };
+      /** @description The logical file name, tenant, or source type is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesAuthoringController_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        draftId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftDocument'];
+        };
+      };
+      /** @description Rules authoring draft not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesAuthoringController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        draftId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RulesAuthoringDraftUpdateDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftDocument'];
+        };
+      };
+      /** @description The draft content is invalid or exceeds limits. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Rules authoring draft not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The draft revision changed concurrently. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesAuthoringController_validate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        draftId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RulesAuthoringDraftTransitionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftDocument'];
+        };
+      };
+      /** @description Rules authoring draft not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The draft revision changed concurrently. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesAuthoringController_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        draftId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RulesAuthoringDraftTransitionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringDraftDocument'];
+        };
+      };
+      /** @description Rules authoring draft not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The draft is stale, unvalidated, or contains errors. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesAuthoringController_export: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        draftId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesAuthoringExportDocument'];
+        };
+      };
+      /** @description Rules authoring draft not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only an unchanged approved revision can be exported. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   RulesIntelligenceController_fieldsForSnapshot: {
     parameters: {
       query?: {
@@ -1484,34 +2011,6 @@ export interface operations {
       };
     };
   };
-  RulesUseCasesController_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        useCaseId: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['RulesUseCaseDocument'];
-        };
-      };
-      /** @description Rules use case not found. */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
   RulesUseCaseAdministrationController_create: {
     parameters: {
       query?: never;
@@ -1542,6 +2041,34 @@ export interface operations {
       };
       /** @description The use-case ID already exists. */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RulesUseCasesController_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        useCaseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RulesUseCaseDocument'];
+        };
+      };
+      /** @description Rules use case not found. */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -1606,6 +2133,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      /** @description The custom Rules use case was deleted. */
       204: {
         headers: {
           [name: string]: unknown;
@@ -1628,5 +2156,4 @@ export interface operations {
       };
     };
   };
-
 }

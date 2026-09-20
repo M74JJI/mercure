@@ -27,9 +27,7 @@ export class RulesUseCaseCreateDto extends createZodDto(
     .strict(),
 ) {}
 
-export class RulesUseCaseUpdateDto extends createZodDto(
-  z.object(editableFields).strict(),
-) {}
+export class RulesUseCaseUpdateDto extends createZodDto(z.object(editableFields).strict()) {}
 
 export class RulesUseCaseAdministrationParamsDto extends createZodDto(
   z

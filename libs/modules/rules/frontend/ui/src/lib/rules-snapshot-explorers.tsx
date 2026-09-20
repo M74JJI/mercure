@@ -155,7 +155,9 @@ export function RulesSnapshotRulesExplorer({
                 {rules.map((rule) => (
                   <tr key={rule.position}>
                     <td>
-                      <a className={styles.backLink} href={path + '/' + rule.position}><strong>{rule.id}</strong></a>
+                      <a className={styles.backLink} href={path + '/' + rule.position}>
+                        <strong>{rule.id}</strong>
+                      </a>
                       <small>{rule.description}</small>
                     </td>
                     <td>
@@ -247,7 +249,9 @@ export function RulesSnapshotDecodersExplorer({
                 {decoders.map((decoder) => (
                   <tr key={decoder.position}>
                     <td>
-                      <a className={styles.backLink} href={path + '/' + decoder.position}><strong>{decoder.name}</strong></a>
+                      <a className={styles.backLink} href={path + '/' + decoder.position}>
+                        <strong>{decoder.name}</strong>
+                      </a>
                     </td>
                     <td>{decoder.parent ?? '—'}</td>
                     <td>{decoder.tenant}</td>
@@ -325,7 +329,9 @@ export function RulesSnapshotIssuesExplorer({
             {issues.map((issue) => (
               <li key={issue.position}>
                 <div className={styles.issueTopline}>
-                  <a className={styles.backLink} href={path + '/' + issue.position}><strong>{issue.title}</strong></a>
+                  <a className={styles.backLink} href={path + '/' + issue.position}>
+                    <strong>{issue.title}</strong>
+                  </a>
                   <StatusBadge tone={issue.severity === 'error' ? 'accent' : 'neutral'}>
                     {issue.severity}
                   </StatusBadge>

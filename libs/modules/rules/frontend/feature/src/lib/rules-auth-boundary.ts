@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { RulesFrontendApiError } from '@mercure/rules-frontend-data-access';
+import type { RulesFrontendApiError } from '@mercure/rules-frontend-data-access';
 
 export function redirectRulesAuthorizationFailure(error: RulesFrontendApiError): void {
   if (error.status === 401) {

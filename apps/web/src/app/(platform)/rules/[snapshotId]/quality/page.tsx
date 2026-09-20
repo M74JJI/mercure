@@ -13,15 +13,10 @@ interface RulesQualityPageProps {
   readonly params: Promise<{
     readonly snapshotId: string;
   }>;
-  readonly searchParams: Promise<
-    Readonly<Record<string, string | readonly string[] | undefined>>
-  >;
+  readonly searchParams: Promise<Readonly<Record<string, string | readonly string[] | undefined>>>;
 }
 
-export default async function RulesQualityRoute({
-  params,
-  searchParams,
-}: RulesQualityPageProps) {
+export default async function RulesQualityRoute({ params, searchParams }: RulesQualityPageProps) {
   const [{ snapshotId }, query] = await Promise.all([params, searchParams]);
 
   return <RulesQualityFeature snapshotId={snapshotId} searchParams={query} />;

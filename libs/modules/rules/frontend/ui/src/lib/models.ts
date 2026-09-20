@@ -27,6 +27,7 @@ export interface RulesRulePreviewView {
   readonly severity: string;
   readonly jiraVisible: boolean;
   readonly tenant: string;
+  readonly sourceFilePosition: number;
   readonly useCaseId: string;
   readonly mitre: readonly string[];
 }
@@ -37,6 +38,7 @@ export interface RulesDecoderPreviewView {
   readonly parent?: string;
   readonly tenant: string;
   readonly sourceFile: string;
+  readonly sourceFilePosition: number;
 }
 
 export interface RulesIssuePreviewView {
@@ -57,7 +59,11 @@ export interface RulesRuleDetailView extends RulesRulePreviewView {
   readonly sourceSection?: string;
   readonly useCaseConfidence: string;
   readonly dependencies: readonly { readonly type: string; readonly value: string }[];
-  readonly fields: readonly { readonly name: string; readonly type?: string; readonly value: string }[];
+  readonly fields: readonly {
+    readonly name: string;
+    readonly type?: string;
+    readonly value: string;
+  }[];
   readonly frequency?: string;
   readonly timeframe?: string;
   readonly decodedAs: readonly string[];
@@ -379,4 +385,65 @@ export interface RulesDiagnosticsDetailView {
 export interface RulesUseCaseDetailView extends RulesUseCasePreviewView {
   readonly createdBy: string;
   readonly createdAt?: string;
+}
+
+export interface RulesAuthoringValidationIssueView {
+  readonly severity: 'error' | 'warning' | 'info';
+  readonly type: string;
+  readonly title: string;
+  readonly detail: string;
+  readonly ruleId?: string;
+  readonly decoderName?: string;
+  readonly fileName?: string;
+  readonly tenant?: string;
+}
+
+export interface RulesAuthoringValidationView {
+  readonly revision: number;
+  readonly sha256: string;
+  readonly ruleCount: number;
+  readonly decoderCount: number;
+  readonly issueCount: number;
+  readonly errorCount: number;
+  readonly warningCount: number;
+  readonly infoCount: number;
+  readonly validatedAt: string;
+}
+
+export interface RulesAuthoringDraftSummaryView {
+  readonly id: string;
+  readonly sourceSnapshotId?: string;
+  readonly sourceFilePosition?: number;
+  readonly fileName: string;
+  readonly tenant: string;
+  readonly sourceType: 'rules' | 'decoders';
+  readonly sha256: string;
+  readonly revision: number;
+  readonly state: 'draft' | 'validated' | 'approved';
+  readonly createdBy: string;
+  readonly updatedBy: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly validation?: RulesAuthoringValidationView;
+  readonly approvedRevision?: number;
+  readonly approvedSha256?: string;
+  readonly approvedBy?: string;
+  readonly approvedAt?: string;
+}
+
+export interface RulesAuthoringEventView {
+  readonly eventType: 'create' | 'edit' | 'validate' | 'approve';
+  readonly state: 'draft' | 'validated' | 'approved';
+  readonly revision: number;
+  readonly actorSubject: string;
+  readonly createdAt: string;
+}
+
+export interface RulesAuthoringDraftView extends RulesAuthoringDraftSummaryView {
+  readonly content: string;
+  readonly eventCount: number;
+  readonly events: readonly RulesAuthoringEventView[];
+  readonly validation?: RulesAuthoringValidationView & {
+    readonly issues: readonly RulesAuthoringValidationIssueView[];
+  };
 }

@@ -4,12 +4,7 @@ import type { RulesUseCaseDetailView } from './models';
 import styles from './rules.module.css';
 
 export type RulesUseCaseAdminErrorCode =
-  | 'validation'
-  | 'conflict'
-  | 'not-found'
-  | 'unavailable'
-  | 'protected'
-  | 'confirmation';
+  'validation' | 'conflict' | 'not-found' | 'unavailable' | 'protected' | 'confirmation';
 
 export type RulesUseCaseAdminField =
   | 'id'
@@ -60,9 +55,7 @@ function errorMessage(code: RulesUseCaseAdminErrorCode | undefined): string | un
   return undefined;
 }
 
-export function RulesUseCaseAdministrationForm(
-  props: RulesUseCaseAdministrationFormProps,
-) {
+export function RulesUseCaseAdministrationForm(props: RulesUseCaseAdministrationFormProps) {
   const useCase = props.mode === 'edit' ? props.useCase : undefined;
   const message = errorMessage(props.errorCode);
   const title = props.mode === 'create' ? 'Create custom use case' : 'Edit custom use case';
@@ -142,7 +135,10 @@ export function RulesUseCaseAdministrationForm(
           </label>
 
           <div className={styles.formActions}>
-            <a className={styles.actionLink} href={useCase ? '/rules/use-cases/' + useCase.id : '/rules/use-cases'}>
+            <a
+              className={styles.actionLink}
+              href={useCase ? '/rules/use-cases/' + useCase.id : '/rules/use-cases'}
+            >
               Cancel
             </a>
             <button type="submit">

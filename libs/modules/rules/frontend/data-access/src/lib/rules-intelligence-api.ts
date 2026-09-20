@@ -87,10 +87,7 @@ export class RulesIntelligenceDataAccess {
     return requireData('read field intelligence', data, response);
   }
 
-  async quality(
-    snapshotId: string,
-    query: RulesQualityQuery = {},
-  ): Promise<RulesQuality> {
+  async quality(snapshotId: string, query: RulesQualityQuery = {}): Promise<RulesQuality> {
     const { data, response } = await safelyRequest('read quality intelligence', () =>
       this.client.GET('/api/v1/rules/intelligence/snapshots/{snapshotId}/quality', {
         params: {
@@ -126,10 +123,7 @@ export class RulesIntelligenceDataAccess {
     return requireData('compare Rules snapshots', data, response);
   }
 
-  async roundtrip(
-    snapshotId: string,
-    query: RulesRoundtripQuery = {},
-  ): Promise<RulesRoundtrip> {
+  async roundtrip(snapshotId: string, query: RulesRoundtripQuery = {}): Promise<RulesRoundtrip> {
     const { data, response } = await safelyRequest('read round-trip diagnostics', () =>
       this.client.GET('/api/v1/rules/intelligence/snapshots/{snapshotId}/roundtrip', {
         params: {
