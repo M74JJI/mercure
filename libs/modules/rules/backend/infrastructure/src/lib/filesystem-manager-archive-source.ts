@@ -13,6 +13,7 @@ import type {
 const ARCHIVE_EXTENSIONS = ['.tar.gz', '.tgz'] as const;
 const XML_SOURCE_PATTERN = /(^|\/)(rules|decoders)\/[^/]+\.xml$/i;
 const TAR_LIST_OUTPUT_LIMIT_BYTES = 16 * 1024 * 1024;
+const TAR_COMMAND_TIMEOUT_MS = 30_000;
 
 interface ManagerArchiveSourceOptions {
   readonly rootPath: string;
@@ -68,10 +69,15 @@ function runTar(args: readonly string[], maxStdoutBytes: number): Promise<Buffer
     const stderr: Buffer[] = [];
     let stdoutBytes = 0;
     let settled = false;
+    const timeout = setTimeout(() => {
+      fail(new Error(`tar command exceeded the configured ${TAR_COMMAND_TIMEOUT_MS}-ms timeout`));
+    }, TAR_COMMAND_TIMEOUT_MS);
+    timeout.unref();
 
     const fail = (error: Error): void => {
       if (settled) return;
       settled = true;
+      clearTimeout(timeout);
       child.kill('SIGKILL');
       reject(error);
     };
@@ -95,6 +101,7 @@ function runTar(args: readonly string[], maxStdoutBytes: number): Promise<Buffer
     child.on('close', (code) => {
       if (settled) return;
       settled = true;
+      clearTimeout(timeout);
 
       if (code === 0) {
         resolve(Buffer.concat(stdout));
