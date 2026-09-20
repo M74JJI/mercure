@@ -391,7 +391,7 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
               sourceType: 'rules',
               content: '<group name="invalid,"></group>',
               sha256: 'a'.repeat(64),
-              createdBy: ' ',
+              createdBy: '\n\t',
               updatedBy: 'constraint-test',
             },
           }),
@@ -466,6 +466,18 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
               state: 'draft',
               revision: 0,
               actorSubject: 'constraint-test',
+            },
+          }),
+        ).rejects.toThrow();
+
+        await expect(
+          database.rulesAuthoringDraftEvent.create({
+            data: {
+              draftId: standalone.id,
+              eventType: 'edit',
+              state: 'draft',
+              revision: 1,
+              actorSubject: '\n\t',
             },
           }),
         ).rejects.toThrow();

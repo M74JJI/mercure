@@ -41,7 +41,7 @@ CREATE TABLE "rules_authoring_drafts" (
     CONSTRAINT "rules_authoring_drafts_content_check"
       CHECK (
         OCTET_LENGTH("content") BETWEEN 1 AND 1048576
-        AND BTRIM("content") <> ''
+        AND "content" ~ '[^[:space:]]'
       ),
     CONSTRAINT "rules_authoring_drafts_sha256_check"
       CHECK ("sha256" ~ '^[0-9a-f]{64}
@@ -91,7 +91,7 @@ CREATE TABLE "rules_authoring_drafts" (
           "state" = 'approved'
           AND "approved_revision" = "revision"
           AND "approved_sha256" = "sha256"
-          AND BTRIM("approved_by") <> ''
+          AND "approved_by" ~ '[^[:space:]]'
           AND "approved_at" IS NOT NULL
           AND "validation_error_count" = 0
         )
@@ -140,7 +140,7 @@ CREATE TABLE "rules_authoring_draft_events" (
     CONSTRAINT "rules_authoring_draft_events_revision_check"
       CHECK ("revision" >= 1),
     CONSTRAINT "rules_authoring_draft_events_actor_subject_check"
-      CHECK (BTRIM("actor_subject") <> '')
+      CHECK ("actor_subject" ~ '[^[:space:]]')
 );
 
 CREATE INDEX "rules_authoring_draft_events_draft_id_created_at_idx"
@@ -177,8 +177,8 @@ CREATE INDEX "rules_authoring_draft_validation_issues_draft_id_revision_severity
 ),
     CONSTRAINT "rules_authoring_drafts_actor_check"
       CHECK (
-        BTRIM("created_by") <> ''
-        AND BTRIM("updated_by") <> ''
+        "created_by" ~ '[^[:space:]]'
+        AND "updated_by" ~ '[^[:space:]]'
       ),
     CONSTRAINT "rules_authoring_drafts_source_provenance_check"
       CHECK (
