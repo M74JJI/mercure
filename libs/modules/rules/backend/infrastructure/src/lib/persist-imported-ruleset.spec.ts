@@ -4,6 +4,7 @@ import {
   AnalyzeRuleset,
   ImportArchivedRuleset,
   PersistImportedRuleset,
+  RulesetImportInProgressError,
   type RulesetArchiveSource,
   type RulesetSnapshotStore,
 } from '@mercure/rules-backend-application';
@@ -28,20 +29,20 @@ function useCase(name: string): RulesUseCase {
 }
 
 describe('PersistImportedRuleset', () => {
-  it('serializes concurrent imports without collapsing distinct observations or requests', async () => {
-    let activeReads = 0;
-    let maxActiveReads = 0;
+  it('rejects concurrent imports and accepts a later observation after the active import completes', async () => {
     let readCount = 0;
     let persistedCount = 0;
+    let releaseFirstRead: (() => void) | undefined;
+    const firstReadGate = new Promise<void>((resolve) => {
+      releaseFirstRead = resolve;
+    });
 
     const source: RulesetArchiveSource = {
       async readSnapshot() {
-        activeReads += 1;
-        maxActiveReads = Math.max(maxActiveReads, activeReads);
         readCount += 1;
-
-        await new Promise((resolve) => setTimeout(resolve, 5));
-        activeReads -= 1;
+        if (readCount === 1) {
+          await firstReadGate;
+        }
 
         return {
           sourceRoot: '/tmp/rules',
@@ -88,16 +89,20 @@ describe('PersistImportedRuleset', () => {
     );
     const persist = new PersistImportedRuleset(importer, store);
 
-    const [first, second] = await Promise.all([
-      persist.execute({ useCases: [useCase('First')] }),
-      persist.execute({ useCases: [useCase('Second')] }),
-    ]);
+    const first = persist.execute({ useCases: [useCase('First')] });
 
-    expect(maxActiveReads).toBe(1);
+    await expect(persist.execute({ useCases: [useCase('Rejected')] })).rejects.toBeInstanceOf(
+      RulesetImportInProgressError,
+    );
+
+    releaseFirstRead?.();
+    const firstResult = await first;
+    const laterResult = await persist.execute({ useCases: [useCase('Later')] });
+
     expect(readCount).toBe(2);
     expect(persistedCount).toBe(2);
-    expect(first.snapshot.id).not.toBe(second.snapshot.id);
-    expect(first.analysis.useCases[0]?.name).toBe('First');
-    expect(second.analysis.useCases[0]?.name).toBe('Second');
+    expect(firstResult.snapshot.id).not.toBe(laterResult.snapshot.id);
+    expect(firstResult.analysis.useCases[0]?.name).toBe('First');
+    expect(laterResult.analysis.useCases[0]?.name).toBe('Later');
   });
 });

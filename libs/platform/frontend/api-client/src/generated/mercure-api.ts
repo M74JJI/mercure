@@ -1289,6 +1289,13 @@ export interface operations {
           'application/json': components['schemas']['RulesSnapshotDocument'];
         };
       };
+      /** @description Another Rules snapshot import is already in progress. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description No usable Rules source files are currently available to import. */
       503: {
         headers: {

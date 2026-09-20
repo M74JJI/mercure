@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Controller,
   Get,
   Inject,
@@ -12,6 +13,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiExtraModels,
   ApiNotFoundResponse,
@@ -30,6 +32,7 @@ import {
 import {
   PersistImportedRuleset,
   QueryRulesetSnapshots,
+  RulesetImportInProgressError,
   RulesetImportUnavailableError,
   RulesetSnapshotNotFoundError,
   RulesetSnapshotRecordNotFoundError,
@@ -74,6 +77,10 @@ async function translateRulesHttpErrors<T>(operation: () => Promise<T>): Promise
 
     if (error instanceof RulesetImportUnavailableError) {
       throw new ServiceUnavailableException(error.message);
+    }
+
+    if (error instanceof RulesetImportInProgressError) {
+      throw new ConflictException(error.message);
     }
 
     throw error;
@@ -139,6 +146,9 @@ export class RulesSnapshotsController {
   ] satisfies readonly MercureCapability[])
   @ApiOperation({ summary: 'Import and persist the configured Rules manager snapshot' })
   @ApiCreatedResponse({ type: RulesSnapshotDocument })
+  @ApiConflictResponse({
+    description: 'Another Rules snapshot import is already in progress.',
+  })
   @ApiServiceUnavailableResponse({
     description: 'No usable Rules source files are currently available to import.',
   })

@@ -16,6 +16,7 @@ export {
 export {
   PersistImportedRuleset,
   RULESET_SNAPSHOT_STORE,
+  RulesetImportInProgressError,
   RulesetImportUnavailableError,
   type PersistImportedRulesetResult,
   type RulesetSnapshotIdentity,
