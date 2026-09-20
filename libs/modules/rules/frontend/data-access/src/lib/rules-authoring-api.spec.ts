@@ -68,7 +68,10 @@ describe('RulesAuthoringDataAccess', () => {
             ],
           });
         }
-        return jsonResponse(draft, request.method === 'POST' && pathname.endsWith('/drafts') ? 201 : 200);
+        return jsonResponse(
+          draft,
+          request.method === 'POST' && pathname.endsWith('/drafts') ? 201 : 200,
+        );
       },
     });
 

@@ -262,7 +262,10 @@ export class CreateRulesAuthoringDraft {
   ) {}
 
   async execute(input: CreateRulesAuthoringDraftInput): Promise<RulesAuthoringDraft> {
-    const source = await this.source.getSnapshotFile(input.sourceSnapshotId, input.sourceFilePosition);
+    const source = await this.source.getSnapshotFile(
+      input.sourceSnapshotId,
+      input.sourceFilePosition,
+    );
     if (!source) {
       throw new RulesAuthoringSourceNotFoundError(
         input.sourceSnapshotId,

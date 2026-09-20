@@ -184,7 +184,9 @@ export class RulesAuthoringController {
   @Post('new')
   @ApiOperation({ summary: 'Create a new bounded logical Rules XML draft' })
   @ApiCreatedResponse({ type: RulesAuthoringDraftDocument })
-  @ApiBadRequestResponse({ description: 'The logical file name, tenant, or source type is invalid.' })
+  @ApiBadRequestResponse({
+    description: 'The logical file name, tenant, or source type is invalid.',
+  })
   @ZodSerializerDto(RulesAuthoringDraftDocument)
   createNew(
     @Req() request: PrincipalRequest,
