@@ -1,7 +1,10 @@
 import { createHash } from 'node:crypto';
-import { spawn } from 'node:child_process';
+import { createReadStream } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { createGunzip } from 'node:zlib';
+
+import { extract, type ExtractEvents } from 'tar-stream';
 
 import type {
   RulesetArchiveInfo,
@@ -12,8 +15,7 @@ import type {
 
 const ARCHIVE_EXTENSIONS = ['.tar.gz', '.tgz'] as const;
 const XML_SOURCE_PATTERN = /(^|\/)(rules|decoders)\/[^/]+\.xml$/i;
-const TAR_LIST_OUTPUT_LIMIT_BYTES = 16 * 1024 * 1024;
-const TAR_COMMAND_TIMEOUT_MS = 30_000;
+const ARCHIVE_READ_TIMEOUT_MS = 30_000;
 
 interface ManagerArchiveSourceOptions {
   readonly rootPath: string;
@@ -22,15 +24,28 @@ interface ManagerArchiveSourceOptions {
   readonly maxTotalBytes: number;
 }
 
-interface ArchiveXmlEntry {
-  readonly archiveMember: string;
-  readonly sourcePath: string;
+interface ArchiveReadLimits {
+  readonly maxFiles: number;
+  readonly remainingFiles: number;
+  readonly maxEntryBytes: number;
+  readonly maxTotalBytes: number;
+  readonly remainingTotalBytes: number;
 }
 
-interface ArchiveWorkItem extends RulesetArchiveInfo {
-  readonly path: string;
-  readonly entries: readonly ArchiveXmlEntry[];
+interface ArchiveReadFile {
+  readonly sourcePath: string;
+  readonly content: string;
+  readonly size: number;
 }
+
+interface ArchiveReadResult {
+  readonly xmlFiles: number;
+  readonly files: readonly ArchiveReadFile[];
+  readonly totalBytes: number;
+  readonly errors: readonly string[];
+}
+
+type ArchiveEntryStream = ExtractEvents['entry'][1];
 
 function errorMessage(error: unknown, fallback: string): string {
   return error instanceof Error && error.message.trim() ? error.message : fallback;
@@ -59,98 +74,155 @@ function normalizeArchiveEntry(entry: string): string | null {
   return XML_SOURCE_PATTERN.test(normalized) ? normalized : null;
 }
 
-function runTar(args: readonly string[], maxStdoutBytes: number): Promise<Buffer> {
+async function drainArchiveEntry(stream: ArchiveEntryStream): Promise<void> {
+  for await (const chunk of stream) {
+    void chunk;
+  }
+}
+
+async function readArchiveEntry(
+  stream: ArchiveEntryStream,
+  expectedBytes: number,
+): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  let bytes = 0;
+
+  for await (const chunk of stream) {
+    if (!Buffer.isBuffer(chunk) && !(chunk instanceof Uint8Array)) {
+      throw new Error('archive member emitted an unsupported stream chunk');
+    }
+
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    bytes += buffer.length;
+
+    if (bytes > expectedBytes) {
+      throw new Error(`archive member exceeded its declared ${expectedBytes}-byte size`);
+    }
+
+    chunks.push(buffer);
+  }
+
+  if (bytes !== expectedBytes) {
+    throw new Error(
+      `archive member size mismatch: expected ${expectedBytes} bytes but read ${bytes}`,
+    );
+  }
+
+  return Buffer.concat(chunks, bytes);
+}
+
+function isRegularArchiveFile(type: string): boolean {
+  return type === 'file' || type === 'contiguous-file';
+}
+
+function readArchiveXml(
+  archivePath: string,
+  limits: ArchiveReadLimits,
+): Promise<ArchiveReadResult> {
   return new Promise((resolve, reject) => {
-    const child = spawn('tar', [...args], {
-      windowsHide: true,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    const stdout: Buffer[] = [];
-    const stderr: Buffer[] = [];
-    let stdoutBytes = 0;
+    const input = createReadStream(archivePath);
+    const gunzip = createGunzip();
+    const extractor = extract();
+    const seen = new Set<string>();
+    const files: ArchiveReadFile[] = [];
+    const errors: string[] = [];
+    let xmlFiles = 0;
+    let totalBytes = 0;
     let settled = false;
+
     const timeout = setTimeout(() => {
-      fail(new Error(`tar command exceeded the configured ${TAR_COMMAND_TIMEOUT_MS}-ms timeout`));
-    }, TAR_COMMAND_TIMEOUT_MS);
+      fail(new Error(`archive read exceeded the configured ${ARCHIVE_READ_TIMEOUT_MS}-ms timeout`));
+    }, ARCHIVE_READ_TIMEOUT_MS);
     timeout.unref();
 
     const fail = (error: Error): void => {
       if (settled) return;
       settled = true;
       clearTimeout(timeout);
-      child.kill('SIGKILL');
+      input.destroy();
+      gunzip.destroy();
+      extractor.destroy(error);
       reject(error);
     };
 
-    child.stdout.on('data', (chunk: Buffer) => {
-      stdoutBytes += chunk.length;
-      if (stdoutBytes > maxStdoutBytes) {
-        fail(new Error(`tar output exceeded the configured ${maxStdoutBytes}-byte limit`));
-        return;
-      }
-      stdout.push(chunk);
+    extractor.on('entry', (header, stream, next) => {
+      void (async () => {
+        const sourcePath = normalizeArchiveEntry(header.name);
+        if (!sourcePath) {
+          await drainArchiveEntry(stream);
+          next();
+          return;
+        }
+
+        xmlFiles += 1;
+        if (xmlFiles > limits.remainingFiles) {
+          throw new Error(
+            `snapshot contains more than the configured ${limits.maxFiles} XML-file limit`,
+          );
+        }
+
+        if (seen.has(sourcePath)) {
+          throw new Error(`duplicate archive member is not allowed: ${sourcePath}`);
+        }
+        seen.add(sourcePath);
+
+        if (!isRegularArchiveFile(header.type)) {
+          errors.push(`${sourcePath}: archive member is not a regular file`);
+          await drainArchiveEntry(stream);
+          next();
+          return;
+        }
+
+        if (header.size > limits.maxEntryBytes) {
+          errors.push(
+            `${sourcePath}: XML member exceeds the configured ${limits.maxEntryBytes}-byte limit`,
+          );
+          await drainArchiveEntry(stream);
+          next();
+          return;
+        }
+
+        if (totalBytes + header.size > limits.remainingTotalBytes) {
+          errors.push(
+            `${sourcePath}: snapshot exceeds the configured ${limits.maxTotalBytes}-byte XML limit`,
+          );
+          await drainArchiveEntry(stream);
+          next();
+          return;
+        }
+
+        const content = await readArchiveEntry(stream, header.size);
+        totalBytes += content.length;
+        files.push({
+          sourcePath,
+          content: content.toString('utf8'),
+          size: content.length,
+        });
+        next();
+      })().catch((error: unknown) => {
+        next(error instanceof Error ? error : new Error('failed to read archive member'));
+      });
     });
 
-    child.stderr.on('data', (chunk: Buffer) => {
-      if (stderr.reduce((total, item) => total + item.length, 0) < 64 * 1024) {
-        stderr.push(chunk);
-      }
-    });
-
-    child.on('error', (error) => fail(error));
-    child.on('close', (code) => {
+    input.on('error', fail);
+    gunzip.on('error', fail);
+    extractor.on('error', fail);
+    extractor.on('finish', () => {
       if (settled) return;
       settled = true;
       clearTimeout(timeout);
 
-      if (code === 0) {
-        resolve(Buffer.concat(stdout));
-        return;
-      }
-
-      const detail = Buffer.concat(stderr).toString('utf8').trim();
-      reject(new Error(detail || `tar exited with code ${String(code)}`));
+      files.sort((left, right) => left.sourcePath.localeCompare(right.sourcePath));
+      resolve({
+        xmlFiles,
+        files,
+        totalBytes,
+        errors,
+      });
     });
+
+    input.pipe(gunzip).pipe(extractor);
   });
-}
-
-async function listXmlEntries(
-  archivePath: string,
-  maxFiles: number,
-): Promise<readonly ArchiveXmlEntry[]> {
-  const output = await runTar(['-tzf', archivePath], TAR_LIST_OUTPUT_LIMIT_BYTES);
-  const seen = new Set<string>();
-  const entries: ArchiveXmlEntry[] = [];
-
-  for (const rawEntry of output.toString('utf8').split(/\r?\n/)) {
-    const archiveMember = rawEntry.trim();
-    if (!archiveMember) continue;
-
-    const sourcePath = normalizeArchiveEntry(archiveMember);
-    if (!sourcePath) continue;
-    if (seen.has(sourcePath)) {
-      throw new Error(`duplicate archive member is not allowed: ${sourcePath}`);
-    }
-
-    seen.add(sourcePath);
-    entries.push({ archiveMember, sourcePath });
-
-    if (entries.length > maxFiles) {
-      throw new Error(`archive contains more than the configured ${maxFiles} XML-file limit`);
-    }
-  }
-
-  entries.sort((left, right) => left.sourcePath.localeCompare(right.sourcePath));
-  return entries;
-}
-
-async function readArchiveEntry(
-  archivePath: string,
-  entry: string,
-  maxEntryBytes: number,
-): Promise<string> {
-  const output = await runTar(['-xOzf', archivePath, '--', entry], maxEntryBytes);
-  return output.toString('utf8');
 }
 
 function buildFingerprint(archives: readonly RulesetArchiveInfo[]): string {
@@ -179,7 +251,6 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
   async readSnapshot(): Promise<RulesetArchiveSnapshot> {
     const loadedAt = new Date().toISOString();
     const archives: RulesetArchiveInfo[] = [];
-    const workItems: ArchiveWorkItem[] = [];
     const files: RulesetSourceInput[] = [];
     const errors: string[] = [];
 
@@ -209,81 +280,42 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
       .sort((left, right) => left.localeCompare(right));
 
     let totalXmlFiles = 0;
+    let totalBytes = 0;
 
     for (const archiveName of archiveNames) {
       const archivePath = path.join(this.options.rootPath, archiveName);
 
       try {
         const archiveStat = await stat(archivePath);
-        const entries = await listXmlEntries(archivePath, this.options.maxFiles - totalXmlFiles);
+        const result = await readArchiveXml(archivePath, {
+          maxFiles: this.options.maxFiles,
+          remainingFiles: this.options.maxFiles - totalXmlFiles,
+          maxEntryBytes: this.options.maxEntryBytes,
+          maxTotalBytes: this.options.maxTotalBytes,
+          remainingTotalBytes: this.options.maxTotalBytes - totalBytes,
+        });
 
-        totalXmlFiles += entries.length;
-        if (totalXmlFiles > this.options.maxFiles) {
-          throw new Error(
-            `snapshot contains more than the configured ${this.options.maxFiles} XML-file limit`,
-          );
-        }
+        totalXmlFiles += result.xmlFiles;
+        totalBytes += result.totalBytes;
 
         const archive: RulesetArchiveInfo = {
           name: archiveName,
           size: archiveStat.size,
           modifiedAt: archiveStat.mtime.toISOString(),
-          xmlFiles: entries.length,
+          xmlFiles: result.xmlFiles,
         };
 
         archives.push(archive);
-        workItems.push({
-          ...archive,
-          path: archivePath,
-          entries,
-        });
+        files.push(
+          ...result.files.map((file) => ({
+            name: `${archive.name}/${file.sourcePath}`,
+            content: file.content,
+            size: file.size,
+          })),
+        );
+        errors.push(...result.errors.map((error) => `${archive.name}/${error}`));
       } catch (error) {
         errors.push(`${archiveName}: ${errorMessage(error, 'failed to inspect archive')}`);
-      }
-    }
-
-    let totalBytes = 0;
-
-    for (const archive of workItems) {
-      for (const entry of archive.entries) {
-        if (files.length >= this.options.maxFiles) {
-          errors.push(
-            `snapshot XML-file limit of ${this.options.maxFiles} reached before all archives were read`,
-          );
-          break;
-        }
-
-        try {
-          const content = await readArchiveEntry(
-            archive.path,
-            entry.archiveMember,
-            this.options.maxEntryBytes,
-          );
-          const size = Buffer.byteLength(content, 'utf8');
-
-          if (size > this.options.maxEntryBytes) {
-            throw new Error(
-              `XML member exceeds the configured ${this.options.maxEntryBytes}-byte limit`,
-            );
-          }
-
-          if (totalBytes + size > this.options.maxTotalBytes) {
-            throw new Error(
-              `snapshot exceeds the configured ${this.options.maxTotalBytes}-byte XML limit`,
-            );
-          }
-
-          totalBytes += size;
-          files.push({
-            name: `${archive.name}/${entry.sourcePath}`,
-            content,
-            size,
-          });
-        } catch (error) {
-          errors.push(
-            `${archive.name}/${entry.sourcePath}: ${errorMessage(error, 'failed to read archive member')}`,
-          );
-        }
       }
     }
 
