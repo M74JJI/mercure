@@ -25,6 +25,8 @@ jobs:
       AUTH_KEYCLOAK_SECRET: ci-only-not-a-production-secret
       AUTH_KEYCLOAK_ISSUER: https://identity.example.test/realms/mercure
       WEB_AUTH_AUTHORITY_CLIENT_ID: mercure-api
+      WEB_AUTH_ADMIN_AUTHORITIES: mercure-admin
+      WEB_AUTH_USER_AUTHORITIES: mercure-user
       NEXT_PUBLIC_API_BASE_URL: https://api.example.test
 
     steps:
