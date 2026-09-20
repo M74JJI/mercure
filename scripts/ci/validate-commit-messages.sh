@@ -13,6 +13,15 @@ validate_commit() {
   subject="$(git show -s --format=%s "$sha")"
   body="$(git show -s --format=%B "$sha")"
 
+  local parents
+  parents="$(git show -s --format=%P "$sha")"
+
+  if [[ "$(wc -w <<< "$parents" | tr -d ' ')" -ge 2 ]] &&
+     [[ "$subject" =~ ^Merge[[:space:]]pull[[:space:]]request[[:space:]]\#[0-9]+[[:space:]]from[[:space:]][A-Za-z0-9_.-]+/[A-Za-z0-9._/-]+$ ]]; then
+    validate_attribution "$body"
+    return 0
+  fi
+
   validate_subject "$subject" "Commit $sha"
   validate_attribution "$body"
 }
