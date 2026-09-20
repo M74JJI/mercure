@@ -31,6 +31,7 @@ import {
 } from '@mercure/platform-backend-identity-domain';
 import {
   ApproveRulesAuthoringDraft,
+  CreateNewRulesAuthoringDraft,
   CreateRulesAuthoringDraft,
   ExportRulesAuthoringDraft,
   GetRulesAuthoringDraft,
@@ -47,6 +48,7 @@ import {
 
 import {
   RulesAuthoringDraftCreateDto,
+  RulesAuthoringDraftCreateNewDto,
   RulesAuthoringDraftDocument,
   RulesAuthoringDraftListDocument,
   RulesAuthoringDraftParamsDto,
@@ -98,6 +100,7 @@ function translateAuthoringError(error: unknown): never {
 @ApiExtraModels(
   RulesAuthoringDraftParamsDto,
   RulesAuthoringDraftCreateDto,
+  RulesAuthoringDraftCreateNewDto,
   RulesAuthoringDraftUpdateDto,
   RulesAuthoringDraftTransitionDto,
 )
@@ -108,6 +111,7 @@ export class RulesAuthoringController {
   constructor(
     private readonly listDrafts: ListRulesAuthoringDrafts,
     private readonly getDraft: GetRulesAuthoringDraft,
+    private readonly createNewDraft: CreateNewRulesAuthoringDraft,
     private readonly createDraft: CreateRulesAuthoringDraft,
     private readonly updateDraft: UpdateRulesAuthoringDraft,
     private readonly validateDraft: ValidateRulesAuthoringDraft,
@@ -167,6 +171,26 @@ export class RulesAuthoringController {
       this.createDraft.execute({
         sourceSnapshotId: body.sourceSnapshotId,
         sourceFilePosition: body.sourceFilePosition,
+        actorSubject: actor,
+      }),
+    );
+  }
+
+  @Post('new')
+  @ApiOperation({ summary: 'Create a new bounded logical Rules XML draft' })
+  @ApiCreatedResponse({ type: RulesAuthoringDraftDocument })
+  @ApiBadRequestResponse({ description: 'The logical file name, tenant, or source type is invalid.' })
+  @ZodSerializerDto(RulesAuthoringDraftDocument)
+  createNew(
+    @Req() request: PrincipalRequest,
+    @ZodBody(RulesAuthoringDraftCreateNewDto) body: RulesAuthoringDraftCreateNewDto,
+  ) {
+    const actor = principal(request).subject;
+    return this.mutation(actor, 'create', undefined, () =>
+      this.createNewDraft.execute({
+        fileName: body.fileName,
+        tenant: body.tenant,
+        sourceType: body.sourceType,
         actorSubject: actor,
       }),
     );

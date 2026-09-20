@@ -9,6 +9,7 @@ import {
   ApproveRulesAuthoringDraft,
   BuildRulesetSnapshotGraph,
   CompareRulesetSnapshots,
+  CreateNewRulesAuthoringDraft,
   CreateRulesAuthoringDraft,
   CreateCustomRulesUseCase,
   DeleteCustomRulesUseCase,
@@ -108,6 +109,11 @@ import {
     {
       provide: GetRulesAuthoringDraft,
       useFactory: (store: RulesAuthoringDraftStore) => new GetRulesAuthoringDraft(store),
+      inject: [RULES_AUTHORING_DRAFT_STORE],
+    },
+    {
+      provide: CreateNewRulesAuthoringDraft,
+      useFactory: (store: RulesAuthoringDraftStore) => new CreateNewRulesAuthoringDraft(store),
       inject: [RULES_AUTHORING_DRAFT_STORE],
     },
     {
@@ -256,6 +262,7 @@ import {
     AnalyzeRuleset,
     ListRulesAuthoringDrafts,
     GetRulesAuthoringDraft,
+    CreateNewRulesAuthoringDraft,
     CreateRulesAuthoringDraft,
     UpdateRulesAuthoringDraft,
     ValidateRulesAuthoringDraft,

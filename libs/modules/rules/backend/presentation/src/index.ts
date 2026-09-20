@@ -48,6 +48,7 @@ export {
 export { RulesAuthoringController } from './lib/rules-authoring.controller';
 export {
   RulesAuthoringDraftCreateDto,
+  RulesAuthoringDraftCreateNewDto,
   RulesAuthoringDraftDocument,
   RulesAuthoringDraftListDocument,
   RulesAuthoringDraftParamsDto,

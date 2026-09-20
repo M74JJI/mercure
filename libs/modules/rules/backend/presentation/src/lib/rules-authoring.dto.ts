@@ -49,8 +49,8 @@ const validationSummaryWithoutIssuesSchema = z.object(validationBase).strict();
 
 const draftBase = {
   id: z.string().uuid(),
-  sourceSnapshotId: z.string().uuid(),
-  sourceFilePosition: z.number().int().min(0),
+  sourceSnapshotId: z.string().uuid().optional(),
+  sourceFilePosition: z.number().int().min(0).optional(),
   fileName: z.string(),
   tenant: z.string(),
   sourceType: sourceTypeSchema,
@@ -76,6 +76,16 @@ export class RulesAuthoringDraftCreateDto extends createZodDto(
     .object({
       sourceSnapshotId: z.string().uuid(),
       sourceFilePosition: z.number().int().min(0),
+    })
+    .strict(),
+) {}
+
+export class RulesAuthoringDraftCreateNewDto extends createZodDto(
+  z
+    .object({
+      fileName: z.string().min(5).max(255),
+      tenant: z.string().min(1).max(255),
+      sourceType: sourceTypeSchema,
     })
     .strict(),
 ) {}

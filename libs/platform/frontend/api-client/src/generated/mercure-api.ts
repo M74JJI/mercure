@@ -206,6 +206,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/rules/authoring/drafts/new': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create a new bounded logical Rules XML draft */
+    post: operations['RulesAuthoringController_createNew'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/rules/authoring/drafts/{draftId}': {
     parameters: {
       query?: never;
@@ -645,6 +662,12 @@ export interface components {
       sourceSnapshotId: string;
       sourceFilePosition: number;
     };
+    RulesAuthoringDraftCreateNewDto: {
+      fileName: string;
+      tenant: string;
+      /** @enum {string} */
+      sourceType: 'rules' | 'decoders';
+    };
     RulesAuthoringDraftUpdateDto: {
       expectedRevision: number;
       content: string;
@@ -656,8 +679,8 @@ export interface components {
       /** Format: uuid */
       id: string;
       /** Format: uuid */
-      sourceSnapshotId: string;
-      sourceFilePosition: number;
+      sourceSnapshotId?: string;
+      sourceFilePosition?: number;
       fileName: string;
       tenant: string;
       /** @enum {string} */
@@ -711,8 +734,8 @@ export interface components {
       /** Format: uuid */
       id: string;
       /** Format: uuid */
-      sourceSnapshotId: string;
-      sourceFilePosition: number;
+      sourceSnapshotId?: string;
+      sourceFilePosition?: number;
       fileName: string;
       tenant: string;
       /** @enum {string} */
@@ -1526,6 +1549,24 @@ export interface operations {
       };
       400: { headers: { [name: string]: unknown }; content?: never };
       404: { headers: { [name: string]: unknown }; content?: never };
+    };
+  };
+  RulesAuthoringController_createNew: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: { 'application/json': components['schemas']['RulesAuthoringDraftCreateNewDto'] };
+    };
+    responses: {
+      201: {
+        headers: { [name: string]: unknown };
+        content: { 'application/json': components['schemas']['RulesAuthoringDraftDocument'] };
+      };
+      400: { headers: { [name: string]: unknown }; content?: never };
     };
   };
   RulesAuthoringController_get: {
