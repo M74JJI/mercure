@@ -264,6 +264,36 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
         sourceSnapshotId: null,
         sourceFilePosition: null,
       });
+
+      await expect(
+        database.rulesAuthoringDraft.create({
+          data: {
+            sourceFilePosition: 99,
+            fileName: 'invalid-provenance.xml',
+            tenant: 'manager-invalid',
+            sourceType: 'rules',
+            content: '<group name="invalid,"></group>',
+            sha256: 'c'.repeat(64),
+            createdBy: 'constraint-test',
+            updatedBy: 'constraint-test',
+          },
+        }),
+      ).rejects.toThrow();
+
+      await expect(
+        database.rulesAuthoringDraft.create({
+          data: {
+            fileName: 'invalid-approved.xml',
+            tenant: 'manager-invalid',
+            sourceType: 'rules',
+            content: '<group name="invalid,"></group>',
+            sha256: 'd'.repeat(64),
+            state: 'approved',
+            createdBy: 'constraint-test',
+            updatedBy: 'constraint-test',
+          },
+        }),
+      ).rejects.toThrow();
     } finally {
       if (standaloneDraftId) {
         await database.rulesAuthoringDraft.delete({ where: { id: standaloneDraftId } });
