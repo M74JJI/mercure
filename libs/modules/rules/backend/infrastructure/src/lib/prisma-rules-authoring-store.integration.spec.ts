@@ -429,15 +429,7 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
           database.rulesAuthoringDraft.update({
             where: { id: standalone.id },
             data: {
-              validatedRevision: standalone.revision,
-              validatedSha256: standalone.sha256,
-              validatedRuleCount: 0,
-              validatedDecoderCount: 0,
-              validationIssueCount: 0,
-              validationErrorCount: 0,
-              validationWarningCount: 0,
-              validationInfoCount: 0,
-              validatedAt: new Date(),
+              state: 'draft',
             },
           }),
         ).rejects.toThrow();
