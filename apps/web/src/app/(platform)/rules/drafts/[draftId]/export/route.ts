@@ -13,6 +13,10 @@ function safeFileName(value: string): string {
   return safe.toLowerCase().endsWith('.xml') ? safe : safe + '.xml';
 }
 
+const draftIdPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+
 export async function GET(
   _request: Request,
   { params }: { readonly params: Promise<{ readonly draftId: string }> },
@@ -22,6 +26,10 @@ export async function GET(
   if (identity.role !== 'admin') return new Response('Forbidden.', { status: 403 });
 
   const { draftId } = await params;
+  if (!draftIdPattern.test(draftId)) {
+    return new Response('Invalid draft ID.', { status: 400 });
+  }
+
   try {
     const artifact = await new RulesAuthoringDataAccess({
       fetch: authenticatedMercureFetch,
@@ -40,10 +48,28 @@ export async function GET(
     });
   } catch (error) {
     if (error instanceof RulesFrontendApiError) {
-      return new Response(
-        error.status === 404 ? 'Draft not found.' : error.status === 409 ? 'Draft is not exportable.' : 'Authoring export unavailable.',
-        { status: error.status === 404 || error.status === 409 ? error.status : 503 },
-      );
+      const status =
+        error.status === 400 ||
+        error.status === 401 ||
+        error.status === 403 ||
+        error.status === 404 ||
+        error.status === 409
+          ? error.status
+          : 503;
+      const message =
+        status === 400
+          ? 'Invalid export request.'
+          : status === 401
+            ? 'Authentication required.'
+            : status === 403
+              ? 'Forbidden.'
+              : status === 404
+                ? 'Draft not found.'
+                : status === 409
+                  ? 'Draft is not exportable.'
+                  : 'Authoring export unavailable.';
+
+      return new Response(message, { status });
     }
     throw error;
   }
