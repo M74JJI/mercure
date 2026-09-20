@@ -55,6 +55,8 @@ At minimum configure:
 - `OIDC_ISSUER_URL` using HTTPS;
 - `OIDC_AUDIENCE`;
 - `OIDC_CLIENT_ID`;
+- `OIDC_ADMIN_AUTHORITIES` with application-specific administrator roles/groups;
+- `OIDC_USER_AUTHORITIES` with application-specific user roles/groups;
 - `RULES_MANAGER_ARCHIVE_DIR`.
 
 Review the bounded database, JWKS, HTTP body, and Rules archive limits in `.env.example` before deployment. The Rules authoring domain remains capped at 1 MiB of XML, while the HTTP and Server Action transport envelope is 4 MiB so form/JSON framing and escaping cannot reject a valid near-limit draft before domain validation. Do not configure `API_BODY_LIMIT_BYTES` below 4 MiB.
@@ -72,6 +74,8 @@ Production requires explicit:
 - `AUTH_KEYCLOAK_SECRET`;
 - `AUTH_KEYCLOAK_ISSUER` using HTTPS;
 - `WEB_AUTH_AUTHORITY_CLIENT_ID`;
+- `WEB_AUTH_ADMIN_AUTHORITIES`;
+- `WEB_AUTH_USER_AUTHORITIES`;
 - `NEXT_PUBLIC_API_BASE_URL` pointing to the intended API origin.
 
 Keep frontend and backend authority mappings aligned. Frontend role mapping controls presentation and routing only; NestJS capability enforcement is authoritative.

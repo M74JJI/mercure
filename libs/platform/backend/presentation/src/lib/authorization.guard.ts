@@ -39,7 +39,7 @@ export class AuthorizationGuard implements CanActivate {
       ) ?? [];
 
     if (required.length === 0) {
-      return true;
+      throw new ForbiddenException('Authorization policy is required.');
     }
 
     const request = context.switchToHttp().getRequest<MercureAuthenticatedRequest>();

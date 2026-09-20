@@ -110,9 +110,13 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
     let snapshotId: string | undefined;
 
     try {
-      const saved = await store.persist(imported);
+      const [saved, concurrentDuplicate] = await Promise.all([
+        store.persist(imported),
+        store.persist(imported),
+      ]);
       snapshotId = saved.id;
 
+      expect(concurrentDuplicate.id).toBe(saved.id);
       expect(saved).toMatchObject({
         sourceFingerprint: 'a'.repeat(64),
         complete: false,

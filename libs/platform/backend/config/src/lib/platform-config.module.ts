@@ -169,7 +169,13 @@ export function parsePlatformEnvironment(
   const parsed = platformEnvironmentSchema.parse(environment);
 
   if (parsed.NODE_ENV === 'production') {
-    const required = ['OIDC_ISSUER_URL', 'OIDC_AUDIENCE', 'OIDC_CLIENT_ID'] as const;
+    const required = [
+      'OIDC_ISSUER_URL',
+      'OIDC_AUDIENCE',
+      'OIDC_CLIENT_ID',
+      'OIDC_ADMIN_AUTHORITIES',
+      'OIDC_USER_AUTHORITIES',
+    ] as const;
     for (const key of required) {
       const rawValue = environment[key];
       if (typeof rawValue !== 'string' || rawValue.trim() === '') {

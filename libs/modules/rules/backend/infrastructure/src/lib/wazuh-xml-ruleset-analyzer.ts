@@ -69,27 +69,6 @@ function maskXmlCommentsPreservingOffsets(content: string): string {
   return content.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/[^\r\n]/g, ' '));
 }
 
-function enclosingRuleGroups(content: string, ruleStartIndex: number): string[] {
-  const stack: string[][] = [];
-  const expression = /<\/?group\b[^>]*>/gi;
-  let match: RegExpExecArray | null;
-
-  while ((match = expression.exec(content)) && match.index < ruleStartIndex) {
-    const tag = match[0];
-    if (!tag) continue;
-
-    if (/^<\/group\b/i.test(tag)) {
-      stack.pop();
-      continue;
-    }
-
-    if (/\/\s*>$/.test(tag)) continue;
-    stack.push(splitCsv(attribute(tag, 'name')));
-  }
-
-  return [...new Set(stack.flat())];
-}
-
 const XML_NAME = /^[A-Za-z_][A-Za-z0-9_.:-]*/;
 const XML_ENTITY = /&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9A-Fa-f]+;)/;
 
@@ -405,21 +384,31 @@ function parseRuleBlock(
 function parseRules(source: RulesetSourceFile): RuleRecord[] {
   const rules: RuleRecord[] = [];
   const semanticContent = maskXmlCommentsPreservingOffsets(source.content);
-  const expression = /<rule\b[\s\S]*?<\/rule>/gi;
-  let match: RegExpExecArray | null;
+  const ruleExpression = /<rule\b[\s\S]*?<\/rule>/gi;
+  const groupExpression = /<\/?group\b[^>]*>/gi;
+  const groupStack: string[][] = [];
+  let groupMatch = groupExpression.exec(semanticContent);
+  let ruleMatch: RegExpExecArray | null;
 
-  while ((match = expression.exec(semanticContent))) {
-    const block = match[0];
+  while ((ruleMatch = ruleExpression.exec(semanticContent))) {
+    while (groupMatch && groupMatch.index < ruleMatch.index) {
+      const tag = groupMatch[0];
+
+      if (/^<\/group\b/i.test(tag)) {
+        groupStack.pop();
+      } else if (!/\/\s*>$/.test(tag)) {
+        groupStack.push(splitCsv(attribute(tag, 'name')));
+      }
+
+      groupMatch = groupExpression.exec(semanticContent);
+    }
+
+    const block = ruleMatch[0];
     if (!block) continue;
 
-    const rawXml = source.content.slice(match.index, match.index + block.length);
-    const rule = parseRuleBlock(
-      block,
-      source,
-      match.index,
-      enclosingRuleGroups(semanticContent, match.index),
-      rawXml,
-    );
+    const rawXml = source.content.slice(ruleMatch.index, ruleMatch.index + block.length);
+    const enclosingGroups = [...new Set(groupStack.flat())];
+    const rule = parseRuleBlock(block, source, ruleMatch.index, enclosingGroups, rawXml);
     if (rule) rules.push(rule);
   }
 

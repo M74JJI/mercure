@@ -422,6 +422,33 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     expect(result.decoders.map((decoder) => decoder.name)).toEqual(['active_decoder']);
   });
 
+  it('tracks enclosing groups across many rules without leaking rule-local groups', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const rules = Array.from({ length: 200 }, (_value, index) => {
+      const id = 155000 + index;
+      return [
+        `  <rule id="${id}" level="5">`,
+        `    <description>Rule ${id}</description>`,
+        '    <group>rule_local,</group>',
+        '  </rule>',
+      ].join('\n');
+    });
+
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-e/rules/1550-many-wrapper_rules.xml',
+          content: ['<group name="windows,production,">', ...rules, '</group>'].join('\n'),
+        },
+      ],
+    });
+
+    expect(result.rules).toHaveLength(200);
+    expect(result.rules.every((rule) => rule.groups.includes('windows'))).toBe(true);
+    expect(result.rules.every((rule) => rule.groups.includes('production'))).toBe(true);
+    expect(result.rules.every((rule) => rule.groups.includes('rule_local'))).toBe(true);
+  });
+
   it('accepts Wazuh level 16 and splits SID references separated by spaces or commas', async () => {
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const result = await analyzer.analyze({
