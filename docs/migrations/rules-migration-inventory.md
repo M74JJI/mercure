@@ -56,5 +56,7 @@ Completed:
 
 Next:
 
-1. the approved non-AI Rules migration scope is complete at the current backend/application and read-only frontend boundaries;
-2. public mutating Rules administration, identity/RBAC, intelligence presentation APIs/UI, and AI-assisted features require separate product/security decisions and ADRs before implementation.
+1. the approved non-AI Rules migration scope is complete at the current backend/application and baseline read-only frontend boundaries;
+2. ADR-0015 approves the external OIDC identity, protected-by-default API and capability authorization boundary; that enforcement must land before additional protected Rules presentation routes;
+3. ADR-0016 approves bounded read-only presentation of the existing diff, round-trip diagnostics, use-case catalog, field intelligence, quality and semantic graph capabilities;
+4. public mutating Rules administration, XML export/edit workflows, tenant-level RBAC and AI-assisted features remain deferred and require separate product/security decisions before implementation.
