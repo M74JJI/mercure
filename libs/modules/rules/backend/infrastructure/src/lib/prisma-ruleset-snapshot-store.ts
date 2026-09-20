@@ -207,7 +207,7 @@ export class PrismaRulesetSnapshotStore implements RulesetSnapshotStore {
           criticalCount: stats.critical,
           mitreMappedCount: stats.mitreMapped,
           missingUseCaseCount: stats.missingUseCase,
-          brokenDependencyCount: stats.brokenDependencies,
+          unresolvedDependencyCount: stats.unresolvedDependencies,
         },
         select: {
           id: true,
