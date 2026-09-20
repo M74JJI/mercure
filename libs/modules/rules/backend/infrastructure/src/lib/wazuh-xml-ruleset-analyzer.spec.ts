@@ -453,7 +453,6 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     expect(result.issues.filter((issue) => issue.type === 'level_above_standard')).toEqual([]);
   });
 
-
   it('preserves source-section attribution beyond the former lookback window', async () => {
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const result = await analyzer.analyze({
