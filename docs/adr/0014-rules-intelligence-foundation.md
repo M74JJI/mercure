@@ -114,4 +114,5 @@ M12 does not include:
 - Multi-manager snapshots cannot silently cross-link rule IDs, decoder names, groups, or fields.
 - Frontend visualization can evolve independently from backend graph semantics.
 - Quality scores have consistent directionality and stable tenant-scoped identities.
+- Snapshot summaries expose absent local references as `unresolvedDependencyCount`; the metric does not claim that stock/external Wazuh dependencies are broken.
 - Future API/UI work can expose bounded intelligence results without reimplementing analysis in Next.js.
