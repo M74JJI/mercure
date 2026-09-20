@@ -438,11 +438,7 @@ describe('WazuhXmlRulesetAnalyzer', () => {
       files: [
         {
           name: 'manager-e/rules/1550-many-wrapper_rules.xml',
-          content: [
-            '<group name="windows,production,">',
-            ...rules,
-            '</group>',
-          ].join('\n'),
+          content: ['<group name="windows,production,">', ...rules, '</group>'].join('\n'),
         },
       ],
     });

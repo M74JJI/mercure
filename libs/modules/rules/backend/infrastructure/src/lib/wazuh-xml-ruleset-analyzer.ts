@@ -408,13 +408,7 @@ function parseRules(source: RulesetSourceFile): RuleRecord[] {
 
     const rawXml = source.content.slice(ruleMatch.index, ruleMatch.index + block.length);
     const enclosingGroups = [...new Set(groupStack.flat())];
-    const rule = parseRuleBlock(
-      block,
-      source,
-      ruleMatch.index,
-      enclosingGroups,
-      rawXml,
-    );
+    const rule = parseRuleBlock(block, source, ruleMatch.index, enclosingGroups, rawXml);
     if (rule) rules.push(rule);
   }
 
