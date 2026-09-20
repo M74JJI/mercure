@@ -2,7 +2,7 @@
 
 ## Commit format
 
-Every commit subject MUST match:
+Every authored commit subject MUST match:
 
 `<type>:<scope>:<description>`
 
@@ -42,6 +42,8 @@ Initial allowed scopes:
 - `testing`
 
 `identity` is the platform security/SSO scope. New product-module scopes are added deliberately as modules are introduced.
+
+GitHub-generated two-parent pull-request merge commits on `main` are the sole subject-format exception. Governance recognizes only the canonical `Merge pull request #<number> from <owner>/<branch>` form; authored commits, branch pushes, and PR commit ranges remain subject to the format above.
 
 Examples:
 
