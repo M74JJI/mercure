@@ -27,7 +27,7 @@ A green code review without these environment checks is a release candidate, not
 - pnpm: version pinned by `packageManager` in `package.json`.
 - PostgreSQL compatible with the repository migration history; CI validates against PostgreSQL 18.6.
 - Keycloak or a compatible OIDC issuer configured according to `docs/standards/keycloak-identity.md`.
-- A reverse proxy / ingress that provides HTTPS for the web application and API in production.
+- A reverse proxy / ingress that provides HTTPS for the web application and API in production. Its request-body limit must be at least 4 MiB so the bounded authoring transport envelope is not truncated or rejected before Next/Fastify validation; keep the proxy limit explicitly bounded rather than unlimited.
 - Read access from the API runtime to the configured `RULES_MANAGER_ARCHIVE_DIR`.
 - The system `tar` executable for bounded manager archive inspection.
 
