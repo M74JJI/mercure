@@ -31,6 +31,7 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
 
     let snapshotId: string | undefined;
     let draftId: string | undefined;
+    let standaloneDraftId: string | undefined;
 
     try {
       const analysis = await analyzer.analyze({
@@ -230,7 +231,43 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
         { eventType: 'validate', revision: 2, actorSubject: 'admin-validate' },
         { eventType: 'approve', revision: 2, actorSubject: 'admin-approve' },
       ]);
+
+      const standalone = await authoringStore.createNew(
+        {
+          fileName: '4300-standalone_rules.xml',
+          tenant: 'manager-standalone',
+          sourceType: 'rules',
+          content: '<group name="custom,">\n</group>\n',
+        },
+        'admin-standalone',
+      );
+      standaloneDraftId = standalone.id;
+
+      expect(standalone.sourceSnapshotId).toBeUndefined();
+      expect(standalone.sourceFilePosition).toBeUndefined();
+      expect(standalone).toMatchObject({
+        fileName: '4300-standalone_rules.xml',
+        tenant: 'manager-standalone',
+        sourceType: 'rules',
+        revision: 1,
+        state: 'draft',
+      });
+
+      const storedStandalone = await database.rulesAuthoringDraft.findUnique({
+        where: { id: standalone.id },
+        select: {
+          sourceSnapshotId: true,
+          sourceFilePosition: true,
+        },
+      });
+      expect(storedStandalone).toEqual({
+        sourceSnapshotId: null,
+        sourceFilePosition: null,
+      });
     } finally {
+      if (standaloneDraftId) {
+        await database.rulesAuthoringDraft.delete({ where: { id: standaloneDraftId } });
+      }
       if (draftId) {
         await database.rulesAuthoringDraft.delete({ where: { id: draftId } });
       }
