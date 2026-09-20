@@ -283,6 +283,22 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
       await expect(
         database.rulesAuthoringDraft.create({
           data: {
+            sourceSnapshotId: snapshotId,
+            sourceFilePosition: 99_999,
+            fileName: 'invalid-source-link.xml',
+            tenant: 'manager-invalid',
+            sourceType: 'rules',
+            content: '<group name="invalid,"></group>',
+            sha256: 'e'.repeat(64),
+            createdBy: 'constraint-test',
+            updatedBy: 'constraint-test',
+          },
+        }),
+      ).rejects.toThrow();
+
+      await expect(
+        database.rulesAuthoringDraft.create({
+          data: {
             fileName: 'invalid-approved.xml',
             tenant: 'manager-invalid',
             sourceType: 'rules',

@@ -31,6 +31,10 @@ CREATE TABLE "rules_authoring_drafts" (
     CONSTRAINT "rules_authoring_drafts_source_snapshot_id_fkey"
       FOREIGN KEY ("source_snapshot_id") REFERENCES "ruleset_snapshots"("id")
       ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "rules_authoring_drafts_source_file_fkey"
+      FOREIGN KEY ("source_snapshot_id", "source_file_position")
+      REFERENCES "ruleset_snapshot_files"("snapshot_id", "position")
+      ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "rules_authoring_drafts_source_type_check"
       CHECK ("source_type" IN ('rules', 'decoders')),
     CONSTRAINT "rules_authoring_drafts_state_check"
