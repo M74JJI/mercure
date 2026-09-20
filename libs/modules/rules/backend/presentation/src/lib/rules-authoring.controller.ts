@@ -117,10 +117,12 @@ export class RulesAuthoringController {
   constructor(
     @Inject(ListRulesAuthoringDrafts) private readonly listDrafts: ListRulesAuthoringDrafts,
     @Inject(GetRulesAuthoringDraft) private readonly getDraft: GetRulesAuthoringDraft,
-    @Inject(CreateNewRulesAuthoringDraft) private readonly createNewDraft: CreateNewRulesAuthoringDraft,
+    @Inject(CreateNewRulesAuthoringDraft)
+    private readonly createNewDraft: CreateNewRulesAuthoringDraft,
     @Inject(CreateRulesAuthoringDraft) private readonly createDraft: CreateRulesAuthoringDraft,
     @Inject(UpdateRulesAuthoringDraft) private readonly updateDraft: UpdateRulesAuthoringDraft,
-    @Inject(ValidateRulesAuthoringDraft) private readonly validateDraft: ValidateRulesAuthoringDraft,
+    @Inject(ValidateRulesAuthoringDraft)
+    private readonly validateDraft: ValidateRulesAuthoringDraft,
     @Inject(ApproveRulesAuthoringDraft) private readonly approveDraft: ApproveRulesAuthoringDraft,
     @Inject(ExportRulesAuthoringDraft) private readonly exportDraft: ExportRulesAuthoringDraft,
   ) {}

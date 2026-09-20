@@ -88,7 +88,8 @@ export class RulesIntelligenceController {
     @Inject(ScoreRulesetSnapshotQuality) private readonly quality: ScoreRulesetSnapshotQuality,
     @Inject(BuildRulesetSnapshotGraph) private readonly graph: BuildRulesetSnapshotGraph,
     @Inject(CompareRulesetSnapshots) private readonly comparison: CompareRulesetSnapshots,
-    @Inject(AnalyzeRulesetSnapshotRoundtrip) private readonly roundtrip: AnalyzeRulesetSnapshotRoundtrip,
+    @Inject(AnalyzeRulesetSnapshotRoundtrip)
+    private readonly roundtrip: AnalyzeRulesetSnapshotRoundtrip,
   ) {}
 
   @Get('snapshots/:snapshotId/fields')
