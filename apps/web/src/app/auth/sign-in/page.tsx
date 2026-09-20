@@ -14,5 +14,5 @@ interface SignInPageProps {
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
   const { callbackUrl } = await searchParams;
-  return <IdentitySignInFeature callbackUrl={callbackUrl} />;
+  return <IdentitySignInFeature {...(callbackUrl === undefined ? {} : { callbackUrl })} />;
 }
