@@ -7,8 +7,7 @@ import {
   RulesFrontendApiError,
 } from '@mercure/rules-frontend-data-access';
 
-const draftIdPattern =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const draftIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function safeFileName(value: string): string {
   const leaf = value.split(/[\\/]/).at(-1) || 'rules.xml';
@@ -45,8 +44,7 @@ export async function exportRulesAuthoringDraftResponse(draftId: string): Promis
       status: 200,
       headers: {
         'cache-control': 'no-store',
-        'content-disposition':
-          'attachment; filename="' + safeFileName(artifact.fileName) + '"',
+        'content-disposition': 'attachment; filename="' + safeFileName(artifact.fileName) + '"',
         'content-type': 'application/xml; charset=utf-8',
         'x-content-type-options': 'nosniff',
         'x-mercure-draft-revision': String(artifact.revision),
