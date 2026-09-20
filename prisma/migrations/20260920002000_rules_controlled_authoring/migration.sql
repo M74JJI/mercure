@@ -70,7 +70,9 @@ CREATE TABLE "rules_authoring_drafts" (
           AND "validated_revision" = "revision"
           AND "validated_sha256" = "sha256"
           AND "validated_rule_count" IS NOT NULL
+          AND "validated_rule_count" >= 0
           AND "validated_decoder_count" IS NOT NULL
+          AND "validated_decoder_count" >= 0
           AND "validation_issue_count" IS NOT NULL
           AND "validation_error_count" IS NOT NULL
           AND "validation_warning_count" IS NOT NULL
@@ -137,6 +139,12 @@ CREATE TABLE "rules_authoring_draft_events" (
       CHECK ("event_type" IN ('create', 'edit', 'validate', 'approve')),
     CONSTRAINT "rules_authoring_draft_events_state_check"
       CHECK ("state" IN ('draft', 'validated', 'approved')),
+    CONSTRAINT "rules_authoring_draft_events_transition_check"
+      CHECK (
+        ("event_type" IN ('create', 'edit') AND "state" = 'draft')
+        OR ("event_type" = 'validate' AND "state" = 'validated')
+        OR ("event_type" = 'approve' AND "state" = 'approved')
+      ),
     CONSTRAINT "rules_authoring_draft_events_revision_check"
       CHECK ("revision" >= 1),
     CONSTRAINT "rules_authoring_draft_events_actor_subject_check"

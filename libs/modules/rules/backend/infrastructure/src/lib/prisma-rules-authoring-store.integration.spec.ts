@@ -447,6 +447,15 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
         ).rejects.toThrow();
 
         await expect(
+          database.rulesAuthoringDraft.update({
+            where: { id: standalone.id },
+            data: {
+              validatedRuleCount: -1,
+            },
+          }),
+        ).rejects.toThrow();
+
+        await expect(
           database.rulesAuthoringDraftEvent.create({
             data: {
               draftId: standalone.id,
@@ -478,6 +487,18 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
               state: 'draft',
               revision: 1,
               actorSubject: '\n\t',
+            },
+          }),
+        ).rejects.toThrow();
+
+        await expect(
+          database.rulesAuthoringDraftEvent.create({
+            data: {
+              draftId: standalone.id,
+              eventType: 'approve',
+              state: 'draft',
+              revision: standalone.revision,
+              actorSubject: 'constraint-test',
             },
           }),
         ).rejects.toThrow();
