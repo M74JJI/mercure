@@ -4,6 +4,16 @@ import { fileURLToPath } from 'node:url';
 const workspaceRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 const securityHeaders = [
+  {
+    key: 'Content-Security-Policy',
+    value: [
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      ...(process.env.NODE_ENV === 'production' ? ['upgrade-insecure-requests'] : []),
+    ].join('; '),
+  },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
