@@ -59,4 +59,5 @@ Next:
 1. the approved non-AI Rules migration scope is complete at the current backend/application and baseline read-only frontend boundaries;
 2. ADR-0015 approves the external OIDC identity, protected-by-default API and capability authorization boundary; that enforcement must land before additional protected Rules presentation routes;
 3. ADR-0016 approves bounded read-only presentation of the existing diff, round-trip diagnostics, use-case catalog, field intelligence, quality and semantic graph capabilities;
-4. public mutating Rules administration, XML export/edit workflows, tenant-level RBAC and AI-assisted features remain deferred and require separate product/security decisions before implementation.
+4. ADR-0017 approves public administration of custom Rules use-case catalog entries behind `rules:admin`, with authenticated creator attribution and system-entry protection;
+5. rule/decoder administration, XML export/edit workflows, tenant-level RBAC and AI-assisted features remain deferred and require separate product/security decisions before implementation.
