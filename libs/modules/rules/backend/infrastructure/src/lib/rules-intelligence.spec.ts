@@ -190,9 +190,9 @@ describe('Rules intelligence', () => {
     expect(managerA).toBeDefined();
     expect(managerB).toBeDefined();
     expect(managerA?.key).not.toBe(managerB?.key);
-    expect(managerA?.warnings).toContain('Missing tenant dependency SID 999.');
+    expect(managerA?.warnings).toContain('Dependency SID 999 is unresolved in this snapshot; it may be provided by stock or external rules.');
     expect(managerA?.warnings).toContain(
-      'No tenant producer found for dependency group missing_group.',
+      'Dependency group missing_group is unresolved in this snapshot; it may be produced by stock or external rules.',
     );
     expect(managerA?.dimensions.noiseControl).toBeGreaterThanOrEqual(0);
     expect(managerA?.dimensions.noiseControl).toBeLessThanOrEqual(100);
