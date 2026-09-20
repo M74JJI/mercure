@@ -65,6 +65,7 @@ export {
   RulesAuthoringDraftDetailFeature,
   RulesAuthoringDraftListFeature,
 } from './lib/rules-authoring-feature';
+export { exportRulesAuthoringDraftResponse } from './lib/rules-authoring-export-route';
 export {
   approveRulesAuthoringDraftAction,
   createNewRulesAuthoringDraftAction,
