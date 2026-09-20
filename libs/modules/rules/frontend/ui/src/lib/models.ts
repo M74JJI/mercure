@@ -438,6 +438,7 @@ export interface RulesAuthoringEventView {
 
 export interface RulesAuthoringDraftView extends RulesAuthoringDraftSummaryView {
   readonly content: string;
+  readonly eventCount: number;
   readonly events: readonly RulesAuthoringEventView[];
   readonly validation?: RulesAuthoringValidationView & {
     readonly issues: readonly RulesAuthoringValidationIssueView[];

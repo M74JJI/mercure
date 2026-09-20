@@ -705,6 +705,7 @@ export interface components {
       approvedBy?: string;
       approvedAt?: string;
       content: string;
+      eventCount: number;
       events: {
         /** @enum {string} */
         eventType: 'create' | 'edit' | 'validate' | 'approve';

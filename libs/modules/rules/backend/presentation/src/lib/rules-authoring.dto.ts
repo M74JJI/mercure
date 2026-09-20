@@ -116,6 +116,7 @@ const draftSchema = z
   .object({
     ...draftBase,
     content: z.string(),
+    eventCount: z.number().int().min(0),
     events: z.array(authoringEventSchema),
     validation: validationSummarySchema.optional(),
   })

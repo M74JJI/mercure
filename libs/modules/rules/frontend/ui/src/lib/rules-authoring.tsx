@@ -307,6 +307,12 @@ export function RulesAuthoringDraftDetail({
                   Info <strong>{draft.validation.infoCount}</strong>
                 </span>
               </div>
+              {draft.validation.issueCount > draft.validation.issues.length ? (
+                <p className={styles.supportingText}>
+                  Showing {draft.validation.issues.length} of {draft.validation.issueCount}{' '}
+                  findings. Severity counts include the complete validation result.
+                </p>
+              ) : null}
               {draft.validation.issues.length === 0 ? (
                 <p className={styles.emptyInline}>No validation findings.</p>
               ) : (
@@ -379,8 +385,13 @@ export function RulesAuthoringDraftDetail({
               <p className={styles.eyebrow}>Audit trail</p>
               <h2>Authoring history</h2>
             </div>
-            <StatusBadge tone="neutral">{draft.events.length + ' events'}</StatusBadge>
+            <StatusBadge tone="neutral">{draft.eventCount + ' events'}</StatusBadge>
           </div>
+          {draft.eventCount > draft.events.length ? (
+            <p className={styles.supportingText}>
+              Showing the latest {draft.events.length} of {draft.eventCount} events.
+            </p>
+          ) : null}
           {draft.events.length === 0 ? (
             <p className={styles.emptyInline}>No authoring events are recorded.</p>
           ) : (

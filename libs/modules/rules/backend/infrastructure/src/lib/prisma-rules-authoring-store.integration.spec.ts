@@ -192,6 +192,7 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
         expect(approved).toMatchObject({
           revision: 2,
           state: 'approved',
+          eventCount: 4,
           approvedRevision: 2,
           approvedSha256: updated.sha256,
           approvedBy: 'admin-approve',
