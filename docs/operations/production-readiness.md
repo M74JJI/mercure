@@ -33,6 +33,10 @@ A green code review without these environment checks is a release candidate, not
 
 The repository contains a local PostgreSQL compose file only. It does not currently define production application containers, Kubernetes resources, or a production process-supervisor manifest. Those are deployment-environment concerns and must not be inferred from `deploy/local/postgres.compose.yml`.
 
+After `pnpm build`, run `pnpm release:prepare`. This verifies the API entrypoint and creates a self-contained Next standalone tree at `dist/apps/web-standalone`, including the generated static assets required by the minimal Next server. The exact web `server.js` location is written to `dist/release-manifest.json` so deployment automation does not hard-code monorepo output depth.
+
+The API bundle at `dist/apps/api/main.js` externalizes third-party runtime packages. Run it only from an environment with the repository's pinned production dependencies installed; do not treat `dist/apps/api` alone as a standalone bundle.
+
 ## Required configuration
 
 Start from `.env.example`, but do not use example secrets in production.
@@ -138,6 +142,7 @@ pnpm api:client:check
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm release:prepare
 ~~~
 
 The GitHub Workspace workflow is authoritative for repository validation. The Database integration job additionally validates Prisma, deploys migrations to disposable PostgreSQL, runs Rules persistence integration tests, builds the API, and checks readiness.

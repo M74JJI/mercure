@@ -67,6 +67,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Prepare release artifacts
+        run: pnpm release:prepare
+
   database:
     name: Database integration
     runs-on: ubuntu-latest
