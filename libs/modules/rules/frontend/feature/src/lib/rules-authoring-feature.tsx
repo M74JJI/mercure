@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+
 import { authenticatedMercureFetch } from '@mercure/platform-frontend-identity-data-access/server';
 import {
   RulesAuthoringDataAccess,
@@ -43,6 +45,11 @@ export async function RulesAuthoringDraftListFeature({
       api.list({ offset, limit: AUTHORING_PAGE_SIZE }),
       Promise.resolve(errorCode(searchParams.error)),
     ]);
+    if (page.total > 0 && page.items.length === 0 && offset > 0) {
+      const lastOffset = Math.floor((page.total - 1) / AUTHORING_PAGE_SIZE) * AUTHORING_PAGE_SIZE;
+      redirect(lastOffset === 0 ? '/rules/drafts' : '/rules/drafts?offset=' + lastOffset);
+    }
+
     const pagination = snapshotExplorerPagination(
       '/rules/drafts',
       offset,
