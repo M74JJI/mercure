@@ -28,7 +28,8 @@
     "api:client:generate": "pnpm db:generate && node tools/openapi/generate-client.mjs",
     "api:client:check": "pnpm db:generate && node tools/openapi/generate-client.mjs --check",
     "ops:verify-auth": "bash scripts/ops/verify-production-auth.sh",
-    "release:prepare": "node scripts/release/prepare-release-artifacts.mjs"
+    "release:prepare": "pnpm release:prepare-api && node scripts/release/prepare-release-artifacts.mjs",
+    "release:prepare-api": "pnpm exec nx run api:prune && node scripts/release/sync-api-build-policy.mjs"
   },
   "dependencies": {
     "@fastify/cors": "11.3.0",

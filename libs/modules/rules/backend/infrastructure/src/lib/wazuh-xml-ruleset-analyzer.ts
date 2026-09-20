@@ -32,7 +32,7 @@ function decodeEntities(value: string): string {
 }
 
 function attribute(xml: string, name: string): string | undefined {
-  const match = xml.match(new RegExp(`${name}=["']([^"']+)["']`, 'i'));
+  const match = xml.match(new RegExp(`(?:^|\\s)${name}\\s*=\\s*["']([^"']+)["']`, 'i'));
   return match?.[1] ? decodeEntities(match[1]) : undefined;
 }
 
@@ -56,6 +56,38 @@ function splitCsv(value: string | undefined): string[] {
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function splitSidReferences(value: string | undefined): string[] {
+  return (value ?? '')
+    .split(/[\s,]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function maskXmlCommentsPreservingOffsets(content: string): string {
+  return content.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/[^\r\n]/g, ' '));
+}
+
+function enclosingRuleGroups(content: string, ruleStartIndex: number): string[] {
+  const stack: string[][] = [];
+  const expression = /<\/?group\b[^>]*>/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = expression.exec(content)) && match.index < ruleStartIndex) {
+    const tag = match[0];
+    if (!tag) continue;
+
+    if (/^<\/group\b/i.test(tag)) {
+      stack.pop();
+      continue;
+    }
+
+    if (/\/\s*>$/.test(tag)) continue;
+    stack.push(splitCsv(attribute(tag, 'name')));
+  }
+
+  return [...new Set(stack.flat())];
 }
 
 const XML_NAME = /^[A-Za-z_][A-Za-z0-9_.:-]*/;
@@ -248,7 +280,7 @@ function normalizeSource(input: RulesetSourceInput): RulesetSourceFile {
     size: input.size ?? Buffer.byteLength(content, 'utf8'),
     type: input.type ?? inferFileType(input.name, content),
     content,
-    sha256: createHash('sha256').update(`${input.name}:${content}`).digest('hex'),
+    sha256: createHash('sha256').update(content).digest('hex'),
   };
 }
 
@@ -274,20 +306,22 @@ function parseRuleBlock(
   xml: string,
   source: RulesetSourceFile,
   startIndex: number,
+  wrapperGroups: readonly string[] = [],
+  rawXml: string = xml,
 ): RuleRecord | null {
   const id = attribute(xml, 'id');
   if (!id) return null;
 
   const level = Number(attribute(xml, 'level') ?? 0);
   const description = tagValues(xml, 'description')[0] ?? `Rule ${id}`;
-  const groups = splitCsv(tagValues(xml, 'group').join(','));
+  const groups = [...new Set([...wrapperGroups, ...splitCsv(tagValues(xml, 'group').join(','))])];
   const infoUseCase = extractUseCaseFromInfo(xml);
   const useCase = infoUseCase
     ? { id: infoUseCase, confidence: 'confirmed' as const }
     : inferRuleUseCase(groups, description, source.name);
   const dependencies: RuleDependency[] = [];
 
-  for (const value of splitCsv(tagValues(xml, 'if_sid').join(','))) {
+  for (const value of splitSidReferences(tagValues(xml, 'if_sid').join(','))) {
     dependencies.push({ type: 'if_sid', value });
   }
   for (const value of splitCsv(tagValues(xml, 'if_group').join(','))) {
@@ -364,20 +398,28 @@ function parseRuleBlock(
     ...(timeframe ? { timeframe } : {}),
     decodedAs,
     options: tagValues(xml, 'options'),
-    rawXml: xml,
+    rawXml,
   };
 }
 
 function parseRules(source: RulesetSourceFile): RuleRecord[] {
   const rules: RuleRecord[] = [];
+  const semanticContent = maskXmlCommentsPreservingOffsets(source.content);
   const expression = /<rule\b[\s\S]*?<\/rule>/gi;
   let match: RegExpExecArray | null;
 
-  while ((match = expression.exec(source.content))) {
+  while ((match = expression.exec(semanticContent))) {
     const block = match[0];
     if (!block) continue;
 
-    const rule = parseRuleBlock(block, source, match.index);
+    const rawXml = source.content.slice(match.index, match.index + block.length);
+    const rule = parseRuleBlock(
+      block,
+      source,
+      match.index,
+      enclosingRuleGroups(semanticContent, match.index),
+      rawXml,
+    );
     if (rule) rules.push(rule);
   }
 
@@ -386,12 +428,14 @@ function parseRules(source: RulesetSourceFile): RuleRecord[] {
 
 function parseDecoders(source: RulesetSourceFile): DecoderRecord[] {
   const decoders: DecoderRecord[] = [];
+  const semanticContent = maskXmlCommentsPreservingOffsets(source.content);
   const expression = /<decoder\b[\s\S]*?<\/decoder>/gi;
   let match: RegExpExecArray | null;
 
-  while ((match = expression.exec(source.content))) {
+  while ((match = expression.exec(semanticContent))) {
     const xml = match[0];
     if (!xml) continue;
+    const rawXml = source.content.slice(match.index, match.index + xml.length);
 
     const name = attribute(xml, 'name') ?? tagValues(xml, 'name')[0] ?? 'unnamed_decoder';
     const regex = tagValues(xml, 'regex');
@@ -409,7 +453,7 @@ function parseDecoders(source: RulesetSourceFile): DecoderRecord[] {
       orderFields,
       tenant: source.tenant,
       sourceFile: source.name,
-      rawXml: xml,
+      rawXml,
     });
   }
 
@@ -530,12 +574,12 @@ function validateRuleset(
       });
     }
 
-    if (rule.level > 15) {
+    if (rule.level > 16) {
       issues.push({
         severity: 'warning',
         type: 'level_above_standard',
-        title: `Rule ${rule.id} level is above 15`,
-        detail: `Detected level ${rule.level}. Confirm this is accepted by your Wazuh version and workflow.`,
+        title: `Rule ${rule.id} level is above 16`,
+        detail: `Detected level ${rule.level}. Wazuh rule levels are expected to be between 0 and 16.`,
         ruleId: rule.id,
         tenant: rule.tenant,
       });

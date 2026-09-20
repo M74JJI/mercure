@@ -185,6 +185,37 @@ export class RulesAuthoringContentValidationError extends Error {
 
 const MAX_DRAFT_BYTES = 1_048_576;
 
+function utf8ByteLength(value: string): number {
+  let bytes = 0;
+
+  for (let index = 0; index < value.length; index += 1) {
+    const codeUnit = value.charCodeAt(index);
+
+    if (codeUnit <= 0x7f) {
+      bytes += 1;
+      continue;
+    }
+
+    if (codeUnit <= 0x7ff) {
+      bytes += 2;
+      continue;
+    }
+
+    if (codeUnit >= 0xd800 && codeUnit <= 0xdbff) {
+      const next = value.charCodeAt(index + 1);
+      if (next >= 0xdc00 && next <= 0xdfff) {
+        bytes += 4;
+        index += 1;
+        continue;
+      }
+    }
+
+    bytes += 3;
+  }
+
+  return bytes;
+}
+
 function actor(value: string): string {
   const normalized = value.trim();
   if (!normalized) throw new RulesAuthoringContentValidationError('Actor subject is required.');
@@ -219,7 +250,7 @@ function initialContent(sourceType: Exclude<RulesetSourceType, 'unknown'>): stri
 
 function content(value: string): string {
   if (!value.trim()) throw new RulesAuthoringContentValidationError('Draft XML must not be empty.');
-  if (Buffer.byteLength(value, 'utf8') > MAX_DRAFT_BYTES) {
+  if (utf8ByteLength(value) > MAX_DRAFT_BYTES) {
     throw new RulesAuthoringContentValidationError('Draft XML exceeds the 1 MiB authoring limit.');
   }
   if (value.includes('\0')) {
@@ -280,7 +311,7 @@ export class CreateRulesAuthoringDraft {
 export class CreateNewRulesAuthoringDraft {
   constructor(private readonly store: RulesAuthoringDraftStore) {}
 
-  execute(input: CreateNewRulesAuthoringDraftInput): Promise<RulesAuthoringDraft> {
+  async execute(input: CreateNewRulesAuthoringDraftInput): Promise<RulesAuthoringDraft> {
     return this.store.createNew(
       {
         fileName: logicalFileName(input.fileName),

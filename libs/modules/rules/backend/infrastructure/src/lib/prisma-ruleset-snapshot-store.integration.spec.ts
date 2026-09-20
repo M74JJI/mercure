@@ -394,6 +394,7 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         useCaseId: 'uc_snapshot',
       });
       expect(ruleFile?.rules[0]?.groups.map((group) => group.value)).toEqual([
+        'snapshot',
         'production',
         'uc_snapshot',
       ]);

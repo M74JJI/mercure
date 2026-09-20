@@ -143,7 +143,6 @@ describe('WazuhXmlRulesetAnalyzer', () => {
         'external_or_missing_sid',
         'external_decoder_parent',
         'unknown_file_type',
-        'level_above_standard',
       ]),
     );
     expect(result.issues.find((issue) => issue.type === 'duplicate_rule_id')?.severity).toBe(
@@ -392,14 +391,80 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     );
   });
 
+  it('preserves enclosing Wazuh groups and ignores commented-out rules and decoders', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-e/rules/1500-wrapper_rules.xml',
+          content: [
+            '<group name="windows,sysmon,production,">',
+            '  <!-- <rule id="150000" level="15"><description>Disabled</description></rule> -->',
+            '  <rule id="150001" level="10">',
+            '    <description>Active wrapped rule</description>',
+            '  </rule>',
+            '</group>',
+          ].join('\n'),
+        },
+        {
+          name: 'manager-e/decoders/1500-wrapper_decoders.xml',
+          content: [
+            '<!-- <decoder name="disabled_decoder"><prematch>disabled</prematch></decoder> -->',
+            '<decoder name="active_decoder"><prematch>active</prematch></decoder>',
+          ].join('\n'),
+        },
+      ],
+    });
+
+    expect(result.rules.map((rule) => rule.id)).toEqual(['150001']);
+    expect(result.rules[0]?.groups).toEqual(['windows', 'sysmon', 'production']);
+    expect(result.rules[0]?.status).toBe('production');
+    expect(result.decoders.map((decoder) => decoder.name)).toEqual(['active_decoder']);
+  });
+
+  it('accepts Wazuh level 16 and splits SID references separated by spaces or commas', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-f/rules/1600-sid_rules.xml',
+          content: [
+            '<group name="correlation,">',
+            '  <rule id="160001" level="1"><description>Base one</description></rule>',
+            '  <rule id="160002" level="1"><description>Base two</description></rule>',
+            '  <rule id="160003" level="16">',
+            '    <if_sid>160001 160002</if_sid>',
+            '    <if_matched_sid>160001</if_matched_sid>',
+            '    <description>Critical correlation</description>',
+            '  </rule>',
+            '</group>',
+          ].join('\n'),
+        },
+      ],
+    });
+
+    const critical = result.rules.find((rule) => rule.id === '160003');
+    expect(critical?.dependencies).toEqual([
+      { type: 'if_sid', value: '160001' },
+      { type: 'if_sid', value: '160002' },
+      { type: 'if_matched_sid', value: '160001' },
+    ]);
+    expect(result.issues.filter((issue) => issue.type === 'external_or_missing_sid')).toEqual([]);
+    expect(result.issues.filter((issue) => issue.type === 'level_above_standard')).toEqual([]);
+  });
+
   it('uses SHA-256 source fingerprints and deterministic source classification', async () => {
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const source = await fixture('baseline/manager-a/rules/1000-sample_rules.xml');
     const first = await analyzer.analyze({ files: [source] });
     const second = await analyzer.analyze({ files: [source] });
+    const renamed = await analyzer.analyze({
+      files: [{ ...source, name: 'manager-a/rules/renamed-sample_rules.xml' }],
+    });
 
     expect(first.files[0]?.type).toBe('rules');
     expect(first.files[0]?.sha256).toMatch(/^[a-f0-9]{64}$/);
     expect(first.files[0]?.sha256).toBe(second.files[0]?.sha256);
+    expect(first.files[0]?.sha256).toBe(renamed.files[0]?.sha256);
   });
 });

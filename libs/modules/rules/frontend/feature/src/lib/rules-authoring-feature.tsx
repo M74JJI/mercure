@@ -44,7 +44,7 @@ export async function RulesAuthoringDraftListFeature({
   try {
     const [page, error] = await Promise.all([
       api.list({ offset, limit: AUTHORING_PAGE_SIZE }),
-      Promise.resolve(errorCode(searchParams.error)),
+      Promise.resolve(errorCode(searchParams['error'])),
     ]);
     if (page.total > 0 && page.items.length === 0 && offset > 0) {
       const lastOffset = Math.floor((page.total - 1) / AUTHORING_PAGE_SIZE) * AUTHORING_PAGE_SIZE;
@@ -92,7 +92,7 @@ export async function RulesAuthoringDraftDetailFeature({
     const draft = await api.get(draftId);
     if (!draft) return <RulesUnavailableState />;
 
-    const error = errorCode(searchParams.error);
+    const error = errorCode(searchParams['error']);
     return (
       <RulesAuthoringDraftDetail
         draft={draft}
