@@ -102,7 +102,7 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const context = host.switchToHttp();
     const request = context.getRequest<FastifyRequest>();
     const reply = context.getResponse<FastifyReply>();
-    const requestId = String(request.id ?? request.headers['x-request-id'] ?? 'unknown');
+    const requestId = String(request.id ?? 'unknown');
     const instance = request.url.split('?')[0] || request.url;
 
     if (exception instanceof ZodValidationException) {
