@@ -8,6 +8,9 @@ export default defineConfig({
   plugins: [legacyDecoratorsPlugin()],
   test: {
     environment: 'node',
+    env: {
+      DATABASE_URL: 'postgresql://mercure:mercure-test@127.0.0.1:5432/mercure',
+    },
     include: ['libs/platform/backend/logging/src/**/*.spec.ts'],
     passWithNoTests: false,
   },
