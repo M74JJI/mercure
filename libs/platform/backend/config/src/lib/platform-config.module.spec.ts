@@ -52,6 +52,29 @@ describe('platform OIDC configuration', () => {
     ).toThrow('OIDC_ISSUER_URL must use https:// in production.');
   });
 
+  it('rejects CORS values that are URLs rather than bare origins', () => {
+    for (const origin of [
+      'https://user:secret@mercure.example.test',
+      'https://mercure.example.test/path',
+      'https://mercure.example.test?debug=true',
+      'https://mercure.example.test#fragment',
+    ]) {
+      expect(() =>
+        parsePlatformEnvironment({
+          ...baseEnvironment,
+          API_CORS_ORIGINS: origin,
+        }),
+      ).toThrow();
+    }
+
+    expect(
+      parsePlatformEnvironment({
+        ...baseEnvironment,
+        API_CORS_ORIGINS: 'https://mercure.example.test/',
+      }).API_CORS_ORIGINS,
+    ).toEqual(['https://mercure.example.test']);
+  });
+
   it('requires HTTPS CORS origins in production', () => {
     expect(() =>
       parsePlatformEnvironment({

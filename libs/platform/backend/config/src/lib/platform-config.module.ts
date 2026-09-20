@@ -42,6 +42,15 @@ const corsOrigins = z
         if (url.protocol !== 'http:' && url.protocol !== 'https:') {
           throw new Error('unsupported protocol');
         }
+        if (
+          url.username ||
+          url.password ||
+          url.search ||
+          url.hash ||
+          (url.pathname !== '/' && url.pathname !== '')
+        ) {
+          throw new Error('not an origin');
+        }
         normalized.add(url.origin);
       } catch {
         context.addIssue({
