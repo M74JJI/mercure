@@ -58,6 +58,55 @@ function splitCsv(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
+const XML_NAME = /^[A-Za-z_][A-Za-z0-9_.:-]*/;
+const XML_ENTITY = /&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9A-Fa-f]+;)/;
+
+function textStructureError(value: string): string | undefined {
+  if (value.includes(']]>')) return 'XML text contains an invalid CDATA terminator.';
+  if (XML_ENTITY.test(value)) return 'XML text contains an unescaped ampersand.';
+  return undefined;
+}
+
+function openingTagStructureError(body: string, elementName: string): string | undefined {
+  let cursor = elementName.length;
+  const attributes = new Set<string>();
+
+  while (cursor < body.length) {
+    while (/\s/.test(body[cursor] ?? '')) cursor += 1;
+    if (cursor >= body.length) break;
+
+    const attributeMatch = XML_NAME.exec(body.slice(cursor));
+    const attributeName = attributeMatch?.[0];
+    if (!attributeName) return 'XML attribute name is invalid.';
+    if (attributes.has(attributeName)) {
+      return `XML attribute ${attributeName} is duplicated on <${elementName}>.`;
+    }
+    attributes.add(attributeName);
+    cursor += attributeName.length;
+
+    while (/\s/.test(body[cursor] ?? '')) cursor += 1;
+    if (body[cursor] !== '=') return `XML attribute ${attributeName} is missing '='.`;
+    cursor += 1;
+
+    while (/\s/.test(body[cursor] ?? '')) cursor += 1;
+    const quote = body[cursor];
+    if (quote !== '"' && quote !== "'") {
+      return `XML attribute ${attributeName} must use quotes.`;
+    }
+    cursor += 1;
+
+    const valueStart = cursor;
+    while (cursor < body.length && body[cursor] !== quote) cursor += 1;
+    if (cursor >= body.length) return `XML attribute ${attributeName} is not terminated.`;
+
+    const valueError = textStructureError(body.slice(valueStart, cursor));
+    if (valueError) return valueError;
+    cursor += 1;
+  }
+
+  return undefined;
+}
+
 function findMarkupEnd(content: string, start: number): number {
   let quote: '"' | "'" | undefined;
 
@@ -87,11 +136,19 @@ function xmlFragmentStructureError(content: string): string | undefined {
 
   while (cursor < content.length) {
     const start = content.indexOf('<', cursor);
-    if (start === -1) break;
+    if (start === -1) {
+      return textStructureError(content.slice(cursor));
+    }
+
+    const textError = textStructureError(content.slice(cursor, start));
+    if (textError) return textError;
 
     if (content.startsWith('<!--', start)) {
       const end = content.indexOf('-->', start + 4);
       if (end === -1) return 'XML comment is not terminated.';
+      if (content.slice(start + 4, end).includes('--')) {
+        return 'XML comment contains an invalid double-hyphen sequence.';
+      }
       cursor = end + 3;
       continue;
     }
@@ -139,10 +196,14 @@ function xmlFragmentStructureError(content: string): string | undefined {
 
     const selfClosing = /\/\s*$/.test(markup);
     const body = selfClosing ? markup.replace(/\/\s*$/, '').trim() : markup;
-    const opening = /^([A-Za-z_][A-Za-z0-9_.:-]*)(?:\s|$)/.exec(body);
-    const openingName = opening?.[1];
+    const openingName = XML_NAME.exec(body)?.[0];
 
     if (!openingName) return 'XML opening tag is invalid.';
+    const remainder = body.slice(openingName.length);
+    if (remainder && !/^\s/.test(remainder)) return 'XML opening tag is invalid.';
+
+    const attributeError = openingTagStructureError(body, openingName);
+    if (attributeError) return attributeError;
     if (!selfClosing) stack.push(openingName);
     cursor = end + 1;
   }

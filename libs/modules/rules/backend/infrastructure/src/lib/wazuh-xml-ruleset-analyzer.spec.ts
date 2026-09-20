@@ -271,6 +271,25 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     ).toContain('does not match');
   });
 
+  it('reports invalid entities and duplicate XML attributes', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-d/rules/1402-invalid-attributes.xml',
+          content:
+            '<group name="custom,"><rule id="140002" id="140003" level="5"><description>A & B</description></rule></group>',
+        },
+      ],
+    });
+
+    const structuralIssue = result.issues.find(
+      (issue) => issue.type === 'malformed_xml_structure',
+    );
+    expect(structuralIssue?.severity).toBe('error');
+    expect(structuralIssue?.detail).toMatch(/duplicated|unescaped ampersand/);
+  });
+
   it('allows valid multi-root decoder XML fragments', async () => {
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const result = await analyzer.analyze({
