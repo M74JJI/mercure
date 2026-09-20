@@ -280,7 +280,7 @@ function normalizeSource(input: RulesetSourceInput): RulesetSourceFile {
     size: input.size ?? Buffer.byteLength(content, 'utf8'),
     type: input.type ?? inferFileType(input.name, content),
     content,
-    sha256: createHash('sha256').update(`${input.name}:${content}`).digest('hex'),
+    sha256: createHash('sha256').update(content).digest('hex'),
   };
 }
 

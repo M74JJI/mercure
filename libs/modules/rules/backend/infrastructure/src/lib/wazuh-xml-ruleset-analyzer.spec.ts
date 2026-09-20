@@ -458,9 +458,13 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     const source = await fixture('baseline/manager-a/rules/1000-sample_rules.xml');
     const first = await analyzer.analyze({ files: [source] });
     const second = await analyzer.analyze({ files: [source] });
+    const renamed = await analyzer.analyze({
+      files: [{ ...source, name: 'manager-a/rules/renamed-sample_rules.xml' }],
+    });
 
     expect(first.files[0]?.type).toBe('rules');
     expect(first.files[0]?.sha256).toMatch(/^[a-f0-9]{64}$/);
     expect(first.files[0]?.sha256).toBe(second.files[0]?.sha256);
+    expect(first.files[0]?.sha256).toBe(renamed.files[0]?.sha256);
   });
 });
