@@ -24,6 +24,10 @@ export function resolveApiBaseUrl(explicitBaseUrl?: string): string {
     throw new Error('API base URL must use HTTP or HTTPS.');
   }
 
+  if (process.env['NODE_ENV'] === 'production' && url.protocol !== 'https:') {
+    throw new Error('NEXT_PUBLIC_API_BASE_URL must use HTTPS in production.');
+  }
+
   if (url.username || url.password || url.search || url.hash) {
     throw new Error('API base URL must not contain credentials, query parameters, or fragments.');
   }
