@@ -168,6 +168,37 @@ export function RulesAuthoringDraftDetail({
         {draft.approvedAt ? <p className={styles.supportingText}>Approved by <span className={styles.mono}>{draft.approvedBy}</span> at {new Date(draft.approvedAt).toLocaleString()}.</p> : null}
       </Panel>
 
+      <Panel tone="raised" className={styles.sectionPanel}>
+        <div className={styles.sectionHeader}>
+          <div>
+            <p className={styles.eyebrow}>Audit trail</p>
+            <h2>Authoring history</h2>
+          </div>
+          <StatusBadge tone="neutral">{draft.events.length + ' events'}</StatusBadge>
+        </div>
+        {draft.events.length === 0 ? (
+          <p className={styles.emptyInline}>No authoring events are recorded.</p>
+        ) : (
+          <ul className={styles.issueList}>
+            {draft.events.map((event, index) => (
+              <li key={event.createdAt + ':' + event.eventType + ':' + index}>
+                <div className={styles.issueTopline}>
+                  <strong>{event.eventType}</strong>
+                  <StatusBadge tone={event.state === 'approved' ? 'accent' : 'neutral'}>
+                    {event.state + ' · r' + event.revision}
+                  </StatusBadge>
+                </div>
+                <p>
+                  <span className={styles.mono}>{event.actorSubject}</span>
+                  {' · '}
+                  {new Date(event.createdAt).toLocaleString()}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Panel>
+
       <Panel tone="muted" className={styles.sectionPanel}>
         <div className={styles.sectionHeader}><div><p className={styles.eyebrow}>Deployment boundary</p><h2>Export only</h2></div></div>
         <p className={styles.supportingText}>Mercure does not write this draft to a manager, archive directory, SSH target, Git repository, or Wazuh API.</p>

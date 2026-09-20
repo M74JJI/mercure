@@ -120,6 +120,15 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
       updatedBy: actorSubject,
       createdAt: now,
       updatedAt: now,
+      events: [
+        {
+          eventType: 'create',
+          state: 'draft',
+          revision: 1,
+          actorSubject,
+          createdAt: now,
+        },
+      ],
     };
     return this.draft;
   }
@@ -142,6 +151,16 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
       updatedBy: input.actorSubject,
       createdAt: current.createdAt,
       updatedAt: '2026-09-20T00:01:00.000Z',
+      events: [
+        ...current.events,
+        {
+          eventType: 'edit',
+          state: 'draft',
+          revision: current.revision + 1,
+          actorSubject: input.actorSubject,
+          createdAt: '2026-09-20T00:01:00.000Z',
+        },
+      ],
     };
     return this.draft;
   }
@@ -154,6 +173,16 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
       ...this.draft,
       state: 'validated',
       updatedBy: input.actorSubject,
+      events: [
+        ...this.draft.events,
+        {
+          eventType: 'validate',
+          state: 'validated',
+          revision: input.expectedRevision,
+          actorSubject: input.actorSubject,
+          createdAt: '2026-09-20T00:02:00.000Z',
+        },
+      ],
       validation: {
         revision: input.expectedRevision,
         sha256: input.expectedSha256,
@@ -180,6 +209,16 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
       approvedSha256: input.expectedSha256,
       approvedBy: input.actorSubject,
       approvedAt: '2026-09-20T00:03:00.000Z',
+      events: [
+        ...this.draft.events,
+        {
+          eventType: 'approve',
+          state: 'approved',
+          revision: input.expectedRevision,
+          actorSubject: input.actorSubject,
+          createdAt: '2026-09-20T00:03:00.000Z',
+        },
+      ],
     };
     return this.draft;
   }
@@ -245,6 +284,11 @@ describe('controlled Rules authoring workflow', () => {
 
     const approved = await flow.approve.execute(draft.id, 1, actor);
     expect(approved.state).toBe('approved');
+    expect(approved.events.map((event) => event.eventType)).toEqual([
+      'create',
+      'validate',
+      'approve',
+    ]);
 
     const artifact = await flow.exportDraft.execute(draft.id);
     expect(artifact).toMatchObject({

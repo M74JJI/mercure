@@ -103,6 +103,7 @@ export {
 export type {
   RulesAuthoringDraftSummaryView,
   RulesAuthoringDraftView,
+  RulesAuthoringEventView,
   RulesAuthoringValidationIssueView,
   RulesAuthoringValidationView,
 } from './lib/models';

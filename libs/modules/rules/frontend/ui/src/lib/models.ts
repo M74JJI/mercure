@@ -428,8 +428,17 @@ export interface RulesAuthoringDraftSummaryView {
   readonly approvedAt?: string;
 }
 
+export interface RulesAuthoringEventView {
+  readonly eventType: 'create' | 'edit' | 'validate' | 'approve';
+  readonly state: 'draft' | 'validated' | 'approved';
+  readonly revision: number;
+  readonly actorSubject: string;
+  readonly createdAt: string;
+}
+
 export interface RulesAuthoringDraftView extends RulesAuthoringDraftSummaryView {
   readonly content: string;
+  readonly events: readonly RulesAuthoringEventView[];
   readonly validation?: RulesAuthoringValidationView & {
     readonly issues: readonly RulesAuthoringValidationIssueView[];
   };
