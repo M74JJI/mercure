@@ -13,14 +13,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  runner-probe:
-    name: Runner probe
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    steps:
-      - name: Confirm runner assignment
-        run: echo "GitHub-hosted runner started successfully."
-
   quality:
     name: Workspace quality
     runs-on: ubuntu-latest
