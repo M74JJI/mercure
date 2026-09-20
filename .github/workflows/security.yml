@@ -46,6 +46,9 @@ jobs:
       - name: Build pruned API runtime dependency graph
         run: pnpm db:generate && pnpm exec nx build api
 
+      - name: Normalize API release lockfile
+        run: pnpm release:normalize-api
+
       - name: Install deployable API dependencies
         working-directory: dist/apps/api
         run: pnpm install --prod --frozen-lockfile
