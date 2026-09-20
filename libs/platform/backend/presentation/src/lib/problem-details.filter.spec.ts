@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import { describe, expect, it, vi } from 'vitest';
 
-import { safeErrorTrace } from './problem-details.filter';
+import { ProblemDetailsFilter, safeErrorTrace } from './problem-details.filter';
 
 describe('ProblemDetailsFilter error logging', () => {
   it('keeps stack frames without logging exception-message content', () => {
@@ -25,5 +26,64 @@ describe('ProblemDetailsFilter error logging', () => {
     error.stack = 'Error: sensitive detail';
 
     expect(safeErrorTrace(error)).toBeUndefined();
+  });
+
+  it('never exposes explicit 5xx exception details to the client', () => {
+    const send = vi.fn();
+    const status = vi.fn(() => ({ send }));
+    const type = vi.fn(() => ({ status }));
+    const host = {
+      switchToHttp: () => ({
+        getRequest: () => ({
+          id: 'server-request-id',
+          url: '/api/v1/rules/snapshots/import',
+        }),
+        getResponse: () => ({ type }),
+      }),
+    };
+
+    new ProblemDetailsFilter().catch(
+      new HttpException(
+        'postgresql://secret-user:secret-password@database.internal/mercure',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      ),
+      host as never,
+    );
+
+    expect(send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: HttpStatus.SERVICE_UNAVAILABLE,
+        detail: 'An unexpected error occurred.',
+        requestId: 'server-request-id',
+      }),
+    );
+    expect(JSON.stringify(send.mock.calls)).not.toContain('secret-password');
+  });
+
+  it('preserves bounded 4xx exception details', () => {
+    const send = vi.fn();
+    const status = vi.fn(() => ({ send }));
+    const type = vi.fn(() => ({ status }));
+    const host = {
+      switchToHttp: () => ({
+        getRequest: () => ({
+          id: 'server-request-id',
+          url: '/api/v1/rules/drafts/not-found',
+        }),
+        getResponse: () => ({ type }),
+      }),
+    };
+
+    new ProblemDetailsFilter().catch(
+      new HttpException('Draft not found.', HttpStatus.NOT_FOUND),
+      host as never,
+    );
+
+    expect(send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: HttpStatus.NOT_FOUND,
+        detail: 'Draft not found.',
+      }),
+    );
   });
 });

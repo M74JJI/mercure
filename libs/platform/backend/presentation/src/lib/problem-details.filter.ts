@@ -134,9 +134,11 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const code = statusCode(status);
     const fallbackDetail = status >= 500 ? 'An unexpected error occurred.' : statusTitle(status);
     const detail =
-      exception instanceof HttpException
-        ? detailFromResponse(exception.getResponse(), fallbackDetail)
-        : fallbackDetail;
+      status >= 500
+        ? fallbackDetail
+        : exception instanceof HttpException
+          ? detailFromResponse(exception.getResponse(), fallbackDetail)
+          : fallbackDetail;
 
     if (status >= 500) {
       this.logger.error(
