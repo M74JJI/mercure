@@ -297,8 +297,13 @@ describe('WazuhXmlRulesetAnalyzer', () => {
       files: [
         {
           name: 'manager-d/rules/1402-invalid-attributes.xml',
-          content:
-            '<group name="custom,"><rule id="140002" id="140003" level="5"><description>A & B</description></rule></group>',
+          content: [
+            '<group name="custom,">',
+            '  <rule id="140002" id="140003" level="5">',
+            '    <description>A & B</description>',
+            '  </rule>',
+            '</group>',
+          ].join('\n'),
         },
       ],
     });
