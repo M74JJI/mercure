@@ -121,6 +121,22 @@ function issue(row: ValidationIssueRow): ValidationIssue {
 const MAX_VISIBLE_VALIDATION_ISSUES = 500;
 const MAX_VISIBLE_AUTHORING_EVENTS = 200;
 
+function visibleValidationIssues(
+  issues: readonly ValidationIssue[],
+): readonly ValidationIssue[] {
+  const visible: ValidationIssue[] = [];
+
+  for (const severity of ['error', 'warning', 'info'] as const) {
+    for (const item of issues) {
+      if (item.severity !== severity) continue;
+      visible.push(item);
+      if (visible.length === MAX_VISIBLE_VALIDATION_ISSUES) return visible;
+    }
+  }
+
+  return visible;
+}
+
 function contentSha256(content: string): string {
   return createHash('sha256').update(content).digest('hex');
 }
@@ -452,7 +468,7 @@ export class PrismaRulesAuthoringStore implements RulesAuthoringDraftStore, Rule
     input: PersistRulesAuthoringValidationInput,
   ): Promise<RulesAuthoringDraft> {
     const counts = issueCounts(input.issues);
-    const visibleIssues = input.issues.slice(0, MAX_VISIBLE_VALIDATION_ISSUES);
+    const visibleIssues = visibleValidationIssues(input.issues);
     const validatedAt = new Date();
 
     await this.database.$transaction(async (transaction) => {

@@ -276,22 +276,34 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
           fileName: standalone.fileName,
           tenant: standalone.tenant,
         }));
+        const blockingError = {
+          severity: 'error' as const,
+          type: 'blocking_error_after_warnings',
+          title: 'Blocking error',
+          detail: 'This approval-blocking error must remain visible after bounding.',
+          fileName: standalone.fileName,
+          tenant: standalone.tenant,
+        };
         const boundedValidation = await authoringStore.persistValidation({
           draftId: standalone.id,
           expectedRevision: standalone.revision,
           expectedSha256: standalone.sha256,
           ruleCount: 0,
           decoderCount: 0,
-          issues: manyWarnings,
+          issues: [...manyWarnings, blockingError],
           actorSubject: 'admin-bounded-validation',
         });
 
         expect(boundedValidation.validation).toMatchObject({
-          issueCount: 505,
+          issueCount: 506,
           warningCount: 505,
-          errorCount: 0,
+          errorCount: 1,
         });
         expect(boundedValidation.validation?.issues).toHaveLength(500);
+        expect(boundedValidation.validation?.issues[0]).toMatchObject({
+          severity: 'error',
+          type: 'blocking_error_after_warnings',
+        });
         expect(
           await database.rulesAuthoringDraftValidationIssue.count({
             where: {
@@ -300,6 +312,17 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
             },
           }),
         ).toBe(500);
+
+        expect(
+          await database.rulesAuthoringDraftValidationIssue.findFirst({
+            where: {
+              draftId: standalone.id,
+              revision: standalone.revision,
+              severity: 'error',
+            },
+            select: { type: true },
+          }),
+        ).toEqual({ type: 'blocking_error_after_warnings' });
 
         await database.rulesAuthoringDraftEvent.createMany({
           data: Array.from({ length: 205 }, (_, index) => ({
