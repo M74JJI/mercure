@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 
 import type { PrismaClient } from '@mercure/platform-backend-database/client';
 import type {
@@ -25,13 +25,32 @@ function contentFingerprint(files: ImportArchivedRulesetResult['analysis']['file
   return createHash('sha256').update(JSON.stringify(canonical)).digest('hex');
 }
 
-async function writeBatches<T>(
-  items: readonly T[],
-  writer: (batch: readonly T[]) => Promise<unknown>,
-): Promise<void> {
+function batches<T>(items: readonly T[]): readonly (readonly T[])[] {
+  const result: T[][] = [];
   for (let offset = 0; offset < items.length; offset += WRITE_BATCH_SIZE) {
-    await writer(items.slice(offset, offset + WRITE_BATCH_SIZE));
+    result.push(items.slice(offset, offset + WRITE_BATCH_SIZE));
   }
+  return result;
+}
+
+function snapshotIdentity(snapshot: {
+  readonly id: string;
+  readonly sourceFingerprint: string;
+  readonly contentFingerprint: string;
+  readonly complete: boolean;
+  readonly sourceErrorCount: number;
+  readonly loadedAt: Date;
+  readonly createdAt: Date;
+}): RulesetSnapshotIdentity {
+  return {
+    id: snapshot.id,
+    sourceFingerprint: snapshot.sourceFingerprint,
+    contentFingerprint: snapshot.contentFingerprint,
+    complete: snapshot.complete,
+    sourceErrorCount: snapshot.sourceErrorCount,
+    loadedAt: snapshot.loadedAt.toISOString(),
+    createdAt: snapshot.createdAt.toISOString(),
+  };
 }
 
 export class PrismaRulesetSnapshotStore implements RulesetSnapshotStore {
@@ -187,12 +206,39 @@ export class PrismaRulesetSnapshotStore implements RulesetSnapshotStore {
 
     const stats = imported.analysis.stats;
 
-    const snapshot = await this.database.$transaction(async (transaction) => {
-      const created = await transaction.rulesetSnapshot.create({
+    const existing = await this.database.rulesetSnapshot.findFirst({
+      where: {
+        sourceFingerprint,
+        contentFingerprint: fingerprint,
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        sourceFingerprint: true,
+        contentFingerprint: true,
+        complete: true,
+        sourceErrorCount: true,
+        loadedAt: true,
+        createdAt: true,
+      },
+    });
+    if (existing) {
+      return snapshotIdentity(existing);
+    }
+
+    const snapshotId = randomUUID();
+    const deduplicationKey = createHash('sha256')
+      .update(`${sourceFingerprint}:${fingerprint}`)
+      .digest('hex');
+
+    const operations = [
+      this.database.rulesetSnapshot.create({
         data: {
+          id: snapshotId,
           sourceRoot: imported.source.sourceRoot,
           sourceFingerprint,
           contentFingerprint: fingerprint,
+          deduplicationKey,
           loadedAt,
           complete: sourceErrors.length === 0,
           sourceErrorCount: sourceErrors.length,
@@ -209,6 +255,102 @@ export class PrismaRulesetSnapshotStore implements RulesetSnapshotStore {
           missingUseCaseCount: stats.missingUseCase,
           unresolvedDependencyCount: stats.unresolvedDependencies,
         },
+      }),
+      ...batches(sourceErrors).map((batch) =>
+        this.database.rulesetSnapshotSourceError.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(archives).map((batch) =>
+        this.database.rulesetSnapshotArchive.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(files).map((batch) =>
+        this.database.rulesetSnapshotFile.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(rules).map((batch) =>
+        this.database.rulesetSnapshotRule.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(ruleGroups).map((batch) =>
+        this.database.rulesetSnapshotRuleGroup.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(ruleMitre).map((batch) =>
+        this.database.rulesetSnapshotRuleMitre.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(ruleDependencies).map((batch) =>
+        this.database.rulesetSnapshotRuleDependency.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(ruleFields).map((batch) =>
+        this.database.rulesetSnapshotRuleField.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(ruleDecodedAs).map((batch) =>
+        this.database.rulesetSnapshotRuleDecodedAs.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(ruleOptions).map((batch) =>
+        this.database.rulesetSnapshotRuleOption.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(decoders).map((batch) =>
+        this.database.rulesetSnapshotDecoder.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(decoderPrematches).map((batch) =>
+        this.database.rulesetSnapshotDecoderPrematch.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(decoderRegex).map((batch) =>
+        this.database.rulesetSnapshotDecoderRegex.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(decoderOrderFields).map((batch) =>
+        this.database.rulesetSnapshotDecoderOrderField.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(issues).map((batch) =>
+        this.database.rulesetSnapshotIssue.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+      ...batches(useCases).map((batch) =>
+        this.database.rulesetSnapshotUseCase.createMany({
+          data: batch.map((item) => ({ ...item, snapshotId })),
+        }),
+      ),
+    ];
+
+    try {
+      await this.database.$transaction(operations);
+    } catch (error) {
+      const code =
+        typeof error === 'object' && error !== null && 'code' in error
+          ? String(error.code)
+          : undefined;
+      if (code !== 'P2002') {
+        throw error;
+      }
+
+      const duplicate = await this.database.rulesetSnapshot.findUnique({
+        where: { deduplicationKey },
         select: {
           id: true,
           sourceFingerprint: true,
@@ -219,99 +361,25 @@ export class PrismaRulesetSnapshotStore implements RulesetSnapshotStore {
           createdAt: true,
         },
       });
+      if (!duplicate) {
+        throw error;
+      }
+      return snapshotIdentity(duplicate);
+    }
 
-      await writeBatches(sourceErrors, (batch) =>
-        transaction.rulesetSnapshotSourceError.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(archives, (batch) =>
-        transaction.rulesetSnapshotArchive.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(files, (batch) =>
-        transaction.rulesetSnapshotFile.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(rules, (batch) =>
-        transaction.rulesetSnapshotRule.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(ruleGroups, (batch) =>
-        transaction.rulesetSnapshotRuleGroup.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(ruleMitre, (batch) =>
-        transaction.rulesetSnapshotRuleMitre.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(ruleDependencies, (batch) =>
-        transaction.rulesetSnapshotRuleDependency.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(ruleFields, (batch) =>
-        transaction.rulesetSnapshotRuleField.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(ruleDecodedAs, (batch) =>
-        transaction.rulesetSnapshotRuleDecodedAs.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(ruleOptions, (batch) =>
-        transaction.rulesetSnapshotRuleOption.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(decoders, (batch) =>
-        transaction.rulesetSnapshotDecoder.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(decoderPrematches, (batch) =>
-        transaction.rulesetSnapshotDecoderPrematch.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(decoderRegex, (batch) =>
-        transaction.rulesetSnapshotDecoderRegex.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(decoderOrderFields, (batch) =>
-        transaction.rulesetSnapshotDecoderOrderField.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(issues, (batch) =>
-        transaction.rulesetSnapshotIssue.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-      await writeBatches(useCases, (batch) =>
-        transaction.rulesetSnapshotUseCase.createMany({
-          data: batch.map((item) => ({ ...item, snapshotId: created.id })),
-        }),
-      );
-
-      return created;
+    const snapshot = await this.database.rulesetSnapshot.findUniqueOrThrow({
+      where: { id: snapshotId },
+      select: {
+        id: true,
+        sourceFingerprint: true,
+        contentFingerprint: true,
+        complete: true,
+        sourceErrorCount: true,
+        loadedAt: true,
+        createdAt: true,
+      },
     });
 
-    return {
-      id: snapshot.id,
-      sourceFingerprint: snapshot.sourceFingerprint,
-      contentFingerprint: snapshot.contentFingerprint,
-      complete: snapshot.complete,
-      sourceErrorCount: snapshot.sourceErrorCount,
-      loadedAt: snapshot.loadedAt.toISOString(),
-      createdAt: snapshot.createdAt.toISOString(),
-    };
+    return snapshotIdentity(snapshot);
   }
 }
