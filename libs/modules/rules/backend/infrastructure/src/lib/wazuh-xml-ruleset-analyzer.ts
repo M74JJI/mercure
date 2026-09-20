@@ -60,32 +60,32 @@ function splitCsv(value: string | undefined): string[] {
 
 function splitSidReferences(value: string | undefined): string[] {
   return (value ?? '')
-    .split(/[\\s,]+/)
+    .split(/[\s,]+/)
     .map((item) => item.trim())
     .filter(Boolean);
 }
 
 function maskXmlCommentsPreservingOffsets(content: string): string {
-  return content.replace(/<!--[\\s\\S]*?-->/g, (comment) =>
-    comment.replace(/[^\\r\\n]/g, ' '),
+  return content.replace(/<!--[\s\S]*?-->/g, (comment) =>
+    comment.replace(/[^\r\n]/g, ' '),
   );
 }
 
 function enclosingRuleGroups(content: string, ruleStartIndex: number): string[] {
   const stack: string[][] = [];
-  const expression = /<\\/?group\\b[^>]*>/gi;
+  const expression = /<\/?group\b[^>]*>/gi;
   let match: RegExpExecArray | null;
 
   while ((match = expression.exec(content)) && match.index < ruleStartIndex) {
     const tag = match[0];
     if (!tag) continue;
 
-    if (/^<\\/group\\b/i.test(tag)) {
+    if (/^<\/group\b/i.test(tag)) {
       stack.pop();
       continue;
     }
 
-    if (/\\/\\s*>$/.test(tag)) continue;
+    if (/\/\s*>$/.test(tag)) continue;
     stack.push(splitCsv(attribute(tag, 'name')));
   }
 
@@ -407,7 +407,7 @@ function parseRuleBlock(
 function parseRules(source: RulesetSourceFile): RuleRecord[] {
   const rules: RuleRecord[] = [];
   const semanticContent = maskXmlCommentsPreservingOffsets(source.content);
-  const expression = /<rule\\b[\\s\\S]*?<\\/rule>/gi;
+  const expression = /<rule\b[\s\S]*?<\/rule>/gi;
   let match: RegExpExecArray | null;
 
   while ((match = expression.exec(semanticContent))) {
@@ -431,7 +431,7 @@ function parseRules(source: RulesetSourceFile): RuleRecord[] {
 function parseDecoders(source: RulesetSourceFile): DecoderRecord[] {
   const decoders: DecoderRecord[] = [];
   const semanticContent = maskXmlCommentsPreservingOffsets(source.content);
-  const expression = /<decoder\\b[\\s\\S]*?<\\/decoder>/gi;
+  const expression = /<decoder\b[\s\S]*?<\/decoder>/gi;
   let match: RegExpExecArray | null;
 
   while ((match = expression.exec(semanticContent))) {
