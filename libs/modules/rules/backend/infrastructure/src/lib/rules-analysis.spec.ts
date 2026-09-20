@@ -20,7 +20,7 @@ const emptyStats = {
   critical: 0,
   mitreMapped: 0,
   missingUseCase: 0,
-  brokenDependencies: 0,
+  unresolvedDependencies: 0,
 } as const;
 
 function file(name: string, tenant: string, sha256: string, content = ''): RulesetSourceFile {
