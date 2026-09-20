@@ -10,6 +10,15 @@ export const RULES_AUTHORING_DRAFT_STORE = Symbol('mercure.rules.authoring-draft
 export const RULES_AUTHORING_SOURCE = Symbol('mercure.rules.authoring-source');
 
 export type RulesAuthoringDraftState = 'draft' | 'validated' | 'approved';
+export type RulesAuthoringEventType = 'create' | 'edit' | 'validate' | 'approve';
+
+export interface RulesAuthoringEvent {
+  readonly eventType: RulesAuthoringEventType;
+  readonly state: RulesAuthoringDraftState;
+  readonly revision: number;
+  readonly actorSubject: string;
+  readonly createdAt: string;
+}
 
 export interface RulesAuthoringSourceFile {
   readonly snapshotId: string;
@@ -52,6 +61,7 @@ export interface RulesAuthoringDraft {
   readonly updatedBy: string;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly events: readonly RulesAuthoringEvent[];
   readonly validation?: RulesAuthoringValidationSummary;
   readonly approvedRevision?: number;
   readonly approvedSha256?: string;

@@ -9,6 +9,8 @@ import {
   type RulesAuthoringDraft,
   type RulesAuthoringDraftState,
   type RulesAuthoringDraftStore,
+  type RulesAuthoringEvent,
+  type RulesAuthoringEventType,
   type RulesAuthoringDraftSummary,
   type RulesAuthoringSource,
   type RulesAuthoringSourceFile,
@@ -50,6 +52,14 @@ interface DraftRow {
   readonly approvedAt: Date | null;
 }
 
+interface DraftEventRow {
+  readonly eventType: string;
+  readonly state: string;
+  readonly revision: number;
+  readonly actorSubject: string;
+  readonly createdAt: Date;
+}
+
 interface ValidationIssueRow {
   readonly severity: string;
   readonly type: string;
@@ -69,6 +79,23 @@ function sourceType(value: string): Exclude<RulesetSourceType, 'unknown'> {
 function state(value: string): RulesAuthoringDraftState {
   if (value === 'draft' || value === 'validated' || value === 'approved') return value;
   throw new Error(`Persisted Rules authoring state is invalid: ${value}`);
+}
+
+function eventType(value: string): RulesAuthoringEventType {
+  if (value === 'create' || value === 'edit' || value === 'validate' || value === 'approve') {
+    return value;
+  }
+  throw new Error(`Persisted Rules authoring event type is invalid: ${value}`);
+}
+
+function event(row: DraftEventRow): RulesAuthoringEvent {
+  return {
+    eventType: eventType(row.eventType),
+    state: state(row.state),
+    revision: row.revision,
+    actorSubject: row.actorSubject,
+    createdAt: row.createdAt.toISOString(),
+  };
 }
 
 function validationSeverity(value: string): ValidationSeverity {
@@ -93,7 +120,11 @@ function contentSha256(content: string): string {
   return createHash('sha256').update(content).digest('hex');
 }
 
-function detail(row: DraftRow, issues: readonly ValidationIssueRow[]): RulesAuthoringDraft {
+function detail(
+  row: DraftRow,
+  issues: readonly ValidationIssueRow[],
+  events: readonly DraftEventRow[],
+): RulesAuthoringDraft {
   const validation =
     row.validatedRevision === null ||
     row.validatedSha256 === null ||
@@ -133,6 +164,7 @@ function detail(row: DraftRow, issues: readonly ValidationIssueRow[]): RulesAuth
     updatedBy: row.updatedBy,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
+    events: events.map(event),
     ...(validation === undefined ? {} : { validation }),
     ...(row.approvedRevision === null ? {} : { approvedRevision: row.approvedRevision }),
     ...(row.approvedSha256 === null ? {} : { approvedSha256: row.approvedSha256 }),
@@ -239,15 +271,27 @@ export class PrismaRulesAuthoringStore implements RulesAuthoringDraftStore, Rule
     const row = await this.database.rulesAuthoringDraft.findUnique({ where: { id } });
     if (!row) return null;
 
-    const issues =
+    const [issues, events] = await Promise.all([
       row.validatedRevision === null
-        ? []
-        : await this.database.rulesAuthoringDraftValidationIssue.findMany({
+        ? Promise.resolve([])
+        : this.database.rulesAuthoringDraftValidationIssue.findMany({
             where: { draftId: id, revision: row.validatedRevision },
             orderBy: { position: 'asc' },
-          });
+          }),
+      this.database.rulesAuthoringDraftEvent.findMany({
+        where: { draftId: id },
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        select: {
+          eventType: true,
+          state: true,
+          revision: true,
+          actorSubject: true,
+          createdAt: true,
+        },
+      }),
+    ]);
 
-    return detail(row, issues);
+    return detail(row, issues, events);
   }
 
   async createFromSnapshot(

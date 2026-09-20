@@ -3,6 +3,16 @@ import { z } from 'zod';
 
 const sourceTypeSchema = z.enum(['rules', 'decoders']);
 const stateSchema = z.enum(['draft', 'validated', 'approved']);
+const authoringEventSchema = z
+  .object({
+    eventType: z.enum(['create', 'edit', 'validate', 'approve']),
+    state: stateSchema,
+    revision: z.number().int().min(1),
+    actorSubject: z.string(),
+    createdAt: z.string(),
+  })
+  .strict();
+
 const validationIssueSchema = z
   .object({
     severity: z.enum(['error', 'warning', 'info']),
@@ -87,6 +97,7 @@ const draftSchema = z
   .object({
     ...draftBase,
     content: z.string(),
+    events: z.array(authoringEventSchema),
     validation: validationSummarySchema.optional(),
   })
   .strict();

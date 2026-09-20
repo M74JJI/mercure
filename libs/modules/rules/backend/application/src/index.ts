@@ -99,6 +99,8 @@ export {
   type PersistRulesAuthoringValidationInput,
   type RulesAuthoringDraft,
   type RulesAuthoringDraftState,
+  type RulesAuthoringEvent,
+  type RulesAuthoringEventType,
   type RulesAuthoringDraftStore,
   type RulesAuthoringDraftSummary,
   type RulesAuthoringExport,

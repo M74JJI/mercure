@@ -675,6 +675,15 @@ export interface components {
       approvedBy?: string;
       approvedAt?: string;
       content: string;
+      events: {
+        /** @enum {string} */
+        eventType: 'create' | 'edit' | 'validate' | 'approve';
+        /** @enum {string} */
+        state: 'draft' | 'validated' | 'approved';
+        revision: number;
+        actorSubject: string;
+        createdAt: string;
+      }[];
       validation?: {
         revision: number;
         sha256: string;
