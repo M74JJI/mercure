@@ -7,11 +7,12 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@mercure/platform-backend-identity-domain": "workspace:*",
     "@mercure/rules-backend-application": "workspace:*",
     "@nestjs/common": "11.2.5",
     "@nestjs/swagger": "11.4.7",
     "nestjs-zod": "5.5.0",
-    "zod": "4.5.4",
-    "reflect-metadata": "0.2.2"
+    "reflect-metadata": "0.2.2",
+    "zod": "4.5.4"
   }
 }

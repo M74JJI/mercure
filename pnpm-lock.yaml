@@ -382,6 +382,9 @@ importers:
 
   libs/modules/rules/backend/presentation:
     dependencies:
+      '@mercure/platform-backend-identity-domain':
+        specifier: workspace:*
+        version: link:../../../../platform/backend/identity/domain
       '@mercure/rules-backend-application':
         specifier: workspace:*
         version: link:../application
@@ -475,6 +478,12 @@ importers:
       '@mercure/platform-backend-http':
         specifier: workspace:*
         version: link:../http
+      '@mercure/platform-backend-identity-application':
+        specifier: workspace:*
+        version: link:../identity/application
+      '@mercure/platform-backend-identity-infrastructure':
+        specifier: workspace:*
+        version: link:../identity/infrastructure
       '@mercure/platform-backend-logging':
         specifier: workspace:*
         version: link:../logging
@@ -520,6 +529,26 @@ importers:
         specifier: 5.12.5
         version: 5.12.5
 
+  libs/platform/backend/identity/application:
+    dependencies:
+      '@mercure/platform-backend-identity-domain':
+        specifier: workspace:*
+        version: link:../domain
+
+  libs/platform/backend/identity/domain: {}
+
+  libs/platform/backend/identity/infrastructure:
+    dependencies:
+      '@mercure/platform-backend-identity-application':
+        specifier: workspace:*
+        version: link:../application
+      '@mercure/platform-backend-identity-domain':
+        specifier: workspace:*
+        version: link:../domain
+      jose:
+        specifier: 6.2.3
+        version: 6.2.3
+
   libs/platform/backend/logging:
     dependencies:
       '@mercure/platform-backend-config':
@@ -540,6 +569,12 @@ importers:
       '@mercure/platform-backend-health':
         specifier: workspace:*
         version: link:../health
+      '@mercure/platform-backend-identity-application':
+        specifier: workspace:*
+        version: link:../identity/application
+      '@mercure/platform-backend-identity-domain':
+        specifier: workspace:*
+        version: link:../identity/domain
       '@nestjs/common':
         specifier: 11.2.5
         version: 11.2.5(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1)
@@ -4248,6 +4283,9 @@ packages:
   jiti@2.7.0:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
+
+  jose@6.2.3:
+    resolution: {integrity: sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==}
 
   js-levenshtein@1.1.6:
     resolution: {integrity: sha512-X2BB11YZtrRqY4EnQcLX5Rh373zbK4alC1FW7D7MBhL2gtcC17cTnr6DmfHZeS0s2rTHjUTMMHfG7gO8SSdw+g==}
@@ -9962,6 +10000,8 @@ snapshots:
       supports-color: 8.1.1
 
   jiti@2.7.0: {}
+
+  jose@6.2.3: {}
 
   js-levenshtein@1.1.6: {}
 

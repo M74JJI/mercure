@@ -1,0 +1,14 @@
+{
+  "name": "@mercure/platform-backend-identity-infrastructure",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mercure/platform-backend-identity-application": "workspace:*",
+    "@mercure/platform-backend-identity-domain": "workspace:*",
+    "jose": "6.2.3"
+  }
+}

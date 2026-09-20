@@ -1,0 +1,63 @@
+import { describe, expect, it } from 'vitest';
+
+import { parsePlatformEnvironment } from './platform-config.module';
+
+const baseEnvironment = {
+  DATABASE_URL: 'postgresql://mercure:mercure@127.0.0.1:5432/mercure',
+} as const;
+
+describe('platform OIDC configuration', () => {
+  it('provides deterministic non-production defaults', () => {
+    const config = parsePlatformEnvironment({
+      ...baseEnvironment,
+      NODE_ENV: 'test',
+    });
+
+    expect(config.OIDC_ISSUER_URL).toBe('https://identity.example.test/realms/mercure');
+    expect(config.OIDC_AUDIENCE).toBe('mercure-api');
+    expect(config.OIDC_CLIENT_ID).toBe('mercure-api');
+    expect(config.OIDC_ADMIN_AUTHORITIES).toEqual(['admin', '/security-admins']);
+    expect(config.OIDC_USER_AUTHORITIES).toEqual(['user', '/security-users']);
+  });
+
+  it('requires explicit production OIDC identity settings', () => {
+    expect(() =>
+      parsePlatformEnvironment({
+        ...baseEnvironment,
+        NODE_ENV: 'production',
+      }),
+    ).toThrow('OIDC_ISSUER_URL must be explicitly configured in production.');
+  });
+
+  it('requires HTTPS issuer and explicit audience/client in production', () => {
+    expect(() =>
+      parsePlatformEnvironment({
+        ...baseEnvironment,
+        NODE_ENV: 'production',
+        OIDC_ISSUER_URL: 'http://identity.internal/realms/mercure',
+        OIDC_AUDIENCE: 'mercure-api',
+        OIDC_CLIENT_ID: 'mercure-api',
+      }),
+    ).toThrow('OIDC_ISSUER_URL must use https:// in production.');
+  });
+
+  it('normalizes configured role authorities without permitting an empty mapping', () => {
+    const config = parsePlatformEnvironment({
+      ...baseEnvironment,
+      NODE_ENV: 'test',
+      OIDC_ADMIN_AUTHORITIES: ' admin, /security-admins, admin ',
+      OIDC_USER_AUTHORITIES: ' user, /security-users ',
+    });
+
+    expect(config.OIDC_ADMIN_AUTHORITIES).toEqual(['admin', '/security-admins']);
+    expect(config.OIDC_USER_AUTHORITIES).toEqual(['user', '/security-users']);
+
+    expect(() =>
+      parsePlatformEnvironment({
+        ...baseEnvironment,
+        NODE_ENV: 'test',
+        OIDC_ADMIN_AUTHORITIES: ' , ',
+      }),
+    ).toThrow();
+  });
+});
