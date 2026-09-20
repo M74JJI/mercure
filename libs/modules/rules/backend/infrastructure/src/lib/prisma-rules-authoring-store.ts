@@ -480,7 +480,6 @@ export class PrismaRulesAuthoringStore implements RulesAuthoringDraftStore, Rule
         },
         data: {
           state: 'validated',
-          updatedBy: input.actorSubject,
           validatedRevision: input.expectedRevision,
           validatedSha256: input.expectedSha256,
           validatedRuleCount: input.ruleCount,
@@ -551,7 +550,6 @@ export class PrismaRulesAuthoringStore implements RulesAuthoringDraftStore, Rule
         },
         data: {
           state: 'approved',
-          updatedBy: input.actorSubject,
           approvedRevision: input.expectedRevision,
           approvedSha256: input.expectedSha256,
           approvedBy: input.actorSubject,

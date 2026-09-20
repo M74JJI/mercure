@@ -237,7 +237,6 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
     this.draft = {
       ...this.draft,
       state: 'validated',
-      updatedBy: input.actorSubject,
       eventCount: this.draft.eventCount + 1,
       events: [
         ...this.draft.events,
@@ -270,7 +269,6 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
     this.draft = {
       ...this.draft,
       state: 'approved',
-      updatedBy: input.actorSubject,
       approvedRevision: input.expectedRevision,
       approvedSha256: input.expectedSha256,
       approvedBy: input.actorSubject,
