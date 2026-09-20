@@ -295,17 +295,30 @@ function extractUseCaseFromInfo(xml: string): string | undefined {
   return undefined;
 }
 
-function sourceSectionFor(content: string, index: number): string | undefined {
-  const before = content.slice(Math.max(0, index - 5_000), index);
-  const matches = [...before.matchAll(/Source file:\s*([^<\n]+)/gi)];
-  const section = matches.at(-1)?.[1]?.trim();
-  return section?.replace(/-->/g, '').trim();
+interface SourceSectionMarker {
+  readonly index: number;
+  readonly value: string;
+}
+
+function sourceSectionMarkers(content: string): readonly SourceSectionMarker[] {
+  const markers: SourceSectionMarker[] = [];
+  const expression = /Source file:\s*([^<\n]+)/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = expression.exec(content))) {
+    const value = match[1]?.trim().replace(/-->/g, '').trim();
+    if (value) {
+      markers.push({ index: match.index, value });
+    }
+  }
+
+  return markers;
 }
 
 function parseRuleBlock(
   xml: string,
   source: RulesetSourceFile,
-  startIndex: number,
+  sourceSection: string | undefined,
   wrapperGroups: readonly string[] = [],
   rawXml: string = xml,
 ): RuleRecord | null {
@@ -368,7 +381,6 @@ function parseRuleBlock(
 
   const frequency = attribute(xml, 'frequency');
   const timeframe = attribute(xml, 'timeframe');
-  const sourceSection = sourceSectionFor(source.content, startIndex);
   const hasCorrelationMarkers =
     Boolean(frequency) ||
     Boolean(timeframe) ||
@@ -405,18 +417,26 @@ function parseRuleBlock(
 function parseRules(source: RulesetSourceFile): RuleRecord[] {
   const rules: RuleRecord[] = [];
   const semanticContent = maskXmlCommentsPreservingOffsets(source.content);
+  const markers = sourceSectionMarkers(source.content);
   const expression = /<rule\b[\s\S]*?<\/rule>/gi;
   let match: RegExpExecArray | null;
+  let markerIndex = 0;
+  let sourceSection: string | undefined;
 
   while ((match = expression.exec(semanticContent))) {
     const block = match[0];
     if (!block) continue;
 
+    while (markerIndex < markers.length && markers[markerIndex]!.index < match.index) {
+      sourceSection = markers[markerIndex]!.value;
+      markerIndex += 1;
+    }
+
     const rawXml = source.content.slice(match.index, match.index + block.length);
     const rule = parseRuleBlock(
       block,
       source,
-      match.index,
+      sourceSection,
       enclosingRuleGroups(semanticContent, match.index),
       rawXml,
     );
