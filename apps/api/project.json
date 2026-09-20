@@ -18,7 +18,13 @@
       "options": {
         "platform": "node",
         "outputPath": "dist/apps/api",
+        "outputFileName": "main.js",
         "format": ["cjs"],
+        "esbuildOptions": {
+          "outExtension": {
+            ".js": ".js"
+          }
+        },
         "bundle": true,
         "main": "apps/api/src/main.ts",
         "tsConfig": "apps/api/tsconfig.app.json",
