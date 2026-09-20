@@ -88,6 +88,10 @@ async function readArchiveEntry(
   let bytes = 0;
 
   for await (const chunk of stream) {
+    if (!Buffer.isBuffer(chunk) && !(chunk instanceof Uint8Array)) {
+      throw new Error('archive member emitted an unsupported stream chunk');
+    }
+
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
     bytes += buffer.length;
 
