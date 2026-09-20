@@ -67,6 +67,15 @@ function statusCode(status: number): string {
   }
 }
 
+export function safeErrorTrace(error: Error): string | undefined {
+  const frames = error.stack
+    ?.split('\n')
+    .filter((line) => /^\s*at\s/.test(line))
+    .join('\n');
+
+  return frames?.trim() ? frames : undefined;
+}
+
 function detailFromResponse(response: unknown, fallback: string): string {
   if (typeof response === 'string') {
     return response;
@@ -132,7 +141,7 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     if (status >= 500) {
       this.logger.error(
         'Unhandled request exception',
-        exception instanceof Error ? exception.stack : undefined,
+        exception instanceof Error ? safeErrorTrace(exception) : undefined,
       );
     }
 
