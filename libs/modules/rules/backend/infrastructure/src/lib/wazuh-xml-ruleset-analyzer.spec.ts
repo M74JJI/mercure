@@ -271,6 +271,26 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     ).toContain('does not match');
   });
 
+  it('reports an unclosed element even when trailing text follows it', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-d/rules/1403-unclosed_rules.xml',
+          content: '<group name="custom,">trailing text',
+        },
+      ],
+    });
+
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({
+        severity: 'error',
+        type: 'malformed_xml_structure',
+        detail: 'XML tag <group> is not closed.',
+      }),
+    );
+  });
+
   it('reports invalid entities and duplicate XML attributes', async () => {
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const result = await analyzer.analyze({

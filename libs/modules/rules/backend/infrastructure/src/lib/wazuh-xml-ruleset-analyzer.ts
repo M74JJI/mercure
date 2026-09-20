@@ -137,7 +137,9 @@ function xmlFragmentStructureError(content: string): string | undefined {
   while (cursor < content.length) {
     const start = content.indexOf('<', cursor);
     if (start === -1) {
-      return textStructureError(content.slice(cursor));
+      const tailError = textStructureError(content.slice(cursor));
+      if (tailError) return tailError;
+      break;
     }
 
     const textError = textStructureError(content.slice(cursor, start));
