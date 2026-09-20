@@ -383,7 +383,6 @@ export interface RulesUseCaseDetailView extends RulesUseCasePreviewView {
   readonly createdAt?: string;
 }
 
-
 export interface RulesAuthoringValidationIssueView {
   readonly severity: 'error' | 'warning' | 'info';
   readonly type: string;

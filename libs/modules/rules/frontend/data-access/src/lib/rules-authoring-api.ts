@@ -89,10 +89,7 @@ export class RulesAuthoringDataAccess {
     }
   }
 
-  update(
-    draftId: string,
-    input: RulesAuthoringUpdateInput,
-  ): Promise<RulesAuthoringDraft> {
+  update(draftId: string, input: RulesAuthoringUpdateInput): Promise<RulesAuthoringDraft> {
     return execute('update authoring draft', () =>
       this.client.PUT('/api/v1/rules/authoring/drafts/{draftId}', {
         params: { path: { draftId } },

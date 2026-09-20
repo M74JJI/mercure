@@ -92,13 +92,15 @@ export async function RulesAuthoringDraftDetailFeature({
     if (!draft) return <RulesUnavailableState />;
 
     const error = errorCode(searchParams.error);
-    return <RulesAuthoringDraftDetail
-      draft={draft}
-      updateAction={updateRulesAuthoringDraftAction}
-      validateAction={validateRulesAuthoringDraftAction}
-      approveAction={approveRulesAuthoringDraftAction}
-      {...(error === undefined ? {} : { error })}
-    />;
+    return (
+      <RulesAuthoringDraftDetail
+        draft={draft}
+        updateAction={updateRulesAuthoringDraftAction}
+        validateAction={validateRulesAuthoringDraftAction}
+        approveAction={approveRulesAuthoringDraftAction}
+        {...(error === undefined ? {} : { error })}
+      />
+    );
   } catch (caught) {
     if (caught instanceof RulesFrontendApiError) {
       redirectRulesAuthorizationFailure(caught);
