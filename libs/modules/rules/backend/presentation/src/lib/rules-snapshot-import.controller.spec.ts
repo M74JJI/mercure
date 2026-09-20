@@ -8,9 +8,9 @@ import {
   type MercurePrincipal,
 } from '@mercure/platform-backend-identity-domain';
 import {
-  PersistImportedRuleset,
-  QueryRulesetSnapshots,
   RulesetImportInProgressError,
+  type PersistImportedRuleset,
+  type QueryRulesetSnapshots,
 } from '@mercure/rules-backend-application';
 
 import { RulesSnapshotsController } from './rules-snapshots.controller';
