@@ -143,7 +143,6 @@ describe('WazuhXmlRulesetAnalyzer', () => {
         'external_or_missing_sid',
         'external_decoder_parent',
         'unknown_file_type',
-        'level_above_standard',
       ]),
     );
     expect(result.issues.find((issue) => issue.type === 'duplicate_rule_id')?.severity).toBe(

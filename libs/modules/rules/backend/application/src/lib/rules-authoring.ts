@@ -311,7 +311,7 @@ export class CreateRulesAuthoringDraft {
 export class CreateNewRulesAuthoringDraft {
   constructor(private readonly store: RulesAuthoringDraftStore) {}
 
-  execute(input: CreateNewRulesAuthoringDraftInput): Promise<RulesAuthoringDraft> {
+  async execute(input: CreateNewRulesAuthoringDraftInput): Promise<RulesAuthoringDraft> {
     return this.store.createNew(
       {
         fileName: logicalFileName(input.fileName),
