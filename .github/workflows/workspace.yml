@@ -137,6 +137,7 @@ jobs:
           pnpm exec vitest run
           libs/modules/rules/backend/infrastructure/src/lib/prisma-ruleset-snapshot-store.integration.spec.ts
           libs/modules/rules/backend/infrastructure/src/lib/prisma-rules-use-case-catalog.integration.spec.ts
+          libs/modules/rules/backend/infrastructure/src/lib/prisma-rules-authoring-store.integration.spec.ts
           --config libs/modules/rules/backend/infrastructure/vitest.config.ts
 
       - name: Build API
@@ -176,3 +177,14 @@ jobs:
 
           import_status="$(curl --silent --output /dev/null --write-out '%{http_code}'             --request POST             'http://127.0.0.1:3001/api/v1/rules/snapshots/import')"
           [[ "$import_status" == "401" ]]
+
+          authoring_list_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            'http://127.0.0.1:3001/api/v1/rules/authoring/drafts?offset=0&limit=1')"
+          [[ "$authoring_list_status" == "401" ]]
+
+          authoring_create_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --request POST \
+            --header 'content-type: application/json' \
+            --data '{"fileName":"4300-smoke_rules.xml","tenant":"smoke","sourceType":"rules"}' \
+            'http://127.0.0.1:3001/api/v1/rules/authoring/drafts/new')"
+          [[ "$authoring_create_status" == "401" ]]
