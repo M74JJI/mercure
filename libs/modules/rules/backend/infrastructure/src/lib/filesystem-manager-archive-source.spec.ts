@@ -158,10 +158,10 @@ describe('FilesystemManagerArchiveSource', () => {
         maxEntryBytes: 1024 * 1024,
         maxTotalBytes: 2 * 1024 * 1024,
       });
-      const previousPath = process.env.PATH;
+      const previousPath = process.env['PATH'];
 
       try {
-        process.env.PATH = '';
+        process.env['PATH'] = '';
         const snapshot = await source.readSnapshot();
 
         expect(snapshot.files.map((file) => file.name)).toEqual([
@@ -170,9 +170,9 @@ describe('FilesystemManagerArchiveSource', () => {
         expect(snapshot.errors).toEqual([]);
       } finally {
         if (previousPath === undefined) {
-          delete process.env.PATH;
+          delete process.env['PATH'];
         } else {
-          process.env.PATH = previousPath;
+          process.env['PATH'] = previousPath;
         }
       }
     });
