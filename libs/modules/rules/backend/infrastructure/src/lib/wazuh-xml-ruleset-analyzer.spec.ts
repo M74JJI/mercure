@@ -453,6 +453,29 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     expect(result.issues.filter((issue) => issue.type === 'level_above_standard')).toEqual([]);
   });
 
+
+  it('preserves source-section attribution beyond the former lookback window', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-g/rules/1700-long-section_rules.xml',
+          content: [
+            '<group name="production,">',
+            '  <!-- Source file: 1700-long-source.xml -->',
+            `  ${' '.repeat(6_000)}`,
+            '  <rule id="170001" level="8">',
+            '    <description>Long source section attribution</description>',
+            '  </rule>',
+            '</group>',
+          ].join('\n'),
+        },
+      ],
+    });
+
+    expect(result.rules[0]?.sourceSection).toBe('1700-long-source.xml');
+  });
+
   it('uses SHA-256 source fingerprints and deterministic source classification', async () => {
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const source = await fixture('baseline/manager-a/rules/1000-sample_rules.xml');
