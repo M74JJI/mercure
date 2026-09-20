@@ -409,8 +409,8 @@ export interface RulesAuthoringValidationView {
 
 export interface RulesAuthoringDraftSummaryView {
   readonly id: string;
-  readonly sourceSnapshotId: string;
-  readonly sourceFilePosition: number;
+  readonly sourceSnapshotId?: string;
+  readonly sourceFilePosition?: number;
   readonly fileName: string;
   readonly tenant: string;
   readonly sourceType: 'rules' | 'decoders';

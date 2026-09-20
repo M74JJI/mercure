@@ -13,9 +13,13 @@ function stateTone(state: RulesAuthoringDraftSummaryView['state']) {
 }
 
 export function RulesAuthoringDraftList({
+  createNewAction,
   drafts,
+  error,
 }: {
+  readonly createNewAction: FormAction;
   readonly drafts: readonly RulesAuthoringDraftSummaryView[];
+  readonly error?: 'validation' | 'conflict' | 'not-found' | 'unavailable';
 }) {
   return <div className={styles.page}>
     <PageHeader
@@ -24,10 +28,59 @@ export function RulesAuthoringDraftList({
       description="Controlled XML authoring with deterministic validation and explicit approval. Export never writes to a Wazuh manager."
       actions={<a className={styles.actionLink} href="/rules">Rules snapshots</a>}
     />
+
+    {error ? (
+      <Panel tone="muted" className={styles.formNotice}>
+        <strong>
+          {error === 'validation'
+            ? 'The new draft details were rejected. Use a logical .xml file name and a bounded tenant identifier.'
+            : error === 'not-found'
+              ? 'The requested authoring source was not found.'
+              : 'The authoring API is unavailable.'}
+        </strong>
+      </Panel>
+    ) : null}
+
+    <Panel tone="raised" className={styles.adminFormPanel}>
+      <div className={styles.sectionHeader}>
+        <div>
+          <p className={styles.eyebrow}>New source</p>
+          <h2>Create a blank XML draft</h2>
+        </div>
+      </div>
+      <form action={createNewAction} className={styles.adminForm}>
+        <label>
+          <span>Logical file name</span>
+          <input
+            name="fileName"
+            placeholder="4300-custom_rules.xml"
+            minLength={5}
+            maxLength={255}
+            required
+          />
+          <small>No directories, absolute paths, or traversal segments.</small>
+        </label>
+        <label>
+          <span>Tenant / manager</span>
+          <input name="tenant" placeholder="manager-a" maxLength={255} required />
+        </label>
+        <label>
+          <span>Source type</span>
+          <select name="sourceType" defaultValue="rules">
+            <option value="rules">Rules</option>
+            <option value="decoders">Decoders</option>
+          </select>
+        </label>
+        <div className={styles.formActions}>
+          <button type="submit">Create blank draft</button>
+        </div>
+      </form>
+    </Panel>
+
     {drafts.length === 0 ? (
       <Panel tone="muted" className={styles.statePanel}>
         <h2>No authoring drafts yet</h2>
-        <p>Open a rule or decoder in an immutable snapshot and create a draft from its source file.</p>
+        <p>Create a new bounded XML source above, or open a rule or decoder snapshot record and clone its source file.</p>
       </Panel>
     ) : (
       <div className={styles.snapshotList}>
@@ -86,7 +139,9 @@ export function RulesAuthoringDraftDetail({
 
     <div className={styles.headerActions}>
       <a className={styles.actionLink} href="/rules/drafts">← Drafts</a>
-      <a className={styles.actionLink} href={'/rules/' + draft.sourceSnapshotId}>Source snapshot</a>
+      {draft.sourceSnapshotId ? (
+        <a className={styles.actionLink} href={'/rules/' + draft.sourceSnapshotId}>Source snapshot</a>
+      ) : null}
       {draft.state === 'approved' ? <a className={styles.actionLink} href={'/rules/drafts/' + draft.id + '/export'}>Download approved XML</a> : null}
     </div>
 
@@ -98,7 +153,14 @@ export function RulesAuthoringDraftDetail({
     <Panel tone="muted" className={styles.provenance}>
       <div><span>Tenant</span><strong>{draft.tenant}</strong></div>
       <div><span>Source type</span><strong>{draft.sourceType}</strong></div>
-      <div><span>Source file position</span><strong>{draft.sourceFilePosition}</strong></div>
+      <div>
+        <span>Origin</span>
+        <strong>
+          {draft.sourceSnapshotId === undefined
+            ? 'Created in Mercure'
+            : 'Snapshot file #' + String(draft.sourceFilePosition)}
+        </strong>
+      </div>
       <div><span>Revision</span><strong>{draft.revision}</strong></div>
       <div><span>SHA-256</span><strong className={styles.mono}>{draft.sha256}</strong></div>
       <div><span>Updated by</span><strong className={styles.mono}>{draft.updatedBy}</strong></div>
