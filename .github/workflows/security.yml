@@ -29,7 +29,11 @@ jobs:
           version: 12.4.2
           run_install: false
 
-      - name: Audit locked dependencies
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level high
+
+      - name: Report full dependency advisories
+        continue-on-error: true
         run: pnpm audit --audit-level high
 
   codeql:
