@@ -312,6 +312,30 @@ describe('controlled Rules authoring workflow', () => {
     ).rejects.toBeInstanceOf(RulesAuthoringContentValidationError);
   });
 
+  it('blocks approval for an empty standalone decoder definition', async () => {
+    const store = new TestAuthoringStore('', 'decoders');
+    const flow = workflow(store);
+    const draft = await flow.createNew.execute({
+      fileName: '4301-custom_decoders.xml',
+      tenant: 'manager-new',
+      sourceType: 'decoders',
+      actorSubject: actor,
+    });
+
+    const validated = await flow.validate.execute(draft.id, draft.revision, actor);
+
+    expect(validated.validation?.issues).toContainEqual(
+      expect.objectContaining({
+        severity: 'error',
+        type: 'authoring_empty_decoder_definition',
+        decoderName: 'custom_decoder',
+      }),
+    );
+    await expect(
+      flow.approve.execute(validated.id, validated.revision, actor),
+    ).rejects.toBeInstanceOf(RulesAuthoringInvalidStateError);
+  });
+
   it('blocks approval when a rules draft parses no rules', async () => {
     const store = new TestAuthoringStore('<group name="empty,"></group>');
     const flow = workflow(store);

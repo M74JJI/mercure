@@ -352,6 +352,28 @@ export class ValidateRulesAuthoringDraft {
       });
     }
 
+    if (draft.sourceType === 'decoders') {
+      for (const decoder of analysis.decoders) {
+        if (
+          decoder.parent === undefined &&
+          decoder.prematch.length === 0 &&
+          decoder.regex.length === 0 &&
+          decoder.orderFields.length === 0
+        ) {
+          issues.push({
+            severity: 'error',
+            type: 'authoring_empty_decoder_definition',
+            title: 'Decoder has no matching or extraction definition',
+            detail:
+              'Authoring requires each root decoder to define a parent, prematch, regex, or ordered extraction field before approval.',
+            decoderName: decoder.name,
+            fileName: draft.fileName,
+            tenant: draft.tenant,
+          });
+        }
+      }
+    }
+
     return this.store.persistValidation({
       draftId,
       expectedRevision,
