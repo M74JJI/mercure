@@ -139,6 +139,78 @@ describe('FilesystemManagerArchiveSource', () => {
     });
   });
 
+
+  it('streams manager archives without requiring the system tar executable at runtime', async () => {
+    await withTempDirectory(async (root) => {
+      const archiveRoot = path.join(root, 'archives');
+      const sourceRoot = path.join(root, 'source');
+      await mkdir(archiveRoot, { recursive: true });
+      await mkdir(path.join(sourceRoot, 'rules'), { recursive: true });
+
+      await writeFile(
+        path.join(sourceRoot, 'rules', 'streamed.xml'),
+        '<rule id="225001" level="1"><description>Streamed archive rule</description></rule>',
+      );
+      await createArchive(path.join(archiveRoot, 'manager-streamed.tar.gz'), sourceRoot);
+
+      const source = new FilesystemManagerArchiveSource({
+        rootPath: archiveRoot,
+        maxFiles: 10,
+        maxEntryBytes: 1024 * 1024,
+        maxTotalBytes: 2 * 1024 * 1024,
+      });
+      const previousPath = process.env.PATH;
+
+      try {
+        process.env.PATH = '';
+        const snapshot = await source.readSnapshot();
+
+        expect(snapshot.files.map((file) => file.name)).toEqual([
+          'manager-streamed.tar.gz/rules/streamed.xml',
+        ]);
+        expect(snapshot.errors).toEqual([]);
+      } finally {
+        if (previousPath === undefined) {
+          delete process.env.PATH;
+        } else {
+          process.env.PATH = previousPath;
+        }
+      }
+    });
+  });
+
+  it('enforces the total XML byte limit across streamed archive members', async () => {
+    await withTempDirectory(async (root) => {
+      const archiveRoot = path.join(root, 'archives');
+      const sourceRoot = path.join(root, 'source');
+      await mkdir(archiveRoot, { recursive: true });
+      await mkdir(path.join(sourceRoot, 'rules'), { recursive: true });
+
+      await writeFile(
+        path.join(sourceRoot, 'rules', 'first.xml'),
+        `<rule id="226001" level="1"><description>${'a'.repeat(600)}</description></rule>`,
+      );
+      await writeFile(
+        path.join(sourceRoot, 'rules', 'second.xml'),
+        `<rule id="226002" level="1"><description>${'b'.repeat(600)}</description></rule>`,
+      );
+      await createArchive(path.join(archiveRoot, 'manager-total.tar.gz'), sourceRoot);
+
+      const source = new FilesystemManagerArchiveSource({
+        rootPath: archiveRoot,
+        maxFiles: 10,
+        maxEntryBytes: 1024,
+        maxTotalBytes: 900,
+      });
+
+      const snapshot = await source.readSnapshot();
+
+      expect(snapshot.files).toHaveLength(1);
+      expect(snapshot.errors).toHaveLength(1);
+      expect(snapshot.errors[0]).toContain('900-byte XML limit');
+    });
+  });
+
   it('enforces per-entry and total XML byte limits without extracting to disk', async () => {
     await withTempDirectory(async (root) => {
       const archiveRoot = path.join(root, 'archives');
