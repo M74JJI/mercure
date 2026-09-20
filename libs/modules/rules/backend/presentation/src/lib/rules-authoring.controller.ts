@@ -3,6 +3,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Inject,
   Logger,
   NotFoundException,
   Post,
@@ -114,14 +115,14 @@ export class RulesAuthoringController {
   private readonly logger = new Logger(RulesAuthoringController.name);
 
   constructor(
-    private readonly listDrafts: ListRulesAuthoringDrafts,
-    private readonly getDraft: GetRulesAuthoringDraft,
-    private readonly createNewDraft: CreateNewRulesAuthoringDraft,
-    private readonly createDraft: CreateRulesAuthoringDraft,
-    private readonly updateDraft: UpdateRulesAuthoringDraft,
-    private readonly validateDraft: ValidateRulesAuthoringDraft,
-    private readonly approveDraft: ApproveRulesAuthoringDraft,
-    private readonly exportDraft: ExportRulesAuthoringDraft,
+    @Inject(ListRulesAuthoringDrafts) private readonly listDrafts: ListRulesAuthoringDrafts,
+    @Inject(GetRulesAuthoringDraft) private readonly getDraft: GetRulesAuthoringDraft,
+    @Inject(CreateNewRulesAuthoringDraft) private readonly createNewDraft: CreateNewRulesAuthoringDraft,
+    @Inject(CreateRulesAuthoringDraft) private readonly createDraft: CreateRulesAuthoringDraft,
+    @Inject(UpdateRulesAuthoringDraft) private readonly updateDraft: UpdateRulesAuthoringDraft,
+    @Inject(ValidateRulesAuthoringDraft) private readonly validateDraft: ValidateRulesAuthoringDraft,
+    @Inject(ApproveRulesAuthoringDraft) private readonly approveDraft: ApproveRulesAuthoringDraft,
+    @Inject(ExportRulesAuthoringDraft) private readonly exportDraft: ExportRulesAuthoringDraft,
   ) {}
 
   private async mutation<T extends AuthoringMutationResult>(
