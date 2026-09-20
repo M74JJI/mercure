@@ -23,7 +23,7 @@ const environment: WebIdentityEnvironment = {
   refreshTimeoutMs: 5_000,
   sessionMaxAgeSeconds: 28_800,
   secureCookies: true,
-  sessionCookieName: '__Secure-authjs.session-token',
+  sessionCookieName: '__Host-authjs.session-token',
 };
 
 function jwt(payload: Readonly<Record<string, unknown>>): string {
