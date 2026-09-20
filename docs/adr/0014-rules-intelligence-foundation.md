@@ -57,6 +57,8 @@ The legacy `noiseRisk` dimension is renamed `noiseControl` because the underlyin
 
 Dependency, decoder, produced-field, and group checks are tenant-scoped.
 
+A dependency reference that is absent from one imported snapshot is classified as unresolved, not confirmed broken, because stock or externally managed Wazuh rules/decoders may satisfy it at deployment time. Unresolved SID/group references remain visible as warnings but do not reduce dependency-health scoring until Mercure has authoritative target-ruleset context.
+
 Rule quality results carry tenant identity so duplicate Wazuh rule IDs from different managers remain distinct.
 
 Use-case aggregates are tenant-scoped to avoid one manager masking another manager's weak implementation of the same use case.
@@ -112,4 +114,5 @@ M12 does not include:
 - Multi-manager snapshots cannot silently cross-link rule IDs, decoder names, groups, or fields.
 - Frontend visualization can evolve independently from backend graph semantics.
 - Quality scores have consistent directionality and stable tenant-scoped identities.
+- Snapshot summaries expose absent local references as `unresolvedDependencyCount`; the metric does not claim that stock/external Wazuh dependencies are broken.
 - Future API/UI work can expose bounded intelligence results without reimplementing analysis in Next.js.
