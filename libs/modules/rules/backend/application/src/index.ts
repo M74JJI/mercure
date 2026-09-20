@@ -80,6 +80,7 @@ export {
 
 export {
   ApproveRulesAuthoringDraft,
+  CreateNewRulesAuthoringDraft,
   CreateRulesAuthoringDraft,
   ExportRulesAuthoringDraft,
   GetRulesAuthoringDraft,
@@ -95,6 +96,7 @@ export {
   UpdateRulesAuthoringDraft,
   ValidateRulesAuthoringDraft,
   type ApproveRulesAuthoringDraftInput,
+  type CreateNewRulesAuthoringDraftInput,
   type CreateRulesAuthoringDraftInput,
   type PersistRulesAuthoringValidationInput,
   type RulesAuthoringDraft,

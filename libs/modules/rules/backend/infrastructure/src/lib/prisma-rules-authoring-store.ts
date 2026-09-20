@@ -24,8 +24,8 @@ import type {
 
 interface DraftRow {
   readonly id: string;
-  readonly sourceSnapshotId: string;
-  readonly sourceFilePosition: number;
+  readonly sourceSnapshotId: string | null;
+  readonly sourceFilePosition: number | null;
   readonly fileName: string;
   readonly tenant: string;
   readonly sourceType: string;
@@ -151,8 +151,8 @@ function detail(
 
   return {
     id: row.id,
-    sourceSnapshotId: row.sourceSnapshotId,
-    sourceFilePosition: row.sourceFilePosition,
+    ...(row.sourceSnapshotId === null ? {} : { sourceSnapshotId: row.sourceSnapshotId }),
+    ...(row.sourceFilePosition === null ? {} : { sourceFilePosition: row.sourceFilePosition }),
     fileName: row.fileName,
     tenant: row.tenant,
     sourceType: sourceType(row.sourceType),
@@ -199,8 +199,8 @@ function summary(row: DraftRow): RulesAuthoringDraftSummary {
 
   return {
     id: row.id,
-    sourceSnapshotId: row.sourceSnapshotId,
-    sourceFilePosition: row.sourceFilePosition,
+    ...(row.sourceSnapshotId === null ? {} : { sourceSnapshotId: row.sourceSnapshotId }),
+    ...(row.sourceFilePosition === null ? {} : { sourceFilePosition: row.sourceFilePosition }),
     fileName: row.fileName,
     tenant: row.tenant,
     sourceType: sourceType(row.sourceType),
@@ -311,6 +311,49 @@ export class PrismaRulesAuthoringStore implements RulesAuthoringDraftStore, Rule
           tenant: source.tenant,
           sourceType: source.sourceType,
           content: source.content,
+          sha256,
+          createdBy: actorSubject,
+          updatedBy: actorSubject,
+        },
+        select: { id: true, revision: true, state: true },
+      });
+
+      await transaction.rulesAuthoringDraftEvent.create({
+        data: {
+          draftId: row.id,
+          eventType: 'create',
+          state: row.state,
+          revision: row.revision,
+          actorSubject,
+        },
+      });
+
+      return row.id;
+    });
+
+    const created = await this.get(id);
+    if (!created) throw new RulesAuthoringDraftNotFoundError(id);
+    return created;
+  }
+
+  async createNew(
+    input: {
+      readonly fileName: string;
+      readonly tenant: string;
+      readonly sourceType: Exclude<RulesetSourceType, 'unknown'>;
+      readonly content: string;
+    },
+    actorSubject: string,
+  ): Promise<RulesAuthoringDraft> {
+    const sha256 = contentSha256(input.content);
+
+    const id = await this.database.$transaction(async (transaction) => {
+      const row = await transaction.rulesAuthoringDraft.create({
+        data: {
+          fileName: input.fileName,
+          tenant: input.tenant,
+          sourceType: input.sourceType,
+          content: input.content,
           sha256,
           createdBy: actorSubject,
           updatedBy: actorSubject,

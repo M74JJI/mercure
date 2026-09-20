@@ -318,8 +318,8 @@ model RulesetSnapshotSourceError {
 
 model RulesAuthoringDraft {
   id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sourceSnapshotId   String   @map("source_snapshot_id") @db.Uuid
-  sourceFilePosition Int      @map("source_file_position")
+  sourceSnapshotId   String?  @map("source_snapshot_id") @db.Uuid
+  sourceFilePosition Int?     @map("source_file_position")
   fileName           String   @map("file_name") @db.Text
   tenant             String   @db.VarChar(255)
   sourceType         String   @map("source_type") @db.VarChar(32)
@@ -347,7 +347,7 @@ model RulesAuthoringDraft {
   approvedBy       String?   @map("approved_by") @db.Text
   approvedAt       DateTime? @map("approved_at") @db.Timestamptz(6)
 
-  sourceSnapshot   RulesetSnapshot @relation(fields: [sourceSnapshotId], references: [id], onDelete: Restrict)
+  sourceSnapshot   RulesetSnapshot? @relation(fields: [sourceSnapshotId], references: [id], onDelete: Restrict)
   events           RulesAuthoringDraftEvent[]
   validationIssues RulesAuthoringDraftValidationIssue[]
 

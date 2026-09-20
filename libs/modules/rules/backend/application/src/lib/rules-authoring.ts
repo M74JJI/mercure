@@ -48,8 +48,8 @@ export interface RulesAuthoringValidationSummary {
 
 export interface RulesAuthoringDraft {
   readonly id: string;
-  readonly sourceSnapshotId: string;
-  readonly sourceFilePosition: number;
+  readonly sourceSnapshotId?: string;
+  readonly sourceFilePosition?: number;
   readonly fileName: string;
   readonly tenant: string;
   readonly sourceType: Exclude<RulesetSourceType, 'unknown'>;
@@ -76,6 +76,13 @@ export interface RulesAuthoringDraftSummary extends Omit<RulesAuthoringDraft, 'c
 export interface CreateRulesAuthoringDraftInput {
   readonly sourceSnapshotId: string;
   readonly sourceFilePosition: number;
+  readonly actorSubject: string;
+}
+
+export interface CreateNewRulesAuthoringDraftInput {
+  readonly fileName: string;
+  readonly tenant: string;
+  readonly sourceType: Exclude<RulesetSourceType, 'unknown'>;
   readonly actorSubject: string;
 }
 
@@ -109,6 +116,15 @@ export interface RulesAuthoringDraftStore {
   createFromSnapshot(
     source: Omit<RulesAuthoringSourceFile, 'sourceType'> & {
       readonly sourceType: Exclude<RulesetSourceType, 'unknown'>;
+    },
+    actorSubject: string,
+  ): Promise<RulesAuthoringDraft>;
+  createNew(
+    input: {
+      readonly fileName: string;
+      readonly tenant: string;
+      readonly sourceType: Exclude<RulesetSourceType, 'unknown'>;
+      readonly content: string;
     },
     actorSubject: string,
   ): Promise<RulesAuthoringDraft>;
@@ -173,6 +189,35 @@ function actor(value: string): string {
   return normalized;
 }
 
+function logicalFileName(value: string): string {
+  const normalized = value.trim();
+  if (
+    !/^[A-Za-z0-9][A-Za-z0-9._-]{0,250}\.xml$/i.test(normalized) ||
+    normalized.includes('..')
+  ) {
+    throw new RulesAuthoringContentValidationError(
+      'Draft file name must be a logical XML file name without path separators or traversal.',
+    );
+  }
+  return normalized;
+}
+
+function tenant(value: string): string {
+  const normalized = value.trim();
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,254}$/.test(normalized)) {
+    throw new RulesAuthoringContentValidationError(
+      'Draft tenant must be a bounded logical identifier.',
+    );
+  }
+  return normalized;
+}
+
+function initialContent(sourceType: Exclude<RulesetSourceType, 'unknown'>): string {
+  return sourceType === 'rules'
+    ? '<group name="custom,">\n</group>\n'
+    : '<decoder name="custom_decoder">\n</decoder>\n';
+}
+
 function content(value: string): string {
   if (!value.trim()) throw new RulesAuthoringContentValidationError('Draft XML must not be empty.');
   if (Buffer.byteLength(value, 'utf8') > MAX_DRAFT_BYTES) {
@@ -227,6 +272,22 @@ export class CreateRulesAuthoringDraft {
     content(source.content);
     return this.store.createFromSnapshot(
       { ...source, sourceType: source.sourceType },
+      actor(input.actorSubject),
+    );
+  }
+}
+
+export class CreateNewRulesAuthoringDraft {
+  constructor(private readonly store: RulesAuthoringDraftStore) {}
+
+  execute(input: CreateNewRulesAuthoringDraftInput): Promise<RulesAuthoringDraft> {
+    return this.store.createNew(
+      {
+        fileName: logicalFileName(input.fileName),
+        tenant: tenant(input.tenant),
+        sourceType: input.sourceType,
+        content: initialContent(input.sourceType),
+      },
       actor(input.actorSubject),
     );
   }

@@ -1,7 +1,7 @@
 CREATE TABLE "rules_authoring_drafts" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "source_snapshot_id" UUID NOT NULL,
-    "source_file_position" INTEGER NOT NULL,
+    "source_snapshot_id" UUID,
+    "source_file_position" INTEGER,
     "file_name" TEXT NOT NULL,
     "tenant" VARCHAR(255) NOT NULL,
     "source_type" VARCHAR(32) NOT NULL,
