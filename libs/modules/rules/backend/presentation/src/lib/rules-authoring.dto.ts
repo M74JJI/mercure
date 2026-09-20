@@ -62,7 +62,10 @@ const draftBase = {
   createdAt: z.string(),
   updatedAt: z.string(),
   approvedRevision: z.number().int().min(1).optional(),
-  approvedSha256: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+  approvedSha256: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/)
+    .optional(),
   approvedBy: z.string().optional(),
   approvedAt: z.string().optional(),
 };

@@ -59,7 +59,11 @@ export interface RulesRuleDetailView extends RulesRulePreviewView {
   readonly sourceSection?: string;
   readonly useCaseConfidence: string;
   readonly dependencies: readonly { readonly type: string; readonly value: string }[];
-  readonly fields: readonly { readonly name: string; readonly type?: string; readonly value: string }[];
+  readonly fields: readonly {
+    readonly name: string;
+    readonly type?: string;
+    readonly value: string;
+  }[];
   readonly frequency?: string;
   readonly timeframe?: string;
   readonly decodedAs: readonly string[];

@@ -192,8 +192,10 @@ export function RulesSnapshotRuleDetail({
             </div>
           </div>
           <p className={styles.supportingText}>
-            {[rule.frequency ? 'Frequency ' + rule.frequency : undefined,
-              rule.timeframe ? 'Timeframe ' + rule.timeframe : undefined]
+            {[
+              rule.frequency ? 'Frequency ' + rule.frequency : undefined,
+              rule.timeframe ? 'Timeframe ' + rule.timeframe : undefined,
+            ]
               .filter(Boolean)
               .join(' · ') || 'No frequency/timeframe constraint.'}
           </p>
@@ -223,7 +225,9 @@ export function RulesSnapshotDecoderDetail({
         title={decoder.name}
         description="Read-only normalized decoder inspection. Raw XML is intentionally not exposed."
         actions={
-          <StatusBadge tone="neutral">{decoder.parent ? 'Child decoder' : 'Root decoder'}</StatusBadge>
+          <StatusBadge tone="neutral">
+            {decoder.parent ? 'Child decoder' : 'Root decoder'}
+          </StatusBadge>
         }
       />
       <Navigation snapshotId={snapshotId} collection="decoders" />

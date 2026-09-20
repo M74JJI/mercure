@@ -43,20 +43,25 @@ export async function RulesSnapshotRuleDetailFeature({
   readonly snapshotId: string;
 }) {
   const parsed = recordPosition(position);
-  if (parsed === null) return <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="rules" />;
+  if (parsed === null)
+    return <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="rules" />;
   const api = new RulesDataAccess({ fetch: authenticatedMercureFetch });
   try {
     const [rule, identity] = await Promise.all([
       api.getRule(snapshotId, parsed),
       getServerMercureIdentity(),
     ]);
-    return rule
-      ? <RulesSnapshotRuleDetail
-          snapshotId={snapshotId}
-          rule={rule}
-          {...(identity?.role === 'admin' ? { createDraftAction: createRulesAuthoringDraftAction } : {})}
-        />
-      : <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="rules" />;
+    return rule ? (
+      <RulesSnapshotRuleDetail
+        snapshotId={snapshotId}
+        rule={rule}
+        {...(identity?.role === 'admin'
+          ? { createDraftAction: createRulesAuthoringDraftAction }
+          : {})}
+      />
+    ) : (
+      <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="rules" />
+    );
   } catch (error) {
     return recordError(error, snapshotId, 'rules');
   }
@@ -70,20 +75,25 @@ export async function RulesSnapshotDecoderDetailFeature({
   readonly snapshotId: string;
 }) {
   const parsed = recordPosition(position);
-  if (parsed === null) return <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="decoders" />;
+  if (parsed === null)
+    return <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="decoders" />;
   const api = new RulesDataAccess({ fetch: authenticatedMercureFetch });
   try {
     const [decoder, identity] = await Promise.all([
       api.getDecoder(snapshotId, parsed),
       getServerMercureIdentity(),
     ]);
-    return decoder
-      ? <RulesSnapshotDecoderDetail
-          snapshotId={snapshotId}
-          decoder={decoder}
-          {...(identity?.role === 'admin' ? { createDraftAction: createRulesAuthoringDraftAction } : {})}
-        />
-      : <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="decoders" />;
+    return decoder ? (
+      <RulesSnapshotDecoderDetail
+        snapshotId={snapshotId}
+        decoder={decoder}
+        {...(identity?.role === 'admin'
+          ? { createDraftAction: createRulesAuthoringDraftAction }
+          : {})}
+      />
+    ) : (
+      <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="decoders" />
+    );
   } catch (error) {
     return recordError(error, snapshotId, 'decoders');
   }
@@ -97,13 +107,16 @@ export async function RulesSnapshotIssueDetailFeature({
   readonly snapshotId: string;
 }) {
   const parsed = recordPosition(position);
-  if (parsed === null) return <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="issues" />;
+  if (parsed === null)
+    return <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="issues" />;
   const api = new RulesDataAccess({ fetch: authenticatedMercureFetch });
   try {
     const issue = await api.getIssue(snapshotId, parsed);
-    return issue
-      ? <RulesSnapshotIssueDetail snapshotId={snapshotId} issue={issue} />
-      : <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="issues" />;
+    return issue ? (
+      <RulesSnapshotIssueDetail snapshotId={snapshotId} issue={issue} />
+    ) : (
+      <RulesSnapshotRecordNotFoundState snapshotId={snapshotId} collection="issues" />
+    );
   } catch (error) {
     return recordError(error, snapshotId, 'issues');
   }

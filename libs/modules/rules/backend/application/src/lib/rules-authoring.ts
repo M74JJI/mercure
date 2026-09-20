@@ -1,7 +1,4 @@
-import type {
-  RulesetSourceType,
-  ValidationIssue,
-} from '@mercure/rules-backend-domain';
+import type { RulesetSourceType, ValidationIssue } from '@mercure/rules-backend-domain';
 
 import type { AnalyzeRuleset } from './analyze-ruleset';
 import type { PageRequest, PageResult } from './query-ruleset-snapshots';
@@ -71,8 +68,10 @@ export interface RulesAuthoringDraft {
   readonly approvedAt?: string;
 }
 
-export interface RulesAuthoringDraftSummary
-  extends Omit<RulesAuthoringDraft, 'content' | 'eventCount' | 'events' | 'validation'> {
+export interface RulesAuthoringDraftSummary extends Omit<
+  RulesAuthoringDraft,
+  'content' | 'eventCount' | 'events' | 'validation'
+> {
   readonly validation?: Omit<RulesAuthoringValidationSummary, 'issues'>;
 }
 
@@ -194,10 +193,7 @@ function actor(value: string): string {
 
 function logicalFileName(value: string): string {
   const normalized = value.trim();
-  if (
-    !/^[A-Za-z0-9][A-Za-z0-9._-]{0,250}\.xml$/i.test(normalized) ||
-    normalized.includes('..')
-  ) {
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,250}\.xml$/i.test(normalized) || normalized.includes('..')) {
     throw new RulesAuthoringContentValidationError(
       'Draft file name must be a logical XML file name without path separators or traversal.',
     );
@@ -268,10 +264,7 @@ export class CreateRulesAuthoringDraft {
       input.sourceFilePosition,
     );
     if (!source) {
-      throw new RulesAuthoringSourceNotFoundError(
-        input.sourceSnapshotId,
-        input.sourceFilePosition,
-      );
+      throw new RulesAuthoringSourceNotFoundError(input.sourceSnapshotId, input.sourceFilePosition);
     }
     if (source.sourceType === 'unknown') {
       throw new RulesAuthoringUnsupportedSourceError(source.sourceType);
@@ -327,12 +320,14 @@ export class ValidateRulesAuthoringDraft {
     if (draft.revision !== expectedRevision) throw new RulesAuthoringConflictError(draftId);
 
     const analysis = await this.analyzeRuleset.execute({
-      files: [{
-        name: draft.fileName,
-        content: draft.content,
-        tenant: draft.tenant,
-        type: draft.sourceType,
-      }],
+      files: [
+        {
+          name: draft.fileName,
+          content: draft.content,
+          tenant: draft.tenant,
+          type: draft.sourceType,
+        },
+      ],
       useCases: await this.useCases.list(),
     });
 

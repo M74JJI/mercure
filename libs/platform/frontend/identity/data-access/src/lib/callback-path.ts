@@ -9,11 +9,7 @@ function isBlockedPath(pathname: string): boolean {
     return true;
   }
 
-  if (
-    decoded.includes('\\') ||
-    decoded.startsWith('//') ||
-    /[\u0000-\u001f\u007f]/.test(decoded)
-  ) {
+  if (decoded.includes('\\') || decoded.startsWith('//') || /[\u0000-\u001f\u007f]/.test(decoded)) {
     return true;
   }
 

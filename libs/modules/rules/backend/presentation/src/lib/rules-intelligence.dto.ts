@@ -31,7 +31,15 @@ export class RulesIntelligenceSnapshotParamsDto extends createZodDto(
 ) {}
 
 export class RulesUseCaseParamsDto extends createZodDto(
-  z.object({ useCaseId: z.string().trim().regex(/^uc_[a-z0-9_]+$/).max(255) }).strict(),
+  z
+    .object({
+      useCaseId: z
+        .string()
+        .trim()
+        .regex(/^uc_[a-z0-9_]+$/)
+        .max(255),
+    })
+    .strict(),
 ) {}
 
 export class RulesFieldIntelligenceQueryDto extends createZodDto(
@@ -87,9 +95,7 @@ export class RulesSnapshotCompareQueryDto extends createZodDto(
     .strict(),
 ) {}
 
-export class RulesRoundtripQueryDto extends createZodDto(
-  z.object(paginationShape).strict(),
-) {}
+export class RulesRoundtripQueryDto extends createZodDto(z.object(paginationShape).strict()) {}
 
 export class RulesUseCaseListQueryDto extends createZodDto(
   z

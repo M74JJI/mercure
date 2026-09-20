@@ -35,10 +35,7 @@ function normalize(value: string): string {
   return value.trim().toLowerCase();
 }
 
-export function parseAccessToken(
-  accessToken: string,
-  clientId: string,
-): ParsedAccessToken | null {
+export function parseAccessToken(accessToken: string, clientId: string): ParsedAccessToken | null {
   const payload = decodeJwtPayload(accessToken);
   if (!payload) return null;
 
@@ -56,8 +53,7 @@ export function parseAccessToken(
   const preferredUsername = payload['preferred_username'];
 
   return {
-    expiresAtMs:
-      typeof exp === 'number' && Number.isFinite(exp) && exp > 0 ? exp * 1_000 : null,
+    expiresAtMs: typeof exp === 'number' && Number.isFinite(exp) && exp > 0 ? exp * 1_000 : null,
     preferredUsername:
       typeof preferredUsername === 'string' && preferredUsername.trim()
         ? preferredUsername.trim()

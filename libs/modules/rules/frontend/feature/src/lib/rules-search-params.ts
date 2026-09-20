@@ -1,11 +1,6 @@
-export type RulesSearchParams = Readonly<
-  Record<string, string | readonly string[] | undefined>
->;
+export type RulesSearchParams = Readonly<Record<string, string | readonly string[] | undefined>>;
 
-export function firstSearchParam(
-  params: RulesSearchParams,
-  key: string,
-): string | undefined {
+export function firstSearchParam(params: RulesSearchParams, key: string): string | undefined {
   const value = params[key];
   return typeof value === 'string' ? value : value?.[0];
 }

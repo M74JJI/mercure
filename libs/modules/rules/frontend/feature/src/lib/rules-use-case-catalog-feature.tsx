@@ -35,9 +35,7 @@ export async function RulesUseCaseCatalogFeature({
   const selectedSource = enumSearchParam(searchParams, 'source', sourceValues);
   const deletedCandidate = trimmedSearchParam(searchParams, 'deleted', 255);
   const deletedUseCaseId =
-    deletedCandidate && /^uc_[a-z0-9_]+$/.test(deletedCandidate)
-      ? deletedCandidate
-      : undefined;
+    deletedCandidate && /^uc_[a-z0-9_]+$/.test(deletedCandidate) ? deletedCandidate : undefined;
   const identity = await getServerMercureIdentity();
   const canAdminister = identity?.role === 'admin';
 

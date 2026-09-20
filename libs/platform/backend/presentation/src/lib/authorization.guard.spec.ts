@@ -1,7 +1,4 @@
-import {
-  ForbiddenException,
-  type ExecutionContext,
-} from '@nestjs/common';
+import { ForbiddenException, type ExecutionContext } from '@nestjs/common';
 import type { Reflector } from '@nestjs/core';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -22,10 +19,7 @@ function executionContext(request: MercureAuthenticatedRequest): ExecutionContex
 
 function reflector(required: readonly string[], isPublic = false): Reflector {
   return {
-    getAllAndOverride: vi
-      .fn()
-      .mockReturnValueOnce(isPublic)
-      .mockReturnValueOnce(required),
+    getAllAndOverride: vi.fn().mockReturnValueOnce(isPublic).mockReturnValueOnce(required),
   } as unknown as Reflector;
 }
 

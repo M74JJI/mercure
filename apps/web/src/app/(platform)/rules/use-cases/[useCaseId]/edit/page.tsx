@@ -13,9 +13,7 @@ interface RulesUseCaseEditPageProps {
   readonly params: Promise<{
     readonly useCaseId: string;
   }>;
-  readonly searchParams: Promise<
-    Readonly<Record<string, string | readonly string[] | undefined>>
-  >;
+  readonly searchParams: Promise<Readonly<Record<string, string | readonly string[] | undefined>>>;
 }
 
 export default async function RulesUseCaseEditPage({

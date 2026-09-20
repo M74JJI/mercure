@@ -74,7 +74,11 @@ export function RulesFieldIntelligencePage({
       </section>
 
       <Panel tone="raised" className={styles.compareControls}>
-        <form action={'/rules/' + snapshotId + '/fields'} method="get" className={styles.filterForm}>
+        <form
+          action={'/rules/' + snapshotId + '/fields'}
+          method="get"
+          className={styles.filterForm}
+        >
           <label>
             <span>Search</span>
             <input name="q" defaultValue={selectedQuery} placeholder="source.ip, config, user..." />

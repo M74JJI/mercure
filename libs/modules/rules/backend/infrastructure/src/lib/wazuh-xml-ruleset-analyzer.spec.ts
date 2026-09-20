@@ -308,9 +308,7 @@ describe('WazuhXmlRulesetAnalyzer', () => {
       ],
     });
 
-    const structuralIssue = result.issues.find(
-      (issue) => issue.type === 'malformed_xml_structure',
-    );
+    const structuralIssue = result.issues.find((issue) => issue.type === 'malformed_xml_structure');
     expect(structuralIssue?.severity).toBe('error');
     expect(structuralIssue?.detail).toMatch(/duplicated|unescaped ampersand/);
   });
@@ -321,10 +319,7 @@ describe('WazuhXmlRulesetAnalyzer', () => {
       files: [
         {
           name: 'manager-d/rules/1404-outside-text.xml',
-          content: [
-            'unexpected text',
-            '<group name="custom,"></group>',
-          ].join('\n'),
+          content: ['unexpected text', '<group name="custom,"></group>'].join('\n'),
         },
         {
           name: 'manager-d/rules/1405-invalid-attribute.xml',

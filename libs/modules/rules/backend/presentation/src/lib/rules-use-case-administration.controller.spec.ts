@@ -115,11 +115,7 @@ describe('RulesUseCaseAdministrationController', () => {
     );
 
     await expect(
-      controller.update(
-        { mercurePrincipal: principal },
-        { useCaseId: 'uc_system' },
-        editable,
-      ),
+      controller.update({ mercurePrincipal: principal }, { useCaseId: 'uc_system' }, editable),
     ).rejects.toBeInstanceOf(ConflictException);
   });
   it('maps duplicate create to a conflict', async () => {
@@ -176,10 +172,7 @@ describe('RulesUseCaseAdministrationController', () => {
     );
 
     await expect(
-      controller.delete(
-        { mercurePrincipal: principal },
-        { useCaseId: 'uc_missing' },
-      ),
+      controller.delete({ mercurePrincipal: principal }, { useCaseId: 'uc_missing' }),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
@@ -205,10 +198,7 @@ describe('RulesUseCaseAdministrationController', () => {
     );
 
     await expect(
-      controller.delete(
-        { mercurePrincipal: principal },
-        { useCaseId: 'uc_system' },
-      ),
+      controller.delete({ mercurePrincipal: principal }, { useCaseId: 'uc_system' }),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 });

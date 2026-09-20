@@ -3,11 +3,7 @@
   "name": "platform-backend-presentation",
   "projectType": "library",
   "sourceRoot": "libs/platform/backend/presentation/src",
-  "tags": [
-    "scope:platform",
-    "side:backend",
-    "type:presentation"
-  ],
+  "tags": ["scope:platform", "side:backend", "type:presentation"],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",

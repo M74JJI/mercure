@@ -139,12 +139,7 @@ const platformEnvironmentSchema = z.object({
   OIDC_USER_AUTHORITIES: commaSeparatedValues.default(['user', '/security-users']),
   OIDC_JWKS_TIMEOUT_MS: z.coerce.number().int().min(100).max(30_000).default(5_000),
   OIDC_JWKS_COOLDOWN_MS: z.coerce.number().int().min(1_000).max(600_000).default(30_000),
-  OIDC_JWKS_CACHE_MAX_AGE_MS: z.coerce
-    .number()
-    .int()
-    .min(10_000)
-    .max(86_400_000)
-    .default(600_000),
+  OIDC_JWKS_CACHE_MAX_AGE_MS: z.coerce.number().int().min(10_000).max(86_400_000).default(600_000),
   DATABASE_URL: postgresUrl,
   DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
   DATABASE_CONNECTION_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(5_000),

@@ -21,9 +21,7 @@ export interface RulesOverviewFeatureProps {
   readonly searchParams: RulesSearchParams;
 }
 
-export async function RulesOverviewFeature({
-  searchParams,
-}: RulesOverviewFeatureProps) {
+export async function RulesOverviewFeature({ searchParams }: RulesOverviewFeatureProps) {
   const api = new RulesDataAccess({ fetch: authenticatedMercureFetch });
   const identity = await getServerMercureIdentity();
   const canImport = identity?.role === 'admin';

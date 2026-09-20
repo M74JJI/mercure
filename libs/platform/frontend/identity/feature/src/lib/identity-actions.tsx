@@ -4,11 +4,7 @@ import { signIn, signOut } from 'next-auth/react';
 
 import styles from './identity-feature.module.css';
 
-export function IdentitySignInButton({
-  callbackPath,
-}: {
-  readonly callbackPath: string;
-}) {
+export function IdentitySignInButton({ callbackPath }: { readonly callbackPath: string }) {
   return (
     <button
       className={styles.primaryButton}

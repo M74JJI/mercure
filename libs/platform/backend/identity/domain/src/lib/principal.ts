@@ -1,10 +1,6 @@
 export type MercureRole = 'admin' | 'user';
 
-export type MercureCapability =
-  | 'platform:read'
-  | 'rules:read'
-  | 'rules:import'
-  | 'rules:admin';
+export type MercureCapability = 'platform:read' | 'rules:read' | 'rules:import' | 'rules:admin';
 
 export interface AuthorityRoleMapping {
   readonly admin: readonly string[];
@@ -87,9 +83,6 @@ export function resolveMercurePrincipal(
   };
 }
 
-export function hasCapability(
-  principal: MercurePrincipal,
-  capability: MercureCapability,
-): boolean {
+export function hasCapability(principal: MercurePrincipal, capability: MercureCapability): boolean {
   return principal.capabilities.includes(capability);
 }

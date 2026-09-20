@@ -8,9 +8,7 @@ export interface RulesSnapshotImportFormProps {
   readonly action: (formData: FormData) => Promise<void>;
 }
 
-export function RulesSnapshotImportForm({
-  action,
-}: RulesSnapshotImportFormProps) {
+export function RulesSnapshotImportForm({ action }: RulesSnapshotImportFormProps) {
   const [pending, setPending] = useState(false);
 
   return (

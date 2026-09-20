@@ -8,8 +8,8 @@ import { RulesAuthoringController } from './rules-authoring.controller';
 
 describe('RulesAuthoringController authorization metadata', () => {
   it('requires rules:admin at the controller boundary', () => {
-    expect(
-      Reflect.getMetadata(REQUIRED_CAPABILITIES_METADATA, RulesAuthoringController),
-    ).toEqual(['rules:admin']);
+    expect(Reflect.getMetadata(REQUIRED_CAPABILITIES_METADATA, RulesAuthoringController)).toEqual([
+      'rules:admin',
+    ]);
   });
 });

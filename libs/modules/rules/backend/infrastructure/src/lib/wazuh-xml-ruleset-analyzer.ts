@@ -67,10 +67,7 @@ function textStructureError(value: string): string | undefined {
   return undefined;
 }
 
-function fragmentTextStructureError(
-  value: string,
-  depth: number,
-): string | undefined {
+function fragmentTextStructureError(value: string, depth: number): string | undefined {
   const textError = textStructureError(value);
   if (textError) return textError;
   if (depth === 0 && /\S/.test(value)) {
@@ -154,18 +151,12 @@ function xmlFragmentStructureError(content: string): string | undefined {
   while (cursor < content.length) {
     const start = content.indexOf('<', cursor);
     if (start === -1) {
-      const tailError = fragmentTextStructureError(
-        content.slice(cursor),
-        stack.length,
-      );
+      const tailError = fragmentTextStructureError(content.slice(cursor), stack.length);
       if (tailError) return tailError;
       break;
     }
 
-    const textError = fragmentTextStructureError(
-      content.slice(cursor, start),
-      stack.length,
-    );
+    const textError = fragmentTextStructureError(content.slice(cursor, start), stack.length);
     if (textError) return textError;
 
     if (content.startsWith('<!--', start)) {

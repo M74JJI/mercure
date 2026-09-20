@@ -43,7 +43,8 @@ describe('Rules use-case administration form validation', () => {
       ok: false,
       error: {
         field: 'id',
-        message: 'Use-case ID must start with uc_ and use lowercase letters, digits, or underscores.',
+        message:
+          'Use-case ID must start with uc_ and use lowercase letters, digits, or underscores.',
       },
     });
 

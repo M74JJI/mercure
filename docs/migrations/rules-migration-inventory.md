@@ -23,7 +23,7 @@ Legacy reference: `M74JJI/m-rules@21b1f5d9d4d91ecfd297ac211ce50ac5cd2e2028`.
 | Field intelligence               | `lib/field-intelligence.ts`       | Migrated with tenant-scoped lineage        | Rules domain/application                    |
 | Dependency/field graph           | `lib/graph-engine.ts`             | Migrated as layout-free semantic graph     | Rules domain/application                    |
 | AI rule intelligence             | `lib/ai-rule-intelligence.ts`     | Exclude                                    | Requires separate product/ADR decision      |
-| NextAuth/RBAC/sign-in            | `src/auth.ts`, `src/lib/auth/**`  | Replaced by Keycloak/OIDC                  | Platform identity + web server session       |
+| NextAuth/RBAC/sign-in            | `src/auth.ts`, `src/lib/auth/**`  | Replaced by Keycloak/OIDC                  | Platform identity + web server session      |
 | Monolithic Rules Hub UI          | `WazuhRulesHub.tsx`               | Do not copy                                | Later feature-by-feature frontend migration |
 
 ## M5 parser parity cases

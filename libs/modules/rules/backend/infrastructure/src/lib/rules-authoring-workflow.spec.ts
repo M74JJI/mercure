@@ -93,9 +93,7 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
         ...(draft.approvedRevision === undefined
           ? {}
           : { approvedRevision: draft.approvedRevision }),
-        ...(draft.approvedSha256 === undefined
-          ? {}
-          : { approvedSha256: draft.approvedSha256 }),
+        ...(draft.approvedSha256 === undefined ? {} : { approvedSha256: draft.approvedSha256 }),
         ...(draft.approvedBy === undefined ? {} : { approvedBy: draft.approvedBy }),
         ...(draft.approvedAt === undefined ? {} : { approvedAt: draft.approvedAt }),
       },
@@ -417,14 +415,16 @@ describe('controlled Rules authoring workflow', () => {
   });
 
   it('approves and exports only the exact error-free validated revision', async () => {
-    const store = new TestAuthoringStore([
-      '<group name="authoring,">',
-      '  <rule id="410001" level="5">',
-      '    <description>Authoring test</description>',
-      '    <group>production,</group>',
-      '  </rule>',
-      '</group>',
-    ].join('\n'));
+    const store = new TestAuthoringStore(
+      [
+        '<group name="authoring,">',
+        '  <rule id="410001" level="5">',
+        '    <description>Authoring test</description>',
+        '    <group>production,</group>',
+        '  </rule>',
+        '</group>',
+      ].join('\n'),
+    );
     const flow = workflow(store);
     const draft = await flow.create.execute({
       sourceSnapshotId,

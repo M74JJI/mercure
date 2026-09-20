@@ -10,30 +10,30 @@ Mercure deliberately does **not** deploy approved XML directly to Wazuh managers
 
 Use the pinned Node.js and pnpm versions:
 
-~~~bash
+```bash
 corepack enable
 pnpm install --frozen-lockfile
-~~~
+```
 
 For local PostgreSQL:
 
-~~~bash
+```bash
 docker compose -f deploy/local/postgres.compose.yml up -d
 pnpm db:migrate:deploy
-~~~
+```
 
 Copy `.env.example` to an untracked local environment file and replace values as appropriate. Never commit real credentials or secrets.
 
 Common workspace checks:
 
-~~~bash
+```bash
 pnpm format
 pnpm lint
 pnpm api:client:check
 pnpm typecheck
 pnpm test
 pnpm build
-~~~
+```
 
 ## Identity
 

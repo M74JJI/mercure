@@ -5,10 +5,7 @@ import {
   RulesIntelligenceDataAccess,
   type RulesSnapshotComparisonQuery,
 } from '@mercure/rules-frontend-data-access';
-import {
-  RulesSnapshotComparison,
-  RulesUnavailableState,
-} from '@mercure/rules-frontend-ui';
+import { RulesSnapshotComparison, RulesUnavailableState } from '@mercure/rules-frontend-ui';
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 
@@ -22,12 +19,7 @@ export interface RulesComparisonFeatureProps {
 }
 
 function comparisonKind(value: string | undefined): ComparisonKind {
-  if (
-    value === 'decoders' ||
-    value === 'files' ||
-    value === 'use_cases' ||
-    value === 'issues'
-  ) {
+  if (value === 'decoders' || value === 'files' || value === 'use_cases' || value === 'issues') {
     return value;
   }
 
@@ -63,12 +55,7 @@ export async function RulesComparisonFeature({
     const selectedOffset = comparisonOffset(offset);
 
     if (!latest || !previous) {
-      return (
-        <RulesSnapshotComparison
-          snapshots={snapshots.items}
-          selectedKind={selectedKind}
-        />
-      );
+      return <RulesSnapshotComparison snapshots={snapshots.items} selectedKind={selectedKind} />;
     }
 
     let selectedAfter =

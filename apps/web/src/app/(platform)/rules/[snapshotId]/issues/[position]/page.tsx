@@ -7,7 +7,11 @@ export const metadata: Metadata = {
   description: 'Inspect one validation finding in an immutable Mercure Rules snapshot.',
 };
 
-export default async function Page({ params }: { readonly params: Promise<{ readonly snapshotId: string; readonly position: string }> }) {
+export default async function Page({
+  params,
+}: {
+  readonly params: Promise<{ readonly snapshotId: string; readonly position: string }>;
+}) {
   const { snapshotId, position } = await params;
   return <RulesSnapshotIssueDetailFeature snapshotId={snapshotId} position={position} />;
 }

@@ -115,12 +115,12 @@ Take a database backup before applying a new migration history to an existing en
 
 For a release checkout:
 
-~~~bash
+```bash
 pnpm install --frozen-lockfile
 pnpm db:validate
 pnpm db:generate
 pnpm db:migrate:deploy
-~~~
+```
 
 After migrations, verify:
 
@@ -136,7 +136,7 @@ Never edit a previously deployed migration file. New schema changes after releas
 
 The same release revision must pass:
 
-~~~bash
+```bash
 pnpm install --frozen-lockfile
 pnpm format
 pnpm exec nx run-many -t lint --verbose
@@ -145,7 +145,7 @@ pnpm typecheck
 pnpm test
 pnpm build
 pnpm release:prepare
-~~~
+```
 
 The GitHub Workspace workflow is authoritative for repository validation. The Database integration job additionally validates Prisma, deploys migrations to disposable PostgreSQL, runs Rules persistence integration tests, builds the API, and checks readiness.
 
@@ -168,13 +168,13 @@ Use real Keycloak-issued sessions/tokens in the target environment.
 
 For a read-only API capability smoke test, set the API origin and short-lived real access tokens without printing them:
 
-~~~bash
+```bash
 export MERCURE_API_BASE_URL=https://api.mercure.example
 export MERCURE_USER_ACCESS_TOKEN='<normal-user-access-token>'
 export MERCURE_ADMIN_ACCESS_TOKEN='<administrator-access-token>'
 pnpm ops:verify-auth
 unset MERCURE_USER_ACCESS_TOKEN MERCURE_ADMIN_ACCESS_TOKEN
-~~~
+```
 
 The script is deliberately read-only. It verifies unauthenticated denial, normal-user read access, normal-user denial of the admin-only authoring surface, and administrator read access to that protected surface. Snapshot-import mutation authorization remains covered by automated capability tests and should be exercised with real tokens only in a controlled staging environment or approved change window, because a broken authorization boundary could otherwise turn the smoke test itself into a production mutation.
 

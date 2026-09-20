@@ -54,9 +54,7 @@ export async function createNewRulesAuthoringDraftAction(formData: FormData): Pr
   const tenant = value(formData, 'tenant')?.trim();
   const sourceTypeValue = value(formData, 'sourceType');
   const sourceType =
-    sourceTypeValue === 'rules' || sourceTypeValue === 'decoders'
-      ? sourceTypeValue
-      : null;
+    sourceTypeValue === 'rules' || sourceTypeValue === 'decoders' ? sourceTypeValue : null;
 
   if (!fileName || !tenant || !sourceType) {
     redirect('/rules/drafts?error=validation');
@@ -111,10 +109,7 @@ export async function updateRulesAuthoringDraftAction(formData: FormData): Promi
   }
 }
 
-async function transition(
-  formData: FormData,
-  operation: 'validate' | 'approve',
-): Promise<never> {
+async function transition(formData: FormData, operation: 'validate' | 'approve'): Promise<never> {
   await requireRulesAdminIdentity();
   const draftId = id(formData, 'draftId');
   const expectedRevision = integer(formData, 'expectedRevision', 1);

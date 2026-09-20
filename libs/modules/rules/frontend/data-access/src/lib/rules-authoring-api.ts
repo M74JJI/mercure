@@ -45,9 +45,10 @@ export class RulesAuthoringDataAccess {
     });
   }
 
-  list(
-    request: { readonly offset: number; readonly limit: number },
-  ): Promise<RulesAuthoringDraftPage> {
+  list(request: {
+    readonly offset: number;
+    readonly limit: number;
+  }): Promise<RulesAuthoringDraftPage> {
     return execute('list authoring drafts', () =>
       this.client.GET('/api/v1/rules/authoring/drafts', {
         params: {

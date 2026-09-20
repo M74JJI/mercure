@@ -121,9 +121,7 @@ function issue(row: ValidationIssueRow): ValidationIssue {
 const MAX_VISIBLE_VALIDATION_ISSUES = 500;
 const MAX_VISIBLE_AUTHORING_EVENTS = 200;
 
-function visibleValidationIssues(
-  issues: readonly ValidationIssue[],
-): readonly ValidationIssue[] {
+function visibleValidationIssues(issues: readonly ValidationIssue[]): readonly ValidationIssue[] {
   const visible: ValidationIssue[] = [];
 
   for (const severity of ['error', 'warning', 'info'] as const) {
@@ -283,9 +281,7 @@ export class PrismaRulesAuthoringStore implements RulesAuthoringDraftStore, Rule
     };
   }
 
-  async list(
-    request: PageRequest,
-  ): Promise<PageResult<RulesAuthoringDraftSummary>> {
+  async list(request: PageRequest): Promise<PageResult<RulesAuthoringDraftSummary>> {
     const [total, rows] = await Promise.all([
       this.database.rulesAuthoringDraft.count(),
       this.database.rulesAuthoringDraft.findMany({

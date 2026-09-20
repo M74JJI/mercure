@@ -41,9 +41,7 @@ describe('resolveApiBaseUrl', () => {
   it('accepts a canonical HTTPS origin in production', () => {
     process.env['NODE_ENV'] = 'production';
 
-    expect(resolveApiBaseUrl('https://api.example.test/')).toBe(
-      'https://api.example.test',
-    );
+    expect(resolveApiBaseUrl('https://api.example.test/')).toBe('https://api.example.test');
   });
 
   it('rejects credentials, paths, query parameters, and fragments', () => {

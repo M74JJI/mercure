@@ -75,10 +75,7 @@ export async function authenticatedMercureFetch(request: Request): Promise<Respo
     throw new Error('Authenticated Mercure server session is unavailable.');
   }
 
-  return fetch(
-    withMercureAccessToken(request, token.accessToken, token.accessTokenExpiresAt),
-    {
-      cache: 'no-store',
-    },
-  );
+  return fetch(withMercureAccessToken(request, token.accessToken, token.accessTokenExpiresAt), {
+    cache: 'no-store',
+  });
 }

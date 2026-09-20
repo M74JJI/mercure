@@ -414,7 +414,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1209,7 +1208,6 @@ export interface components {
     RulesUseCaseAdministrationParamsDto: {
       useCaseId: string;
     };
-
   };
   responses: never;
   parameters: never;
@@ -2147,5 +2145,4 @@ export interface operations {
       };
     };
   };
-
 }

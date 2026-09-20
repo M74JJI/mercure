@@ -16,10 +16,7 @@ import {
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
 import { deleteRulesUseCaseAction } from './rules-use-case-administration-actions';
-import {
-  enumSearchParam,
-  type RulesSearchParams,
-} from './rules-search-params';
+import { enumSearchParam, type RulesSearchParams } from './rules-search-params';
 
 const canonicalUseCaseId = /^uc_[a-z0-9_]+$/;
 

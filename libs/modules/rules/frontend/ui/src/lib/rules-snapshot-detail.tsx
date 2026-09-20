@@ -110,7 +110,12 @@ export function RulesSnapshotDetail({
                   {rules.map((rule) => (
                     <tr key={rule.position}>
                       <td>
-                        <a className={styles.backLink} href={'/rules/' + snapshot.id + '/rules/' + rule.position}><strong>{rule.id}</strong></a>
+                        <a
+                          className={styles.backLink}
+                          href={'/rules/' + snapshot.id + '/rules/' + rule.position}
+                        >
+                          <strong>{rule.id}</strong>
+                        </a>
                         <small>{rule.description}</small>
                       </td>
                       <td>{rule.level}</td>
@@ -149,7 +154,12 @@ export function RulesSnapshotDetail({
               {issues.map((issue) => (
                 <li key={issue.position}>
                   <div className={styles.issueTopline}>
-                    <a className={styles.backLink} href={'/rules/' + snapshot.id + '/issues/' + issue.position}><strong>{issue.title}</strong></a>
+                    <a
+                      className={styles.backLink}
+                      href={'/rules/' + snapshot.id + '/issues/' + issue.position}
+                    >
+                      <strong>{issue.title}</strong>
+                    </a>
                     <StatusBadge tone={issue.severity === 'error' ? 'accent' : 'neutral'}>
                       {issue.severity}
                     </StatusBadge>
@@ -187,7 +197,12 @@ export function RulesSnapshotDetail({
               {decoders.map((decoder) => (
                 <li key={decoder.position}>
                   <div>
-                    <a className={styles.backLink} href={'/rules/' + snapshot.id + '/decoders/' + decoder.position}><strong>{decoder.name}</strong></a>
+                    <a
+                      className={styles.backLink}
+                      href={'/rules/' + snapshot.id + '/decoders/' + decoder.position}
+                    >
+                      <strong>{decoder.name}</strong>
+                    </a>
                     <small>{decoder.tenant}</small>
                   </div>
                   <div>

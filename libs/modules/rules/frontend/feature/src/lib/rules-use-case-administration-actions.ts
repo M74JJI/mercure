@@ -20,11 +20,7 @@ import {
   type RulesUseCaseFormError,
 } from './rules-use-case-administration-form';
 
-function errorHref(
-  path: string,
-  code: string,
-  field?: RulesUseCaseFormError['field'],
-): string {
+function errorHref(path: string, code: string, field?: RulesUseCaseFormError['field']): string {
   const params = new URLSearchParams({ error: code });
   if (field) params.set('field', field);
   return path + '?' + params.toString();

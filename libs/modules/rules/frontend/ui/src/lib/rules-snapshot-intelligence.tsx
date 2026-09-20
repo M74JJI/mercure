@@ -194,8 +194,8 @@ export function RulesSnapshotIntelligence({
           </div>
 
           <p className={styles.supportingText}>
-            This API returns semantic nodes and edges only. Visual layout remains a frontend
-            concern so the backend stays deterministic and layout-free.
+            This API returns semantic nodes and edges only. Visual layout remains a frontend concern
+            so the backend stays deterministic and layout-free.
           </p>
         </Panel>
 

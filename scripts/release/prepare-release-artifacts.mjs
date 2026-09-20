@@ -93,8 +93,7 @@ const releaseManifest = {
   web: {
     artifactRoot: path.relative(workspaceRoot, webOutputRoot).split(path.sep).join('/'),
     entrypoint: path.relative(webOutputRoot, webServerFile).split(path.sep).join('/'),
-    startCommand:
-      'node ' + path.relative(webOutputRoot, webServerFile).split(path.sep).join('/'),
+    startCommand: 'node ' + path.relative(webOutputRoot, webServerFile).split(path.sep).join('/'),
     runtimeEnvironment: {
       HOSTNAME: '0.0.0.0',
       PORT: '3000',
@@ -102,11 +101,7 @@ const releaseManifest = {
   },
 };
 
-await writeFile(
-  releaseManifestPath,
-  `${JSON.stringify(releaseManifest, null, 2)}\n`,
-  'utf8',
-);
+await writeFile(releaseManifestPath, `${JSON.stringify(releaseManifest, null, 2)}\n`, 'utf8');
 
 process.stdout.write(
   `Prepared release artifacts.\n` +

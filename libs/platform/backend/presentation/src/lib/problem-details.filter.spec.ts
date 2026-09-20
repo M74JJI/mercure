@@ -5,8 +5,7 @@ import { ProblemDetailsFilter, safeErrorTrace } from './problem-details.filter';
 
 describe('ProblemDetailsFilter error logging', () => {
   it('keeps stack frames without logging exception-message content', () => {
-    const secretXml =
-      '<rule id="999999"><description>sensitive customer XML</description></rule>';
+    const secretXml = '<rule id="999999"><description>sensitive customer XML</description></rule>';
     const error = new Error(secretXml);
     error.stack = [
       'Error: ' + secretXml,

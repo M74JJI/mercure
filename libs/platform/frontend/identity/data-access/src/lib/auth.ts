@@ -164,11 +164,15 @@ export function createIdentityAuthConfig(
         }
 
         if (!auth.user.mercureRole) {
-          return NextResponse.redirect(canonicalAuthRedirect('/auth/forbidden', environment.authOrigin));
+          return NextResponse.redirect(
+            canonicalAuthRedirect('/auth/forbidden', environment.authOrigin),
+          );
         }
 
         if (auth.refreshBoundary) {
-          return NextResponse.redirect(canonicalAuthRedirect(requestedPath, environment.authOrigin));
+          return NextResponse.redirect(
+            canonicalAuthRedirect(requestedPath, environment.authOrigin),
+          );
         }
 
         return true;

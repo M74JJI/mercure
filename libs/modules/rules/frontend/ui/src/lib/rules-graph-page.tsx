@@ -39,7 +39,9 @@ export function RulesGraphPage({
         eyebrow="Rules intelligence"
         title="Semantic dependency graph"
         description="Layout-free relationships across rules, decoders, fields, groups, use cases, MITRE techniques, and bounded external references."
-        actions={<StatusBadge tone="neutral">{String(graph.graph.stats.nodes) + ' nodes'}</StatusBadge>}
+        actions={
+          <StatusBadge tone="neutral">{String(graph.graph.stats.nodes) + ' nodes'}</StatusBadge>
+        }
       />
 
       <div className={styles.headerActions}>
@@ -77,7 +79,11 @@ export function RulesGraphPage({
       </section>
 
       <Panel tone="raised" className={styles.compareControls}>
-        <form action={'/rules/' + snapshotId + '/graph'} method="get" className={styles.graphFilterForm}>
+        <form
+          action={'/rules/' + snapshotId + '/graph'}
+          method="get"
+          className={styles.graphFilterForm}
+        >
           <label>
             <span>Mode</span>
             <select name="mode" defaultValue={selectedMode}>

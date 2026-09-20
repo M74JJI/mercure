@@ -111,10 +111,7 @@ function issueQueryFromDto(query: RulesSnapshotIssuesQueryDto): RulesetSnapshotI
   };
 }
 
-@SetMetadata(
-  REQUIRED_CAPABILITIES_METADATA,
-  ['rules:read'] satisfies readonly MercureCapability[],
-)
+@SetMetadata(REQUIRED_CAPABILITIES_METADATA, ['rules:read'] satisfies readonly MercureCapability[])
 @ApiBearerAuth('keycloak')
 @ApiTags('rules')
 @ApiExtraModels(
@@ -137,10 +134,9 @@ export class RulesSnapshotsController {
   ) {}
 
   @Post('import')
-  @SetMetadata(
-    REQUIRED_CAPABILITIES_METADATA,
-    ['rules:import'] satisfies readonly MercureCapability[],
-  )
+  @SetMetadata(REQUIRED_CAPABILITIES_METADATA, [
+    'rules:import',
+  ] satisfies readonly MercureCapability[])
   @ApiOperation({ summary: 'Import and persist the configured Rules manager snapshot' })
   @ApiCreatedResponse({ type: RulesSnapshotDocument })
   @ApiServiceUnavailableResponse({
@@ -215,9 +211,7 @@ export class RulesSnapshotsController {
   @ApiNotFoundResponse({ description: 'Rules snapshot or rule record not found.' })
   @ZodSerializerDto(RulesSnapshotRuleDocument)
   getRule(@ZodParam(RulesSnapshotRecordParamsDto) params: RulesSnapshotRecordParamsDto) {
-    return translateRulesHttpErrors(() =>
-      this.queries.getRule(params.snapshotId, params.position),
-    );
+    return translateRulesHttpErrors(() => this.queries.getRule(params.snapshotId, params.position));
   }
 
   @Get(':snapshotId/decoders')

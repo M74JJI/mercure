@@ -1,8 +1,4 @@
-import {
-  parseAccessToken,
-  resolveWebRole,
-  type MercureWebRole,
-} from './token-claims';
+import { parseAccessToken, resolveWebRole, type MercureWebRole } from './token-claims';
 import type { WebIdentityEnvironment } from './environment';
 
 export interface ProviderSessionState {

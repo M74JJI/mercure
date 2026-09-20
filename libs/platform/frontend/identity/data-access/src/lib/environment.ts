@@ -9,7 +9,14 @@ const booleanFromEnvironment = z.preprocess((value) => {
 
 const commaSeparatedValues = z
   .string()
-  .transform((value) => [...new Set(value.split(',').map((item) => item.trim()).filter(Boolean))])
+  .transform((value) => [
+    ...new Set(
+      value
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean),
+    ),
+  ])
   .pipe(z.array(z.string().min(1)).min(1));
 
 const httpUrl = z
@@ -56,12 +63,7 @@ const webIdentityEnvironmentSchema = z.object({
   WEB_AUTH_USER_AUTHORITIES: commaSeparatedValues.default(['user', '/security-users']),
   WEB_AUTH_REFRESH_SKEW_SECONDS: z.coerce.number().int().min(10).max(300).default(60),
   WEB_AUTH_REFRESH_TIMEOUT_MS: z.coerce.number().int().min(500).max(30_000).default(5_000),
-  WEB_AUTH_SESSION_MAX_AGE_SECONDS: z.coerce
-    .number()
-    .int()
-    .min(300)
-    .max(86_400)
-    .default(28_800),
+  WEB_AUTH_SESSION_MAX_AGE_SECONDS: z.coerce.number().int().min(300).max(86_400).default(28_800),
 });
 
 export interface WebIdentityEnvironment {
@@ -135,9 +137,6 @@ export function parseWebIdentityEnvironment(
     refreshTimeoutMs: parsed.WEB_AUTH_REFRESH_TIMEOUT_MS,
     sessionMaxAgeSeconds: parsed.WEB_AUTH_SESSION_MAX_AGE_SECONDS,
     secureCookies,
-    sessionCookieName: secureCookies
-      ? '__Host-authjs.session-token'
-      : 'authjs.session-token',
+    sessionCookieName: secureCookies ? '__Host-authjs.session-token' : 'authjs.session-token',
   };
 }
-

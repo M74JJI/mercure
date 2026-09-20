@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  NotFoundException,
-  SetMetadata,
-} from '@nestjs/common';
+import { Controller, Get, NotFoundException, SetMetadata } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiExtraModels,

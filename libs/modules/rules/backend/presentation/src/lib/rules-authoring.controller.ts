@@ -98,10 +98,7 @@ function translateAuthoringError(error: unknown): never {
   throw error;
 }
 
-@SetMetadata(
-  REQUIRED_CAPABILITIES_METADATA,
-  ['rules:admin'] satisfies readonly MercureCapability[],
-)
+@SetMetadata(REQUIRED_CAPABILITIES_METADATA, ['rules:admin'] satisfies readonly MercureCapability[])
 @ApiBearerAuth('keycloak')
 @ApiTags('rules-authoring')
 @ApiExtraModels(
@@ -262,12 +259,8 @@ export class RulesAuthoringController {
     @ZodBody(RulesAuthoringDraftTransitionDto) body: RulesAuthoringDraftTransitionDto,
   ) {
     const actor = principal(request).subject;
-    return this.mutation(
-      actor,
-      'validate',
-      params.draftId,
-      body.expectedRevision,
-      () => this.validateDraft.execute(params.draftId, body.expectedRevision, actor),
+    return this.mutation(actor, 'validate', params.draftId, body.expectedRevision, () =>
+      this.validateDraft.execute(params.draftId, body.expectedRevision, actor),
     );
   }
 
@@ -283,12 +276,8 @@ export class RulesAuthoringController {
     @ZodBody(RulesAuthoringDraftTransitionDto) body: RulesAuthoringDraftTransitionDto,
   ) {
     const actor = principal(request).subject;
-    return this.mutation(
-      actor,
-      'approve',
-      params.draftId,
-      body.expectedRevision,
-      () => this.approveDraft.execute(params.draftId, body.expectedRevision, actor),
+    return this.mutation(actor, 'approve', params.draftId, body.expectedRevision, () =>
+      this.approveDraft.execute(params.draftId, body.expectedRevision, actor),
     );
   }
 

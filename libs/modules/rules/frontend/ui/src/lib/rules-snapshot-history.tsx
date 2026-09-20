@@ -59,9 +59,7 @@ export function RulesSnapshotHistory({
         description="Immutable views of normalized Wazuh rules, decoders, and validation findings imported from the server-configured manager archive source."
         actions={
           <div className={styles.headerActions}>
-            {canImport && importAction ? (
-              <RulesSnapshotImportForm action={importAction} />
-            ) : null}
+            {canImport && importAction ? <RulesSnapshotImportForm action={importAction} /> : null}
             {canAuthor ? (
               <a className={styles.actionLink} href="/rules/drafts">
                 Authoring drafts

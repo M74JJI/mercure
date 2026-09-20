@@ -1,9 +1,6 @@
 import { PageHeader, Panel, StatusBadge } from '@mercure/platform-frontend-design-system';
 
-import type {
-  RulesAuthoringDraftSummaryView,
-  RulesAuthoringDraftView,
-} from './models';
+import type { RulesAuthoringDraftSummaryView, RulesAuthoringDraftView } from './models';
 import styles from './rules.module.css';
 
 type FormAction = (formData: FormData) => void | Promise<void>;
@@ -197,10 +194,7 @@ export function RulesAuthoringDraftDetail({
           </a>
         ) : null}
         {draft.state === 'approved' ? (
-          <a
-            className={styles.actionLink}
-            href={'/rules/drafts/' + draft.id + '/export'}
-          >
+          <a className={styles.actionLink} href={'/rules/drafts/' + draft.id + '/export'}>
             Download approved XML
           </a>
         ) : null}

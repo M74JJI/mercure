@@ -92,10 +92,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
     return row ? mapSnapshot(row) : null;
   }
 
-  async getRule(
-    snapshotId: string,
-    position: number,
-  ): Promise<RulesetSnapshotRuleView | null> {
+  async getRule(snapshotId: string, position: number): Promise<RulesetSnapshotRuleView | null> {
     const row = await this.database.rulesetSnapshotRule.findUnique({
       where: { snapshotId_position: { snapshotId, position } },
       select: {
@@ -199,10 +196,7 @@ export class PrismaRulesetSnapshotQueryStore implements RulesetSnapshotQueryStor
     };
   }
 
-  async getIssue(
-    snapshotId: string,
-    position: number,
-  ): Promise<RulesetSnapshotIssueView | null> {
+  async getIssue(snapshotId: string, position: number): Promise<RulesetSnapshotIssueView | null> {
     const row = await this.database.rulesetSnapshotIssue.findUnique({
       where: { snapshotId_position: { snapshotId, position } },
       select: {
