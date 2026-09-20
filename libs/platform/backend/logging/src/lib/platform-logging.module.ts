@@ -8,6 +8,7 @@ import { PlatformConfig, PlatformConfigModule } from '@mercure/platform-backend-
 export const PLATFORM_LOG_REDACTION_PATHS = [
   'req.headers.authorization',
   'req.headers.cookie',
+  'req.headers.x-request-id',
   'res.headers.set-cookie',
   'req.body.password',
   'req.body.token',

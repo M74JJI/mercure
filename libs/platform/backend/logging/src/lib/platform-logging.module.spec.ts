@@ -8,6 +8,7 @@ describe('platform log redaction policy', () => {
       expect.arrayContaining([
         'req.headers.authorization',
         'req.headers.cookie',
+        'req.headers.x-request-id',
         'res.headers.set-cookie',
         'req.body.password',
         'req.body.token',
