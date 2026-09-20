@@ -39,6 +39,16 @@ const userRequest: MercureAuthenticatedRequest = {
   },
 };
 
+const adminRequest: MercureAuthenticatedRequest = {
+  headers: {},
+  mercurePrincipal: {
+    subject: 'admin-subject-1',
+    roles: ['admin', 'user'],
+    capabilities: ['platform:read', 'rules:read', 'rules:import', 'rules:admin'],
+    authorities: ['admin'],
+  },
+};
+
 describe('AuthorizationGuard', () => {
   it('allows a user with rules:read', () => {
     const guard = new AuthorizationGuard(reflector(['rules:read']));
@@ -50,6 +60,18 @@ describe('AuthorizationGuard', () => {
     const guard = new AuthorizationGuard(reflector(['rules:import']));
 
     expect(() => guard.canActivate(executionContext(userRequest))).toThrow(ForbiddenException);
+  });
+
+  it('returns 403 when a normal Rules reader attempts rules:admin', () => {
+    const guard = new AuthorizationGuard(reflector(['rules:admin']));
+
+    expect(() => guard.canActivate(executionContext(userRequest))).toThrow(ForbiddenException);
+  });
+
+  it('allows an admin principal with rules:admin', () => {
+    const guard = new AuthorizationGuard(reflector(['rules:admin']));
+
+    expect(guard.canActivate(executionContext(adminRequest))).toBe(true);
   });
 
   it('allows explicitly public routes without capability evaluation', () => {
