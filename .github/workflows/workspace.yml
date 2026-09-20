@@ -186,6 +186,10 @@ jobs:
             'http://127.0.0.1:3001/api/v1/rules/authoring/drafts?offset=0&limit=1')"
           [[ "$authoring_list_status" == "401" ]]
 
+          authoring_invalid_uuid_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            'http://127.0.0.1:3001/api/v1/rules/authoring/drafts/not-a-uuid')"
+          [[ "$authoring_invalid_uuid_status" == "401" ]]
+
           authoring_create_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
             --request POST \
             --header 'content-type: application/json' \
