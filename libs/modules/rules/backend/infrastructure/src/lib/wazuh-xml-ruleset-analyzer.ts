@@ -67,6 +67,18 @@ function textStructureError(value: string): string | undefined {
   return undefined;
 }
 
+function fragmentTextStructureError(
+  value: string,
+  depth: number,
+): string | undefined {
+  const textError = textStructureError(value);
+  if (textError) return textError;
+  if (depth === 0 && /\S/.test(value)) {
+    return 'XML fragment contains text outside top-level elements.';
+  }
+  return undefined;
+}
+
 function openingTagStructureError(body: string, elementName: string): string | undefined {
   let cursor = elementName.length;
   const attributes = new Set<string>();
@@ -99,7 +111,12 @@ function openingTagStructureError(body: string, elementName: string): string | u
     while (cursor < body.length && body[cursor] !== quote) cursor += 1;
     if (cursor >= body.length) return `XML attribute ${attributeName} is not terminated.`;
 
-    const valueError = textStructureError(body.slice(valueStart, cursor));
+    const attributeValue = body.slice(valueStart, cursor);
+    if (attributeValue.includes('<')) {
+      return `XML attribute ${attributeName} contains an invalid '<' character.`;
+    }
+
+    const valueError = textStructureError(attributeValue);
     if (valueError) return valueError;
     cursor += 1;
   }
@@ -137,12 +154,18 @@ function xmlFragmentStructureError(content: string): string | undefined {
   while (cursor < content.length) {
     const start = content.indexOf('<', cursor);
     if (start === -1) {
-      const tailError = textStructureError(content.slice(cursor));
+      const tailError = fragmentTextStructureError(
+        content.slice(cursor),
+        stack.length,
+      );
       if (tailError) return tailError;
       break;
     }
 
-    const textError = textStructureError(content.slice(cursor, start));
+    const textError = fragmentTextStructureError(
+      content.slice(cursor, start),
+      stack.length,
+    );
     if (textError) return textError;
 
     if (content.startsWith('<!--', start)) {
@@ -156,6 +179,9 @@ function xmlFragmentStructureError(content: string): string | undefined {
     }
 
     if (content.startsWith('<![CDATA[', start)) {
+      if (stack.length === 0) {
+        return 'XML CDATA section is not allowed outside a top-level element.';
+      }
       const end = content.indexOf(']]>', start + 9);
       if (end === -1) return 'XML CDATA section is not terminated.';
       cursor = end + 3;

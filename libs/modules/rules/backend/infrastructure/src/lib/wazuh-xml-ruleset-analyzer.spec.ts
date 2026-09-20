@@ -315,6 +315,42 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     expect(structuralIssue?.detail).toMatch(/duplicated|unescaped ampersand/);
   });
 
+  it('rejects text outside top-level elements and invalid attribute values', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-d/rules/1404-outside-text.xml',
+          content: [
+            'unexpected text',
+            '<group name="custom,"></group>',
+          ].join('\n'),
+        },
+        {
+          name: 'manager-d/rules/1405-invalid-attribute.xml',
+          content: '<group name="custom<bad,"></group>',
+        },
+      ],
+    });
+
+    const structuralIssues = result.issues.filter(
+      (issue) => issue.type === 'malformed_xml_structure',
+    );
+
+    expect(structuralIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          fileName: 'manager-d/rules/1404-outside-text.xml',
+          detail: 'XML fragment contains text outside top-level elements.',
+        }),
+        expect.objectContaining({
+          fileName: 'manager-d/rules/1405-invalid-attribute.xml',
+          detail: expect.stringContaining("contains an invalid '<' character"),
+        }),
+      ]),
+    );
+  });
+
   it('allows valid multi-root decoder XML fragments', async () => {
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const result = await analyzer.analyze({
