@@ -29,7 +29,6 @@ A green code review without these environment checks is a release candidate, not
 - Keycloak or a compatible OIDC issuer configured according to `docs/standards/keycloak-identity.md`.
 - A reverse proxy / ingress that provides HTTPS for the web application and API in production. Its request-body limit must be at least 4 MiB so the bounded authoring transport envelope is not truncated or rejected before Next/Fastify validation; keep the proxy limit explicitly bounded rather than unlimited.
 - Read access from the API runtime to the configured `RULES_MANAGER_ARCHIVE_DIR`.
-- The system `tar` executable for bounded manager archive inspection.
 
 The repository contains a local PostgreSQL compose file only. It does not currently define production application containers, Kubernetes resources, or a production process-supervisor manifest. Those are deployment-environment concerns and must not be inferred from `deploy/local/postgres.compose.yml`.
 
