@@ -13,6 +13,7 @@ export type RulesAuthoringDraft = Schemas['RulesAuthoringDraftDocument'];
 export type RulesAuthoringDraftSummary = Schemas['RulesAuthoringDraftSummaryDocument'];
 export type RulesAuthoringExport = Schemas['RulesAuthoringExportDocument'];
 export type RulesAuthoringCreateInput = Schemas['RulesAuthoringDraftCreateDto'];
+export type RulesAuthoringCreateNewInput = Schemas['RulesAuthoringDraftCreateNewDto'];
 export type RulesAuthoringUpdateInput = Schemas['RulesAuthoringDraftUpdateDto'];
 
 function noStoreFetch(request: Request): Promise<Response> {
@@ -52,6 +53,14 @@ export class RulesAuthoringDataAccess {
   create(input: RulesAuthoringCreateInput): Promise<RulesAuthoringDraft> {
     return execute('create authoring draft', () =>
       this.client.POST('/api/v1/rules/authoring/drafts', {
+        body: input,
+      }),
+    );
+  }
+
+  createNew(input: RulesAuthoringCreateNewInput): Promise<RulesAuthoringDraft> {
+    return execute('create new authoring draft', () =>
+      this.client.POST('/api/v1/rules/authoring/drafts/new', {
         body: input,
       }),
     );

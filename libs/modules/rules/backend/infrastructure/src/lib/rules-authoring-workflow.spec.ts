@@ -5,8 +5,10 @@ import { describe, expect, it } from 'vitest';
 import {
   AnalyzeRuleset,
   ApproveRulesAuthoringDraft,
+  CreateNewRulesAuthoringDraft,
   CreateRulesAuthoringDraft,
   ExportRulesAuthoringDraft,
+  RulesAuthoringContentValidationError,
   RulesAuthoringInvalidStateError,
   UpdateRulesAuthoringDraft,
   ValidateRulesAuthoringDraft,
@@ -56,8 +58,8 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
     const draft = this.draft;
     return [{
       id: draft.id,
-      sourceSnapshotId: draft.sourceSnapshotId,
-      sourceFilePosition: draft.sourceFilePosition,
+      ...(draft.sourceSnapshotId === undefined ? {} : { sourceSnapshotId: draft.sourceSnapshotId }),
+      ...(draft.sourceFilePosition === undefined ? {} : { sourceFilePosition: draft.sourceFilePosition }),
       fileName: draft.fileName,
       tenant: draft.tenant,
       sourceType: draft.sourceType,
@@ -133,13 +135,49 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
     return this.draft;
   }
 
+  async createNew(
+    input: {
+      readonly fileName: string;
+      readonly tenant: string;
+      readonly sourceType: Exclude<RulesetSourceType, 'unknown'>;
+      readonly content: string;
+    },
+    actorSubject: string,
+  ): Promise<RulesAuthoringDraft> {
+    const now = '2026-09-20T00:00:00.000Z';
+    this.draft = {
+      id: draftId,
+      fileName: input.fileName,
+      tenant: input.tenant,
+      sourceType: input.sourceType,
+      content: input.content,
+      sha256: sha256(input.content),
+      revision: 1,
+      state: 'draft',
+      createdBy: actorSubject,
+      updatedBy: actorSubject,
+      createdAt: now,
+      updatedAt: now,
+      events: [
+        {
+          eventType: 'create',
+          state: 'draft',
+          revision: 1,
+          actorSubject,
+          createdAt: now,
+        },
+      ],
+    };
+    return this.draft;
+  }
+
   async update(input: UpdateRulesAuthoringDraftInput): Promise<RulesAuthoringDraft> {
     if (!this.draft) throw new Error('test draft missing');
     const current = this.draft;
     this.draft = {
       id: current.id,
-      sourceSnapshotId: current.sourceSnapshotId,
-      sourceFilePosition: current.sourceFilePosition,
+      ...(current.sourceSnapshotId === undefined ? {} : { sourceSnapshotId: current.sourceSnapshotId }),
+      ...(current.sourceFilePosition === undefined ? {} : { sourceFilePosition: current.sourceFilePosition }),
       fileName: current.fileName,
       tenant: current.tenant,
       sourceType: current.sourceType,
@@ -232,6 +270,7 @@ const useCases: RulesUseCaseCatalogReader = {
 function workflow(store: TestAuthoringStore) {
   const analyzer = new AnalyzeRuleset(new WazuhXmlRulesetAnalyzer());
   return {
+    createNew: new CreateNewRulesAuthoringDraft(store),
     create: new CreateRulesAuthoringDraft(store, store),
     update: new UpdateRulesAuthoringDraft(store),
     validate: new ValidateRulesAuthoringDraft(store, analyzer, useCases),
@@ -241,6 +280,38 @@ function workflow(store: TestAuthoringStore) {
 }
 
 describe('controlled Rules authoring workflow', () => {
+  it('creates bounded logical XML drafts without snapshot provenance', async () => {
+    const store = new TestAuthoringStore('');
+    const flow = workflow(store);
+
+    const draft = await flow.createNew.execute({
+      fileName: '4300-custom_rules.xml',
+      tenant: 'manager-new',
+      sourceType: 'rules',
+      actorSubject: actor,
+    });
+
+    expect(draft).toMatchObject({
+      fileName: '4300-custom_rules.xml',
+      tenant: 'manager-new',
+      sourceType: 'rules',
+      revision: 1,
+      state: 'draft',
+    });
+    expect(draft.sourceSnapshotId).toBeUndefined();
+    expect(draft.sourceFilePosition).toBeUndefined();
+    expect(draft.content).toBe('<group name="custom,">\n</group>\n');
+
+    await expect(
+      flow.createNew.execute({
+        fileName: '../escape.xml',
+        tenant: 'manager-new',
+        sourceType: 'rules',
+        actorSubject: actor,
+      }),
+    ).rejects.toBeInstanceOf(RulesAuthoringContentValidationError);
+  });
+
   it('blocks approval when a rules draft parses no rules', async () => {
     const store = new TestAuthoringStore('<group name="empty,"></group>');
     const flow = workflow(store);

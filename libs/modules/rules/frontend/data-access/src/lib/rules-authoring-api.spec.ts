@@ -69,6 +69,11 @@ describe('RulesAuthoringDataAccess', () => {
 
     await api.list();
     await api.create({ sourceSnapshotId: draft.sourceSnapshotId, sourceFilePosition: 2 });
+    await api.createNew({
+      fileName: '4300-new_rules.xml',
+      tenant: 'manager-new',
+      sourceType: 'rules',
+    });
     await api.get(draft.id);
     await api.update(draft.id, { expectedRevision: 1, content: draft.content });
     await api.validate(draft.id, 1);
@@ -78,6 +83,7 @@ describe('RulesAuthoringDataAccess', () => {
     expect(requests.map((request) => [request.method, new URL(request.url).pathname])).toEqual([
       ['GET', '/api/v1/rules/authoring/drafts'],
       ['POST', '/api/v1/rules/authoring/drafts'],
+      ['POST', '/api/v1/rules/authoring/drafts/new'],
       ['GET', '/api/v1/rules/authoring/drafts/' + draft.id],
       ['PUT', '/api/v1/rules/authoring/drafts/' + draft.id],
       ['POST', '/api/v1/rules/authoring/drafts/' + draft.id + '/validate'],
