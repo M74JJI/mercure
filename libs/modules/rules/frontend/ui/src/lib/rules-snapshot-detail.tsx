@@ -74,7 +74,7 @@ export function RulesSnapshotDetail({
         <Metric label="MITRE mapped" value={snapshot.mitreMappedCount} />
         <Metric label="Jira visible" value={snapshot.jiraVisibleCount} />
         <Metric label="Missing use case" value={snapshot.missingUseCaseCount} />
-        <Metric label="Broken dependencies" value={snapshot.brokenDependencyCount} />
+        <Metric label="Unresolved dependencies" value={snapshot.unresolvedDependencyCount} />
       </section>
 
       <section className={styles.detailGrid}>

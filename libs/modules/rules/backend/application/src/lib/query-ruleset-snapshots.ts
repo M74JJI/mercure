@@ -37,7 +37,7 @@ export interface RulesetSnapshotSummary {
   readonly criticalCount: number;
   readonly mitreMappedCount: number;
   readonly missingUseCaseCount: number;
-  readonly brokenDependencyCount: number;
+  readonly unresolvedDependencyCount: number;
 }
 
 export interface RulesetSnapshotRuleView {

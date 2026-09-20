@@ -119,7 +119,7 @@ export function RulesSnapshotHistory({
                     <strong>{snapshot.criticalCount}</strong> critical
                   </span>
                   <span>
-                    <strong>{snapshot.brokenDependencyCount}</strong> dependency findings
+                    <strong>{snapshot.unresolvedDependencyCount}</strong> dependency findings
                   </span>
                 </div>
 

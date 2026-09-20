@@ -667,7 +667,7 @@ export class WazuhXmlRulesetAnalyzer implements RulesetAnalyzer {
       rules.map((rule) => rule.useCaseId).filter((id) => id !== 'unassigned'),
     );
     const activeUseCases = useCases.filter((useCase) => usedUseCases.has(useCase.id));
-    const brokenDependencyTypes = new Set([
+    const unresolvedDependencyTypes = new Set([
       'external_or_missing_sid',
       'missing_group_dependency',
       'missing_decoder',
@@ -689,7 +689,8 @@ export class WazuhXmlRulesetAnalyzer implements RulesetAnalyzer {
         critical: rules.filter((rule) => rule.severity === 'critical').length,
         mitreMapped: rules.filter((rule) => rule.mitre.length > 0).length,
         missingUseCase: rules.filter((rule) => rule.useCaseId === 'unassigned').length,
-        brokenDependencies: issues.filter((issue) => brokenDependencyTypes.has(issue.type)).length,
+        unresolvedDependencies: issues.filter((issue) => unresolvedDependencyTypes.has(issue.type))
+          .length,
       },
     };
   }
