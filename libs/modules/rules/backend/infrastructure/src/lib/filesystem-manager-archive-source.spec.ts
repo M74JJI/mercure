@@ -139,7 +139,6 @@ describe('FilesystemManagerArchiveSource', () => {
     });
   });
 
-
   it('streams manager archives without requiring the system tar executable at runtime', async () => {
     await withTempDirectory(async (root) => {
       const archiveRoot = path.join(root, 'archives');

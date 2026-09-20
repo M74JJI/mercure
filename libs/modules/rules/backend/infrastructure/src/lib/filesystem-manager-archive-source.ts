@@ -80,7 +80,10 @@ async function drainArchiveEntry(stream: ArchiveEntryStream): Promise<void> {
   }
 }
 
-async function readArchiveEntry(stream: ArchiveEntryStream, expectedBytes: number): Promise<Buffer> {
+async function readArchiveEntry(
+  stream: ArchiveEntryStream,
+  expectedBytes: number,
+): Promise<Buffer> {
   const chunks: Buffer[] = [];
   let bytes = 0;
 
