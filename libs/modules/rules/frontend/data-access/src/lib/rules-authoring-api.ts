@@ -10,8 +10,8 @@ import { RulesFrontendApiError } from './rules-api';
 type Schemas = ApiComponents['schemas'];
 
 export type RulesAuthoringDraft = Schemas['RulesAuthoringDraftDocument'];
-export type RulesAuthoringDraftSummary = Schemas['RulesAuthoringDraftSummaryDocument'];
 export type RulesAuthoringDraftPage = Schemas['RulesAuthoringDraftListDocument'];
+export type RulesAuthoringDraftSummary = RulesAuthoringDraftPage['items'][number];
 export type RulesAuthoringExport = Schemas['RulesAuthoringExportDocument'];
 export type RulesAuthoringCreateInput = Schemas['RulesAuthoringDraftCreateDto'];
 export type RulesAuthoringCreateNewInput = Schemas['RulesAuthoringDraftCreateNewDto'];
