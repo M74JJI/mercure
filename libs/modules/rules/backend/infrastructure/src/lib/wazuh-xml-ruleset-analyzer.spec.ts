@@ -54,7 +54,7 @@ describe('WazuhXmlRulesetAnalyzer', () => {
       critical: 1,
       mitreMapped: 2,
       missingUseCase: 2,
-      brokenDependencies: 2,
+      unresolvedDependencies: 2,
     });
 
     const helper = result.rules.find((rule) => rule.id === '100001');
