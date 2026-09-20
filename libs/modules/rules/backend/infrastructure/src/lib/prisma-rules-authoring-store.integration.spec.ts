@@ -207,8 +207,8 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
         'admin-approve',
       ]);
 
-      const summaries = await authoringStore.list();
-      const summary = summaries.find((item) => item.id === draftId);
+      const summaries = await authoringStore.list({ offset: 0, limit: 25 });
+      const summary = summaries.items.find((item) => item.id === draftId);
       expect(summary).toMatchObject({
         id: draftId,
         revision: 2,

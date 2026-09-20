@@ -53,10 +53,10 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
     };
   }
 
-  async list(): Promise<readonly RulesAuthoringDraftSummary[]> {
-    if (!this.draft) return [];
+  async list(request: { readonly offset: number; readonly limit: number }) {
+    if (!this.draft) return { ...request, total: 0, items: [] };
     const draft = this.draft;
-    return [{
+    const items: RulesAuthoringDraftSummary[] = [{
       id: draft.id,
       ...(draft.sourceSnapshotId === undefined ? {} : { sourceSnapshotId: draft.sourceSnapshotId }),
       ...(draft.sourceFilePosition === undefined ? {} : { sourceFilePosition: draft.sourceFilePosition }),
@@ -88,6 +88,12 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
       ...(draft.approvedBy === undefined ? {} : { approvedBy: draft.approvedBy }),
       ...(draft.approvedAt === undefined ? {} : { approvedAt: draft.approvedAt }),
     }];
+
+    return {
+      ...request,
+      total: items.length,
+      items: items.slice(request.offset, request.offset + request.limit),
+    };
   }
 
   async get(id: string): Promise<RulesAuthoringDraft | null> {

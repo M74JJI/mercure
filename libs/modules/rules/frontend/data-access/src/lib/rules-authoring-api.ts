@@ -11,6 +11,7 @@ type Schemas = ApiComponents['schemas'];
 
 export type RulesAuthoringDraft = Schemas['RulesAuthoringDraftDocument'];
 export type RulesAuthoringDraftSummary = Schemas['RulesAuthoringDraftSummaryDocument'];
+export type RulesAuthoringDraftPage = Schemas['RulesAuthoringDraftListDocument'];
 export type RulesAuthoringExport = Schemas['RulesAuthoringExportDocument'];
 export type RulesAuthoringCreateInput = Schemas['RulesAuthoringDraftCreateDto'];
 export type RulesAuthoringCreateNewInput = Schemas['RulesAuthoringDraftCreateNewDto'];
@@ -44,9 +45,16 @@ export class RulesAuthoringDataAccess {
     });
   }
 
-  list(): Promise<RulesAuthoringDraftSummary[]> {
+  list(request: { readonly offset: number; readonly limit: number }): Promise<RulesAuthoringDraftPage> {
     return execute('list authoring drafts', () =>
-      this.client.GET('/api/v1/rules/authoring/drafts'),
+      this.client.GET('/api/v1/rules/authoring/drafts', {
+        params: {
+          query: {
+            offset: request.offset,
+            limit: request.limit,
+          },
+        },
+      }),
     );
   }
 

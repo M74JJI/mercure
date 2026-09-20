@@ -653,7 +653,13 @@ export interface components {
         fileName?: string;
         tenant?: string;
       }[];
-    };    RulesAuthoringDraftParamsDto: {
+    };    RulesAuthoringDraftListQueryDto: {
+      /** @default 0 */
+      offset: number;
+      /** @default 25 */
+      limit: number;
+    };
+    RulesAuthoringDraftParamsDto: {
       /** Format: uuid */
       draftId: string;
     };
@@ -764,7 +770,12 @@ export interface components {
         validatedAt: string;
       };
     };
-    RulesAuthoringDraftListDocument: components['schemas']['RulesAuthoringDraftSummaryDocument'][];
+    RulesAuthoringDraftListDocument: {
+      offset: number;
+      limit: number;
+      total: number;
+      items: components['schemas']['RulesAuthoringDraftSummaryDocument'][];
+    };
     RulesAuthoringExportDocument: {
       /** Format: uuid */
       draftId: string;
@@ -1519,7 +1530,10 @@ export interface operations {
   };
   RulesAuthoringController_list: {
     parameters: {
-      query?: never;
+      query?: {
+        offset?: number;
+        limit?: number;
+      };
       header?: never;
       path?: never;
       cookie?: never;

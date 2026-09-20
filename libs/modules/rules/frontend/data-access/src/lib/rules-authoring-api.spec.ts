@@ -45,8 +45,12 @@ describe('RulesAuthoringDataAccess', () => {
           });
         }
         if (pathname.endsWith('/drafts') && request.method === 'GET') {
-          return jsonResponse([
-            {
+          return jsonResponse({
+            offset: 0,
+            limit: 25,
+            total: 1,
+            items: [
+              {
               id: draft.id,
               sourceSnapshotId: draft.sourceSnapshotId,
               sourceFilePosition: draft.sourceFilePosition,
@@ -61,13 +65,14 @@ describe('RulesAuthoringDataAccess', () => {
               createdAt: draft.createdAt,
               updatedAt: draft.updatedAt,
             },
-          ]);
+            ],
+          });
         }
         return jsonResponse(draft, request.method === 'POST' && pathname.endsWith('/drafts') ? 201 : 200);
       },
     });
 
-    await api.list();
+    await api.list({ offset: 0, limit: 25 });
     await api.create({ sourceSnapshotId: draft.sourceSnapshotId, sourceFilePosition: 2 });
     await api.createNew({
       fileName: '4300-new_rules.xml',
