@@ -32,12 +32,31 @@ export class RulesetImportUnavailableError extends Error {
 }
 
 export class PersistImportedRuleset {
+  private inFlight?: Promise<PersistImportedRulesetResult>;
+
   constructor(
     private readonly importer: ImportArchivedRuleset,
     private readonly store: RulesetSnapshotStore,
   ) {}
 
-  async execute(request: ImportArchivedRulesetRequest = {}): Promise<PersistImportedRulesetResult> {
+  execute(request: ImportArchivedRulesetRequest = {}): Promise<PersistImportedRulesetResult> {
+    if (this.inFlight) {
+      return this.inFlight;
+    }
+
+    const operation = this.persist(request);
+    this.inFlight = operation;
+
+    return operation.finally(() => {
+      if (this.inFlight === operation) {
+        this.inFlight = undefined;
+      }
+    });
+  }
+
+  private async persist(
+    request: ImportArchivedRulesetRequest,
+  ): Promise<PersistImportedRulesetResult> {
     const imported = await this.importer.execute(request);
     if (imported.analysis.files.length === 0) {
       throw new RulesetImportUnavailableError();
