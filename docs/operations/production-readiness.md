@@ -169,7 +169,7 @@ pnpm ops:verify-auth
 unset MERCURE_USER_ACCESS_TOKEN MERCURE_ADMIN_ACCESS_TOKEN
 ~~~
 
-The script verifies unauthenticated denial, normal-user read access, normal-user denial of import/authoring capabilities, and administrator read access to the protected authoring surface. It does not perform an administrator import or any authoring mutation.
+The script is deliberately read-only. It verifies unauthenticated denial, normal-user read access, normal-user denial of the admin-only authoring surface, and administrator read access to that protected surface. Snapshot-import mutation authorization remains covered by automated capability tests and should be exercised with real tokens only in a controlled staging environment or approved change window, because a broken authorization boundary could otherwise turn the smoke test itself into a production mutation.
 
 ### Normal user
 

@@ -59,11 +59,6 @@ expect_status \
   "$(request_status GET '/api/v1/rules/authoring/drafts?offset=0&limit=1' "$MERCURE_USER_ACCESS_TOKEN")"
 
 expect_status \
-  'Normal user snapshot-import denial' \
-  '403' \
-  "$(request_status POST '/api/v1/rules/snapshots/import' "$MERCURE_USER_ACCESS_TOKEN")"
-
-expect_status \
   'Administrator Rules read' \
   '200' \
   "$(request_status GET '/api/v1/rules/snapshots?offset=0&limit=1' "$MERCURE_ADMIN_ACCESS_TOKEN")"
@@ -73,7 +68,8 @@ expect_status \
   '200' \
   "$(request_status GET '/api/v1/rules/authoring/drafts?offset=0&limit=1' "$MERCURE_ADMIN_ACCESS_TOKEN")"
 
-echo 'Mercure production authorization smoke test passed.'
+echo 'Mercure read-only production authorization smoke test passed.'
+echo 'Snapshot-import mutation authorization remains covered by automated tests and must be exercised only in a controlled staging/change window.'
 \n'* || "$token" == *
 
 expect_status() {
