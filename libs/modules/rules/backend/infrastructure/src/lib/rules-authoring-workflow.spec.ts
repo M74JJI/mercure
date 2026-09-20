@@ -65,32 +65,38 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
         ...(draft.sourceFilePosition === undefined
           ? {}
           : { sourceFilePosition: draft.sourceFilePosition }),
-      fileName: draft.fileName,
-      tenant: draft.tenant,
-      sourceType: draft.sourceType,
-      sha256: draft.sha256,
-      revision: draft.revision,
-      state: draft.state,
-      createdBy: draft.createdBy,
-      updatedBy: draft.updatedBy,
-      createdAt: draft.createdAt,
-      updatedAt: draft.updatedAt,
-      ...(draft.validation === undefined ? {} : {
-        validation: {
-          revision: draft.validation.revision,
-          sha256: draft.validation.sha256,
-          ruleCount: draft.validation.ruleCount,
-          decoderCount: draft.validation.decoderCount,
-          issueCount: draft.validation.issueCount,
-          errorCount: draft.validation.errorCount,
-          warningCount: draft.validation.warningCount,
-          infoCount: draft.validation.infoCount,
-          validatedAt: draft.validation.validatedAt,
-        },
-      }),
-      ...(draft.approvedRevision === undefined ? {} : { approvedRevision: draft.approvedRevision }),
-      ...(draft.approvedSha256 === undefined ? {} : { approvedSha256: draft.approvedSha256 }),
-      ...(draft.approvedBy === undefined ? {} : { approvedBy: draft.approvedBy }),
+        fileName: draft.fileName,
+        tenant: draft.tenant,
+        sourceType: draft.sourceType,
+        sha256: draft.sha256,
+        revision: draft.revision,
+        state: draft.state,
+        createdBy: draft.createdBy,
+        updatedBy: draft.updatedBy,
+        createdAt: draft.createdAt,
+        updatedAt: draft.updatedAt,
+        ...(draft.validation === undefined
+          ? {}
+          : {
+              validation: {
+                revision: draft.validation.revision,
+                sha256: draft.validation.sha256,
+                ruleCount: draft.validation.ruleCount,
+                decoderCount: draft.validation.decoderCount,
+                issueCount: draft.validation.issueCount,
+                errorCount: draft.validation.errorCount,
+                warningCount: draft.validation.warningCount,
+                infoCount: draft.validation.infoCount,
+                validatedAt: draft.validation.validatedAt,
+              },
+            }),
+        ...(draft.approvedRevision === undefined
+          ? {}
+          : { approvedRevision: draft.approvedRevision }),
+        ...(draft.approvedSha256 === undefined
+          ? {}
+          : { approvedSha256: draft.approvedSha256 }),
+        ...(draft.approvedBy === undefined ? {} : { approvedBy: draft.approvedBy }),
         ...(draft.approvedAt === undefined ? {} : { approvedAt: draft.approvedAt }),
       },
     ];
