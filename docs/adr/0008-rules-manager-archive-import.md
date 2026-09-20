@@ -4,6 +4,7 @@
 - Date: 2026-09-18
 - Supersedes: no prior ADR
 - Extends: ADR-0007
+- Refined by: ADR-0019
 
 ## Context
 
