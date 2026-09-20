@@ -64,7 +64,6 @@ export {
   type RulesSnapshotIssuesExplorerFeatureProps,
 } from './lib/rules-snapshot-issues-explorer-feature';
 
-
 export {
   RulesSnapshotDecoderDetailFeature,
   RulesSnapshotIssueDetailFeature,

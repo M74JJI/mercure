@@ -89,7 +89,6 @@ export {
   type RulesSnapshotIssuesExplorerProps,
 } from './lib/rules-snapshot-explorers';
 
-
 export {
   RulesSnapshotDecoderDetail,
   RulesSnapshotIssueDetail,

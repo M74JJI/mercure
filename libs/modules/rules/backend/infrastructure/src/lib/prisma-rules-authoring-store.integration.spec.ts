@@ -13,8 +13,10 @@ import { WazuhXmlRulesetAnalyzer } from './wazuh-xml-ruleset-analyzer';
 const integrationEnabled = process.env['RULES_PERSISTENCE_INTEGRATION'] === '1';
 
 describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
-  it('persists revisions, rejects stale writes, and preserves the approval audit trail', async () => {
-    const databaseUrl = process.env['DATABASE_URL'];
+  it(
+    'persists revisions, rejects stale writes, and preserves the approval audit trail',
+    async () => {
+      const databaseUrl = process.env['DATABASE_URL'];
     if (!databaseUrl) {
       throw new Error('DATABASE_URL is required for Rules authoring integration tests.');
     }
@@ -322,5 +324,6 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
       }
       await database.$disconnect();
     }
-  });
+    },
+  );
 });

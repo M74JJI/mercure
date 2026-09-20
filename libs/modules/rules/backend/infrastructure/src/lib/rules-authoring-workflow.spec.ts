@@ -56,10 +56,15 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
   async list(request: { readonly offset: number; readonly limit: number }) {
     if (!this.draft) return { ...request, total: 0, items: [] };
     const draft = this.draft;
-    const items: RulesAuthoringDraftSummary[] = [{
-      id: draft.id,
-      ...(draft.sourceSnapshotId === undefined ? {} : { sourceSnapshotId: draft.sourceSnapshotId }),
-      ...(draft.sourceFilePosition === undefined ? {} : { sourceFilePosition: draft.sourceFilePosition }),
+    const items: RulesAuthoringDraftSummary[] = [
+      {
+        id: draft.id,
+        ...(draft.sourceSnapshotId === undefined
+          ? {}
+          : { sourceSnapshotId: draft.sourceSnapshotId }),
+        ...(draft.sourceFilePosition === undefined
+          ? {}
+          : { sourceFilePosition: draft.sourceFilePosition }),
       fileName: draft.fileName,
       tenant: draft.tenant,
       sourceType: draft.sourceType,
@@ -86,8 +91,9 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
       ...(draft.approvedRevision === undefined ? {} : { approvedRevision: draft.approvedRevision }),
       ...(draft.approvedSha256 === undefined ? {} : { approvedSha256: draft.approvedSha256 }),
       ...(draft.approvedBy === undefined ? {} : { approvedBy: draft.approvedBy }),
-      ...(draft.approvedAt === undefined ? {} : { approvedAt: draft.approvedAt }),
-    }];
+        ...(draft.approvedAt === undefined ? {} : { approvedAt: draft.approvedAt }),
+      },
+    ];
 
     return {
       ...request,
@@ -182,8 +188,12 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
     const current = this.draft;
     this.draft = {
       id: current.id,
-      ...(current.sourceSnapshotId === undefined ? {} : { sourceSnapshotId: current.sourceSnapshotId }),
-      ...(current.sourceFilePosition === undefined ? {} : { sourceFilePosition: current.sourceFilePosition }),
+      ...(current.sourceSnapshotId === undefined
+        ? {}
+        : { sourceSnapshotId: current.sourceSnapshotId }),
+      ...(current.sourceFilePosition === undefined
+        ? {}
+        : { sourceFilePosition: current.sourceFilePosition }),
       fileName: current.fileName,
       tenant: current.tenant,
       sourceType: current.sourceType,
@@ -209,7 +219,9 @@ class TestAuthoringStore implements RulesAuthoringDraftStore, RulesAuthoringSour
     return this.draft;
   }
 
-  async persistValidation(input: PersistRulesAuthoringValidationInput): Promise<RulesAuthoringDraft> {
+  async persistValidation(
+    input: PersistRulesAuthoringValidationInput,
+  ): Promise<RulesAuthoringDraft> {
     if (!this.draft) throw new Error('test draft missing');
     const count = (severity: 'error' | 'warning' | 'info') =>
       input.issues.filter((issue) => issue.severity === severity).length;
