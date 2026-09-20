@@ -43,11 +43,8 @@ jobs:
         continue-on-error: true
         run: pnpm audit --audit-level high
 
-      - name: Build pruned API runtime dependency graph
-        run: pnpm db:generate && pnpm exec nx build api
-
-      - name: Normalize API release lockfile
-        run: pnpm release:normalize-api
+      - name: Prepare pruned API runtime dependency graph
+        run: pnpm db:generate && pnpm exec nx run api:prune
 
       - name: Install deployable API dependencies
         working-directory: dist/apps/api
