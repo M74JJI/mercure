@@ -38,7 +38,7 @@ const snapshotSchema = z
     criticalCount: z.number().int().min(0),
     mitreMappedCount: z.number().int().min(0),
     missingUseCaseCount: z.number().int().min(0),
-    brokenDependencyCount: z.number().int().min(0),
+    unresolvedDependencyCount: z.number().int().min(0),
   })
   .strict();
 

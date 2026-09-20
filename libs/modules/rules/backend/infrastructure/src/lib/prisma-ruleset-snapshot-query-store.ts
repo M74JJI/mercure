@@ -31,7 +31,7 @@ const snapshotSelection = {
   criticalCount: true,
   mitreMappedCount: true,
   missingUseCaseCount: true,
-  brokenDependencyCount: true,
+  unresolvedDependencyCount: true,
 } as const;
 
 function mapSnapshot(row: {
@@ -53,7 +53,7 @@ function mapSnapshot(row: {
   readonly criticalCount: number;
   readonly mitreMappedCount: number;
   readonly missingUseCaseCount: number;
-  readonly brokenDependencyCount: number;
+  readonly unresolvedDependencyCount: number;
 }): RulesetSnapshotSummary {
   return {
     ...row,

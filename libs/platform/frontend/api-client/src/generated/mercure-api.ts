@@ -495,7 +495,7 @@ export interface components {
       criticalCount: number;
       mitreMappedCount: number;
       missingUseCaseCount: number;
-      brokenDependencyCount: number;
+      unresolvedDependencyCount: number;
     };
     RulesSnapshotPageDocument: {
       offset: number;
@@ -521,7 +521,7 @@ export interface components {
         criticalCount: number;
         mitreMappedCount: number;
         missingUseCaseCount: number;
-        brokenDependencyCount: number;
+        unresolvedDependencyCount: number;
       }[];
     };
     RulesSnapshotRulePageDocument: {

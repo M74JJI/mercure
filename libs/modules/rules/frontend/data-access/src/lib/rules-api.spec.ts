@@ -38,7 +38,7 @@ describe('RulesDataAccess', () => {
             criticalCount: 12,
             mitreMappedCount: 100,
             missingUseCaseCount: 3,
-            brokenDependencyCount: 1,
+            unresolvedDependencyCount: 1,
           },
           201,
         );
@@ -100,7 +100,7 @@ describe('RulesDataAccess', () => {
               criticalCount: 12,
               mitreMappedCount: 100,
               missingUseCaseCount: 3,
-              brokenDependencyCount: 1,
+              unresolvedDependencyCount: 1,
             },
           ],
         });

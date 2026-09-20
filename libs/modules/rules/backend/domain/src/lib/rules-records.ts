@@ -97,7 +97,7 @@ export interface RulesetStats {
   readonly critical: number;
   readonly mitreMapped: number;
   readonly missingUseCase: number;
-  readonly brokenDependencies: number;
+  readonly unresolvedDependencies: number;
 }
 
 export interface ParsedRuleset {

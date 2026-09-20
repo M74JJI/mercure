@@ -85,7 +85,7 @@ export class PrismaRulesetSnapshotAnalysisSource implements RulesetSnapshotAnaly
         criticalCount: true,
         mitreMappedCount: true,
         missingUseCaseCount: true,
-        brokenDependencyCount: true,
+        unresolvedDependencyCount: true,
       },
     });
 
@@ -268,7 +268,7 @@ export class PrismaRulesetSnapshotAnalysisSource implements RulesetSnapshotAnaly
         critical: snapshot.criticalCount,
         mitreMapped: snapshot.mitreMappedCount,
         missingUseCase: snapshot.missingUseCaseCount,
-        brokenDependencies: snapshot.brokenDependencyCount,
+        unresolvedDependencies: snapshot.unresolvedDependencyCount,
       },
     };
   }
