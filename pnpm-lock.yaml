@@ -342,19 +342,6 @@ importers:
         specifier: 19.3.0
         version: 19.3.0
 
-      '@mercure/platform-frontend-shell':
-        specifier: workspace:*
-        version: link:../../libs/platform/frontend/shell
-      '@mercure/rules-frontend-feature':
-        specifier: workspace:*
-        version: link:../../libs/modules/rules/frontend/feature
-      next:
-        specifier: 16.3.3
-        version: 16.3.3(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@24.13.3)(babel-plugin-macros@3.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      react:
-        specifier: 19.3.0
-        version: 19.3.0
-
   libs/modules/rules/backend/application:
     dependencies:
       '@mercure/rules-backend-domain':
