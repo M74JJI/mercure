@@ -1,0 +1,47 @@
+name: Temporary lockfile refresh
+
+on:
+  push:
+    branches: ['perf/rules-stream-archive-ingestion']
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: perf/rules-stream-archive-ingestion
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: 12.4.2
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Refresh lockfile
+        run: |
+          pnpm install --lockfile-only
+          rm .github/workflows/temporary-lockfile-refresh.yml
+
+      - name: Commit refreshed lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml .github/workflows/temporary-lockfile-refresh.yml
+          git commit -m "chore:dependencies:refresh-lockfile"
+          git push origin HEAD:perf/rules-stream-archive-ingestion
