@@ -359,6 +359,44 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
             },
           }),
         ).rejects.toThrow();
+
+        await expect(
+          database.rulesAuthoringDraftEvent.create({
+            data: {
+              draftId: standalone.id,
+              eventType: 'invalid',
+              state: 'draft',
+              revision: 1,
+              actorSubject: 'constraint-test',
+            },
+          }),
+        ).rejects.toThrow();
+
+        await expect(
+          database.rulesAuthoringDraftEvent.create({
+            data: {
+              draftId: standalone.id,
+              eventType: 'edit',
+              state: 'draft',
+              revision: 0,
+              actorSubject: 'constraint-test',
+            },
+          }),
+        ).rejects.toThrow();
+
+        await expect(
+          database.rulesAuthoringDraftValidationIssue.create({
+            data: {
+              draftId: standalone.id,
+              revision: standalone.revision,
+              position: -1,
+              severity: 'warning',
+              type: 'invalid_position',
+              title: 'Invalid position',
+              detail: 'Negative validation issue positions must be rejected.',
+            },
+          }),
+        ).rejects.toThrow();
       } finally {
         if (standaloneDraftId) {
           await database.rulesAuthoringDraft.delete({ where: { id: standaloneDraftId } });

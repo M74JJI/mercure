@@ -106,7 +106,15 @@ CREATE TABLE "rules_authoring_draft_events" (
     CONSTRAINT "rules_authoring_draft_events_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "rules_authoring_draft_events_draft_id_fkey"
       FOREIGN KEY ("draft_id") REFERENCES "rules_authoring_drafts"("id")
-      ON DELETE CASCADE ON UPDATE CASCADE
+      ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "rules_authoring_draft_events_event_type_check"
+      CHECK ("event_type" IN ('create', 'edit', 'validate', 'approve')),
+    CONSTRAINT "rules_authoring_draft_events_state_check"
+      CHECK ("state" IN ('draft', 'validated', 'approved')),
+    CONSTRAINT "rules_authoring_draft_events_revision_check"
+      CHECK ("revision" >= 1),
+    CONSTRAINT "rules_authoring_draft_events_actor_subject_check"
+      CHECK (BTRIM("actor_subject") <> '')
 );
 
 CREATE INDEX "rules_authoring_draft_events_draft_id_created_at_idx"
@@ -131,7 +139,11 @@ CREATE TABLE "rules_authoring_draft_validation_issues" (
       FOREIGN KEY ("draft_id") REFERENCES "rules_authoring_drafts"("id")
       ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "rules_authoring_draft_validation_issues_severity_check"
-      CHECK ("severity" IN ('error', 'warning', 'info'))
+      CHECK ("severity" IN ('error', 'warning', 'info')),
+    CONSTRAINT "rules_authoring_draft_validation_issues_revision_check"
+      CHECK ("revision" >= 1),
+    CONSTRAINT "rules_authoring_draft_validation_issues_position_check"
+      CHECK ("position" >= 0)
 );
 
 CREATE INDEX "rules_authoring_draft_validation_issues_draft_id_revision_severity_idx"
