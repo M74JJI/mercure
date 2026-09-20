@@ -268,6 +268,52 @@ describe.runIf(integrationEnabled)('PrismaRulesAuthoringStore', () => {
           sourceFilePosition: null,
         });
 
+        const manyWarnings = Array.from({ length: 505 }, (_, index) => ({
+          severity: 'warning' as const,
+          type: 'bounded_warning',
+          title: 'Bounded warning',
+          detail: 'Validation finding ' + String(index),
+          fileName: standalone.fileName,
+          tenant: standalone.tenant,
+        }));
+        const boundedValidation = await authoringStore.persistValidation({
+          draftId: standalone.id,
+          expectedRevision: standalone.revision,
+          expectedSha256: standalone.sha256,
+          ruleCount: 0,
+          decoderCount: 0,
+          issues: manyWarnings,
+          actorSubject: 'admin-bounded-validation',
+        });
+
+        expect(boundedValidation.validation).toMatchObject({
+          issueCount: 505,
+          warningCount: 505,
+          errorCount: 0,
+        });
+        expect(boundedValidation.validation?.issues).toHaveLength(500);
+        expect(
+          await database.rulesAuthoringDraftValidationIssue.count({
+            where: {
+              draftId: standalone.id,
+              revision: standalone.revision,
+            },
+          }),
+        ).toBe(500);
+
+        await database.rulesAuthoringDraftEvent.createMany({
+          data: Array.from({ length: 205 }, (_, index) => ({
+            draftId: standalone.id,
+            eventType: 'edit',
+            state: 'draft',
+            revision: standalone.revision,
+            actorSubject: 'history-' + String(index),
+          })),
+        });
+        const boundedHistory = await authoringStore.get(standalone.id);
+        expect(boundedHistory?.eventCount).toBe(207);
+        expect(boundedHistory?.events).toHaveLength(200);
+
         await expect(
           database.rulesAuthoringDraft.create({
             data: {
