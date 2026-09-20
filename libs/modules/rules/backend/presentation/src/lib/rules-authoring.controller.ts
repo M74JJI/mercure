@@ -65,6 +65,12 @@ interface PrincipalRequest {
 
 type AuthoringOperation = 'create' | 'edit' | 'validate' | 'approve' | 'export';
 
+interface AuthoringMutationResult {
+  readonly id?: string;
+  readonly draftId?: string;
+  readonly revision?: number;
+}
+
 function principal(request: PrincipalRequest): MercurePrincipal {
   if (!request.mercurePrincipal) throw new UnauthorizedException('Authentication is required.');
   return request.mercurePrincipal;
@@ -121,19 +127,23 @@ export class RulesAuthoringController {
     private readonly exportDraft: ExportRulesAuthoringDraft,
   ) {}
 
-  private async mutation<T>(
+  private async mutation<T extends AuthoringMutationResult>(
     actorSubject: string,
     operation: AuthoringOperation,
     draftId: string | undefined,
+    requestedRevision: number | undefined,
     action: () => Promise<T>,
   ): Promise<T> {
     try {
       const result = await action();
+      const resolvedDraftId = draftId ?? result.id ?? result.draftId;
+      const resolvedRevision = result.revision ?? requestedRevision;
       this.logger.log({
         event: 'rules.authoring.mutation',
         actorSubject,
         operation,
-        ...(draftId === undefined ? {} : { draftId }),
+        ...(resolvedDraftId === undefined ? {} : { draftId: resolvedDraftId }),
+        ...(resolvedRevision === undefined ? {} : { revision: resolvedRevision }),
         outcome: 'success',
       });
       return result;
@@ -143,6 +153,7 @@ export class RulesAuthoringController {
         actorSubject,
         operation,
         ...(draftId === undefined ? {} : { draftId }),
+        ...(requestedRevision === undefined ? {} : { revision: requestedRevision }),
         outcome: 'failure',
         failure: error instanceof Error ? error.name : 'unknown',
       });
@@ -172,7 +183,7 @@ export class RulesAuthoringController {
     @ZodBody(RulesAuthoringDraftCreateDto) body: RulesAuthoringDraftCreateDto,
   ) {
     const actor = principal(request).subject;
-    return this.mutation(actor, 'create', undefined, () =>
+    return this.mutation(actor, 'create', undefined, undefined, () =>
       this.createDraft.execute({
         sourceSnapshotId: body.sourceSnapshotId,
         sourceFilePosition: body.sourceFilePosition,
@@ -193,7 +204,7 @@ export class RulesAuthoringController {
     @ZodBody(RulesAuthoringDraftCreateNewDto) body: RulesAuthoringDraftCreateNewDto,
   ) {
     const actor = principal(request).subject;
-    return this.mutation(actor, 'create', undefined, () =>
+    return this.mutation(actor, 'create', undefined, undefined, () =>
       this.createNewDraft.execute({
         fileName: body.fileName,
         tenant: body.tenant,
@@ -229,7 +240,7 @@ export class RulesAuthoringController {
     @ZodBody(RulesAuthoringDraftUpdateDto) body: RulesAuthoringDraftUpdateDto,
   ) {
     const actor = principal(request).subject;
-    return this.mutation(actor, 'edit', params.draftId, () =>
+    return this.mutation(actor, 'edit', params.draftId, body.expectedRevision, () =>
       this.updateDraft.execute({
         draftId: params.draftId,
         expectedRevision: body.expectedRevision,
@@ -251,8 +262,12 @@ export class RulesAuthoringController {
     @ZodBody(RulesAuthoringDraftTransitionDto) body: RulesAuthoringDraftTransitionDto,
   ) {
     const actor = principal(request).subject;
-    return this.mutation(actor, 'validate', params.draftId, () =>
-      this.validateDraft.execute(params.draftId, body.expectedRevision, actor),
+    return this.mutation(
+      actor,
+      'validate',
+      params.draftId,
+      body.expectedRevision,
+      () => this.validateDraft.execute(params.draftId, body.expectedRevision, actor),
     );
   }
 
@@ -268,8 +283,12 @@ export class RulesAuthoringController {
     @ZodBody(RulesAuthoringDraftTransitionDto) body: RulesAuthoringDraftTransitionDto,
   ) {
     const actor = principal(request).subject;
-    return this.mutation(actor, 'approve', params.draftId, () =>
-      this.approveDraft.execute(params.draftId, body.expectedRevision, actor),
+    return this.mutation(
+      actor,
+      'approve',
+      params.draftId,
+      body.expectedRevision,
+      () => this.approveDraft.execute(params.draftId, body.expectedRevision, actor),
     );
   }
 
@@ -284,7 +303,7 @@ export class RulesAuthoringController {
     @ZodParam(RulesAuthoringDraftParamsDto) params: RulesAuthoringDraftParamsDto,
   ) {
     const actor = principal(request).subject;
-    return this.mutation(actor, 'export', params.draftId, () =>
+    return this.mutation(actor, 'export', params.draftId, undefined, () =>
       this.exportDraft.execute(params.draftId),
     );
   }
