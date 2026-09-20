@@ -27,7 +27,7 @@ A green code review without these environment checks is a release candidate, not
 - pnpm: version pinned by `packageManager` in `package.json`.
 - PostgreSQL compatible with the repository migration history; CI validates against PostgreSQL 18.6.
 - Keycloak or a compatible OIDC issuer configured according to `docs/standards/keycloak-identity.md`.
-- A reverse proxy / ingress that provides HTTPS for the web application and API in production. Its request-body limit must be at least 4 MiB so the bounded authoring transport envelope is not truncated or rejected before Next/Fastify validation; keep the proxy limit explicitly bounded rather than unlimited.
+- A reverse proxy / ingress that provides HTTPS for the web application and API in production. Its request-body limit must be at least 4 MiB so the bounded authoring transport envelope is not truncated or rejected before Next/Fastify validation; keep the proxy limit explicitly bounded rather than unlimited. The ingress must restrict `/api/v1/health/live` and `/api/v1/health/ready` to trusted deployment/load-balancer networks rather than exposing dependency probes to the public Internet.
 - Read access from the API runtime to the configured `RULES_MANAGER_ARCHIVE_DIR`.
 
 The repository contains a local PostgreSQL compose file only. It does not currently define production application containers, Kubernetes resources, or a production process-supervisor manifest. Those are deployment-environment concerns and must not be inferred from `deploy/local/postgres.compose.yml`.
@@ -161,7 +161,7 @@ The API exposes:
 - `GET /api/v1/health/live` — process liveness;
 - `GET /api/v1/health/ready` — dependency readiness.
 
-After deployment, verify both endpoints from the deployment network.
+After deployment, verify both endpoints from the deployment network. Verify that requests from the public Internet cannot reach either health endpoint; readiness executes dependency probes, including a bounded PostgreSQL connectivity check, and is intended for trusted infrastructure only.
 
 Also verify a protected Rules endpoint without authentication returns 401. Authentication must be enforced before route input validation, so an unauthenticated request must not gain information about protected resources.
 

@@ -31,8 +31,15 @@ export class RulesetImportUnavailableError extends Error {
   }
 }
 
+export class RulesetImportInProgressError extends Error {
+  constructor() {
+    super('A Rules snapshot import is already in progress.');
+    this.name = 'RulesetImportInProgressError';
+  }
+}
+
 export class PersistImportedRuleset {
-  private tail: Promise<void> = Promise.resolve();
+  private inProgress = false;
 
   constructor(
     private readonly importer: ImportArchivedRuleset,
@@ -40,12 +47,14 @@ export class PersistImportedRuleset {
   ) {}
 
   execute(request: ImportArchivedRulesetRequest = {}): Promise<PersistImportedRulesetResult> {
-    const operation = this.tail.then(() => this.persist(request));
-    this.tail = operation.then(
-      () => undefined,
-      () => undefined,
-    );
-    return operation;
+    if (this.inProgress) {
+      return Promise.reject(new RulesetImportInProgressError());
+    }
+
+    this.inProgress = true;
+    return this.persist(request).finally(() => {
+      this.inProgress = false;
+    });
   }
 
   private async persist(
