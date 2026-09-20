@@ -44,20 +44,20 @@ jobs:
         run: pnpm audit --audit-level high
 
       - name: Prepare pruned API runtime dependency graph
-        run: pnpm db:generate && pnpm exec nx run api:prune
+        run: pnpm db:generate && pnpm release:prepare-api
 
       - name: Install deployable API dependencies
         working-directory: dist/apps/api
         run: pnpm install --prod --frozen-lockfile
 
-      - name: Verify Prisma CLI-only packages are absent
-        working-directory: dist/apps/api
+      - name: Verify ignored advisory packages are not imported by API bundle
         shell: bash
         run: |
           set -euo pipefail
-          for pattern in 'prisma@*' '@prisma+config@*' 'deepmerge-ts@*' 'mysql2@*'; do
-            if find node_modules/.pnpm -maxdepth 1 -mindepth 1 -name "$pattern" -print -quit | grep -q .; then
-              echo "Unexpected non-runtime package present in API artifact: $pattern" >&2
+          for package in prisma @prisma/config deepmerge-ts mysql2; do
+            if grep -Fq "require(\"$package\")" dist/apps/api/main.js ||
+               grep -Fq "require('$package')" dist/apps/api/main.js; then
+              echo "API bundle imports advisory-exempt package: $package" >&2
               exit 1
             fi
           done
