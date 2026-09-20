@@ -88,10 +88,17 @@ const releaseManifest = {
     artifactRoot: path.relative(workspaceRoot, apiRoot).split(path.sep).join('/'),
     entrypoint: path.relative(apiRoot, apiEntrypoint).split(path.sep).join('/'),
     installCommand: 'pnpm install --prod --frozen-lockfile',
+    startCommand: 'node main.js',
   },
   web: {
     artifactRoot: path.relative(workspaceRoot, webOutputRoot).split(path.sep).join('/'),
     entrypoint: path.relative(webOutputRoot, webServerFile).split(path.sep).join('/'),
+    startCommand:
+      'node ' + path.relative(webOutputRoot, webServerFile).split(path.sep).join('/'),
+    runtimeEnvironment: {
+      HOSTNAME: '0.0.0.0',
+      PORT: '3000',
+    },
   },
 };
 

@@ -37,6 +37,8 @@ After `pnpm build`, run `pnpm release:prepare`. This verifies the API entrypoint
 
 The API bundle at `dist/apps/api/main.js` externalizes third-party runtime packages. The Nx build therefore emits a production `package.json`, pruned `pnpm-lock.yaml`, and `pnpm-workspace.yaml` beside the bundle. A deployment can copy `dist/apps/api`, run `pnpm install --prod --frozen-lockfile` inside that artifact, and then start `node main.js`. Do not replace the pruned lock/settings files with ad-hoc dependency installation.
 
+For the web artifact, use the `web.startCommand` written to `dist/release-manifest.json`; do not run `next start` against the standalone tree. Set `HOSTNAME=0.0.0.0` (or the deployment-specific bind address) and `PORT` to the intended web listener. The manifest records safe defaults of `0.0.0.0:3000`, but the deployment platform remains responsible for TLS termination, routing, and health supervision.
+
 ## Required configuration
 
 Start from `.env.example`, but do not use example secrets in production.
