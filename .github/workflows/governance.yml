@@ -56,10 +56,14 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           CURRENT_SHA: ${{ github.sha }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           if [[ "$EVENT_NAME" == "pull_request" ]]; then
             scripts/ci/validate-commit-messages.sh "$BASE_SHA" "$HEAD_SHA"
           else
+            if [[ "$REF_NAME" == "main" ]]; then
+              export ALLOW_GITHUB_PR_MERGE_COMMITS=true
+            fi
             scripts/ci/validate-commit-messages.sh "$BEFORE_SHA" "$CURRENT_SHA"
           fi
