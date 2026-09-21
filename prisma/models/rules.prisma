@@ -1,13 +1,3 @@
-model RulesetImportLease {
-  key        String   @id @db.VarChar(64)
-  owner      String   @db.Uuid
-  acquiredAt DateTime @map("acquired_at") @db.Timestamptz(6)
-  expiresAt  DateTime @map("expires_at") @db.Timestamptz(6)
-
-  @@index([expiresAt])
-  @@map("ruleset_import_leases")
-}
-
 model RulesetSnapshot {
   id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   sourceRoot         String?  @map("source_root") @db.Text

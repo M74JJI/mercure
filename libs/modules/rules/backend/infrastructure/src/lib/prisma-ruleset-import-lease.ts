@@ -1,38 +1,41 @@
-import { randomUUID } from 'node:crypto';
+import { Client } from 'pg';
 
-import type { PrismaClient } from '@mercure/platform-backend-database/client';
 import type {
   RulesetImportLease,
   RulesetImportLeaseHandle,
 } from '@mercure/rules-backend-application';
 
-const IMPORT_LEASE_KEY = 'snapshot-import';
-const IMPORT_LEASE_DURATION_SECONDS = 60 * 60;
+const IMPORT_LOCK_NAMESPACE = 1_296_384_579;
+const IMPORT_LOCK_KEY = 1_381_320_773;
 
-export class PrismaRulesetImportLease implements RulesetImportLease {
-  constructor(private readonly database: PrismaClient) {}
+export interface PostgresRulesetImportLeaseOptions {
+  readonly connectionString: string;
+  readonly connectionTimeoutMillis: number;
+}
+
+export class PostgresRulesetImportLease implements RulesetImportLease {
+  constructor(private readonly options: PostgresRulesetImportLeaseOptions) {}
 
   async acquire(): Promise<RulesetImportLeaseHandle | null> {
-    const owner = randomUUID();
-    const rows = await this.database.$queryRaw<{ owner: string }[]>`
-      INSERT INTO "ruleset_import_leases" ("key", "owner", "acquired_at", "expires_at")
-      VALUES (
-        ${IMPORT_LEASE_KEY},
-        ${owner}::uuid,
-        NOW(),
-        NOW() + (${IMPORT_LEASE_DURATION_SECONDS} * INTERVAL '1 second')
-      )
-      ON CONFLICT ("key") DO UPDATE
-      SET
-        "owner" = EXCLUDED."owner",
-        "acquired_at" = EXCLUDED."acquired_at",
-        "expires_at" = EXCLUDED."expires_at"
-      WHERE "ruleset_import_leases"."expires_at" <= NOW()
-      RETURNING "owner"::text AS "owner"
-    `;
+    const client = new Client({
+      connectionString: this.options.connectionString,
+      connectionTimeoutMillis: this.options.connectionTimeoutMillis,
+    });
 
-    if (rows[0]?.owner !== owner) {
-      return null;
+    try {
+      await client.connect();
+      const result = await client.query<{ acquired: boolean }>(
+        'SELECT pg_try_advisory_lock($1, $2) AS acquired',
+        [IMPORT_LOCK_NAMESPACE, IMPORT_LOCK_KEY],
+      );
+
+      if (result.rows[0]?.acquired !== true) {
+        await client.end();
+        return null;
+      }
+    } catch (error) {
+      await client.end().catch(() => undefined);
+      throw error;
     }
 
     let released = false;
@@ -40,11 +43,15 @@ export class PrismaRulesetImportLease implements RulesetImportLease {
       release: async () => {
         if (released) return;
         released = true;
-        await this.database.$executeRaw`
-          DELETE FROM "ruleset_import_leases"
-          WHERE "key" = ${IMPORT_LEASE_KEY}
-            AND "owner" = ${owner}::uuid
-        `;
+
+        try {
+          await client.query('SELECT pg_advisory_unlock($1, $2)', [
+            IMPORT_LOCK_NAMESPACE,
+            IMPORT_LOCK_KEY,
+          ]);
+        } finally {
+          await client.end();
+        }
       },
     };
   }

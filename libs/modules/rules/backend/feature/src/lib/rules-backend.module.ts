@@ -46,7 +46,7 @@ import {
 } from '@mercure/rules-backend-application';
 import {
   FilesystemManagerArchiveSource,
-  PrismaRulesetImportLease,
+  PostgresRulesetImportLease,
   PrismaRulesetSnapshotAnalysisSource,
   PrismaRulesetSnapshotQueryStore,
   PrismaRulesAuthoringStore,
@@ -173,13 +173,17 @@ import {
       inject: [RULESET_ARCHIVE_SOURCE, AnalyzeRuleset, RULES_USE_CASE_CATALOG],
     },
     {
-      provide: PrismaRulesetImportLease,
-      useFactory: (database: PrismaService) => new PrismaRulesetImportLease(database),
-      inject: [PrismaService],
+      provide: PostgresRulesetImportLease,
+      useFactory: (config: PlatformConfig) =>
+        new PostgresRulesetImportLease({
+          connectionString: config.databaseUrl,
+          connectionTimeoutMillis: config.databaseConnectionTimeoutMs,
+        }),
+      inject: [PlatformConfig],
     },
     {
       provide: RULESET_IMPORT_LEASE,
-      useExisting: PrismaRulesetImportLease,
+      useExisting: PostgresRulesetImportLease,
     },
     {
       provide: PrismaRulesetSnapshotStore,
