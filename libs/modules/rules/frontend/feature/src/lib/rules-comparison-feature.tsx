@@ -8,6 +8,11 @@ import {
 import { RulesSnapshotComparison, RulesUnavailableState } from '@mercure/rules-frontend-ui';
 
 import { redirectRulesAuthorizationFailure } from './rules-auth-boundary';
+import {
+  COMPARISON_SNAPSHOT_PAGE_SIZE,
+  comparisonSnapshotOffset,
+  loadComparisonSnapshotSelection,
+} from './rules-comparison-selection';
 
 type ComparisonKind = NonNullable<RulesSnapshotComparisonQuery['kind']>;
 
@@ -16,6 +21,7 @@ export interface RulesComparisonFeatureProps {
   readonly afterSnapshotId?: string;
   readonly kind?: string;
   readonly offset?: string;
+  readonly snapshotOffset?: string;
 }
 
 function comparisonKind(value: string | undefined): ComparisonKind {
@@ -40,6 +46,7 @@ export async function RulesComparisonFeature({
   beforeSnapshotId,
   kind,
   offset,
+  snapshotOffset,
 }: RulesComparisonFeatureProps) {
   const api = new RulesDataAccess({ fetch: authenticatedMercureFetch });
   const intelligenceApi = new RulesIntelligenceDataAccess({
@@ -47,27 +54,25 @@ export async function RulesComparisonFeature({
   });
 
   try {
-    const snapshots = await api.listSnapshots({ offset: 0, limit: 25 });
-    const knownIds = new Set(snapshots.items.map((snapshot) => snapshot.id));
-    const latest = snapshots.items[0];
-    const previous = snapshots.items[1];
     const selectedKind = comparisonKind(kind);
     const selectedOffset = comparisonOffset(offset);
+    const selectedSnapshotOffset = comparisonSnapshotOffset(snapshotOffset);
+    const selection = await loadComparisonSnapshotSelection(
+      api,
+      selectedSnapshotOffset,
+      beforeSnapshotId,
+      afterSnapshotId,
+    );
+    const selectedAfter = selection.selectedAfter;
+    const selectedBefore = selection.selectedBefore;
 
-    if (!latest || !previous) {
-      return <RulesSnapshotComparison snapshots={snapshots.items} selectedKind={selectedKind} />;
-    }
-
-    let selectedAfter =
-      afterSnapshotId && knownIds.has(afterSnapshotId) ? afterSnapshotId : latest.id;
-    let selectedBefore =
-      beforeSnapshotId && knownIds.has(beforeSnapshotId) ? beforeSnapshotId : previous.id;
-
-    if (selectedBefore === selectedAfter) {
-      selectedBefore =
-        snapshots.items.find((snapshot) => snapshot.id !== selectedAfter)?.id ?? previous.id;
-      selectedAfter =
-        snapshots.items.find((snapshot) => snapshot.id !== selectedBefore)?.id ?? latest.id;
+    if (!selectedAfter || !selectedBefore) {
+      return (
+        <RulesSnapshotComparison
+          snapshots={selection.options}
+          selectedKind={selectedKind}
+        />
+      );
     }
 
     const comparison = await intelligenceApi.compare({
@@ -77,6 +82,23 @@ export async function RulesComparisonFeature({
       offset: selectedOffset,
       limit: PAGE_SIZE,
     });
+
+    const snapshotHref = (snapshotPageOffset: number) =>
+      '/rules/compare?' +
+      new URLSearchParams({
+        before: selectedBefore,
+        after: selectedAfter,
+        kind: selectedKind,
+        snapshotOffset: String(snapshotPageOffset),
+      }).toString();
+    const snapshotPreviousHref =
+      selectedSnapshotOffset > 0
+        ? snapshotHref(Math.max(0, selectedSnapshotOffset - COMPARISON_SNAPSHOT_PAGE_SIZE))
+        : undefined;
+    const snapshotNextHref =
+      selectedSnapshotOffset + selection.page.items.length < selection.page.total
+        ? snapshotHref(selectedSnapshotOffset + COMPARISON_SNAPSHOT_PAGE_SIZE)
+        : undefined;
 
     const previousHref =
       selectedOffset > 0
@@ -101,11 +123,18 @@ export async function RulesComparisonFeature({
 
     return (
       <RulesSnapshotComparison
-        snapshots={snapshots.items}
+        snapshots={selection.options}
         comparison={comparison}
         selectedBefore={selectedBefore}
         selectedAfter={selectedAfter}
         selectedKind={selectedKind}
+        snapshotPage={{
+          offset: selectedSnapshotOffset,
+          shown: selection.page.items.length,
+          total: selection.page.total,
+        }}
+        {...(snapshotPreviousHref === undefined ? {} : { snapshotPreviousHref })}
+        {...(snapshotNextHref === undefined ? {} : { snapshotNextHref })}
         {...(previousHref === undefined ? {} : { previousHref })}
         {...(nextHref === undefined ? {} : { nextHref })}
       />

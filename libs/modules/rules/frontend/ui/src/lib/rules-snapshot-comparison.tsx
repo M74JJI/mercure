@@ -1,6 +1,8 @@
 import { PageHeader, Panel, StatusBadge } from '@mercure/platform-frontend-design-system';
 
 import type { RulesComparisonSnapshotOptionView, RulesSnapshotComparisonView } from './models';
+
+const COMPARISON_SNAPSHOT_PAGE_SIZE = 25;
 import styles from './rules.module.css';
 
 export interface RulesSnapshotComparisonProps {
@@ -11,6 +13,13 @@ export interface RulesSnapshotComparisonProps {
   readonly selectedKind: RulesSnapshotComparisonView['kind'];
   readonly previousHref?: string;
   readonly nextHref?: string;
+  readonly snapshotPreviousHref?: string;
+  readonly snapshotNextHref?: string;
+  readonly snapshotPage?: {
+    readonly offset: number;
+    readonly shown: number;
+    readonly total: number;
+  };
 }
 
 const dateFormatter = new Intl.DateTimeFormat('en', {
@@ -31,6 +40,9 @@ export function RulesSnapshotComparison({
   selectedAfter,
   selectedBefore,
   selectedKind,
+  snapshotNextHref,
+  snapshotPage,
+  snapshotPreviousHref,
 }: RulesSnapshotComparisonProps) {
   return (
     <div className={styles.page}>
@@ -100,6 +112,26 @@ export function RulesSnapshotComparison({
 
               <button type="submit">Compare</button>
             </form>
+            {snapshotPage && snapshotPage.total > COMPARISON_SNAPSHOT_PAGE_SIZE ? (
+              <div className={styles.pagination}>
+                {snapshotPreviousHref ? (
+                  <a className={styles.actionLink} href={snapshotPreviousHref}>
+                    ← Newer snapshots
+                  </a>
+                ) : (
+                  <span />
+                )}
+                <span>
+                  {snapshotPage.offset + 1}–
+                  {snapshotPage.offset + snapshotPage.shown} of {snapshotPage.total}
+                </span>
+                {snapshotNextHref ? (
+                  <a className={styles.actionLink} href={snapshotNextHref}>
+                    Older snapshots →
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
           </Panel>
 
           {comparison ? (
