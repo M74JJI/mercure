@@ -145,6 +145,18 @@ const platformEnvironmentSchema = z.object({
   DATABASE_CONNECTION_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(5_000),
   DATABASE_IDLE_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(600_000).default(10_000),
   DATABASE_HEALTH_TIMEOUT_MS: z.coerce.number().int().min(100).max(30_000).default(2_000),
+  RULES_INTELLIGENCE_RATE_LIMIT_MAX_REQUESTS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(10_000)
+    .default(120),
+  RULES_INTELLIGENCE_RATE_LIMIT_WINDOW_SECONDS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(3_600)
+    .default(60),
   RULES_MANAGER_ARCHIVE_DIR: z.string().trim().min(1).default('/opt/mercure/siem-managers'),
   RULES_ARCHIVE_MAX_ARCHIVES: z.coerce.number().int().min(1).max(512).default(64),
   RULES_ARCHIVE_MAX_COMPRESSED_BYTES: z.coerce
@@ -315,6 +327,14 @@ export class PlatformConfig {
 
   get databaseHealthTimeoutMs(): number {
     return this.config.getOrThrow('DATABASE_HEALTH_TIMEOUT_MS', { infer: true });
+  }
+
+  get rulesIntelligenceRateLimitMaxRequests(): number {
+    return this.config.getOrThrow('RULES_INTELLIGENCE_RATE_LIMIT_MAX_REQUESTS', { infer: true });
+  }
+
+  get rulesIntelligenceRateLimitWindowSeconds(): number {
+    return this.config.getOrThrow('RULES_INTELLIGENCE_RATE_LIMIT_WINDOW_SECONDS', { infer: true });
   }
 
   get rulesManagerArchiveDir(): string {

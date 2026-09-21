@@ -5,6 +5,7 @@ import {
   NotFoundException,
   ServiceUnavailableException,
   SetMetadata,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -58,6 +59,7 @@ import {
   presentSnapshotComparison,
   presentUseCases,
 } from './rules-intelligence.presenter';
+import { RulesIntelligenceRateLimitGuard } from './rules-intelligence-rate-limit.guard';
 import { ZodParam, ZodQuery } from './zod-route-parameters';
 
 async function translateReadErrors<T>(operation: () => Promise<T>): Promise<T> {
@@ -96,6 +98,7 @@ const rulesReadRequirement = ['rules:read'] satisfies readonly MercureCapability
   RulesRoundtripQueryDto,
 )
 @Controller('rules/intelligence')
+@UseGuards(RulesIntelligenceRateLimitGuard)
 export class RulesIntelligenceController {
   constructor(
     @Inject(AnalyzeRulesetSnapshotFields) private readonly fields: AnalyzeRulesetSnapshotFields,

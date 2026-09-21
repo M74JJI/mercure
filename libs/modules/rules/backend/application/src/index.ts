@@ -1,3 +1,9 @@
+export {
+  RULES_INTELLIGENCE_RATE_LIMITER,
+  type RulesIntelligenceRateLimitDecision,
+  type RulesIntelligenceRateLimiter,
+} from './lib/rules-intelligence-rate-limit';
+
 export { BoundedAsyncCache, BoundedAsyncCacheCapacityError } from './lib/bounded-async-cache';
 
 export {

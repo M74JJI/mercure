@@ -391,3 +391,12 @@ model RulesAuthoringDraftValidationIssue {
   @@index([draftId, revision, severity])
   @@map("rules_authoring_draft_validation_issues")
 }
+
+model RulesIntelligenceRateLimit {
+  key         String   @id @db.Char(64)
+  windowStart DateTime @map("window_start") @db.Timestamptz(6)
+  count       Int
+
+  @@index([windowStart])
+  @@map("rules_intelligence_rate_limits")
+}
