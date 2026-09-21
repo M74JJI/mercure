@@ -51,6 +51,7 @@ export {
   type AnalyzeRulesetSnapshotRoundtripResult,
   type CompareRulesetSnapshotsRequest,
   type CompareRulesetSnapshotsResult,
+  type RulesetSnapshotAnalysisProfile,
   type RulesetSnapshotAnalysisSource,
 } from './lib/analyze-ruleset-snapshots';
 
