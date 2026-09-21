@@ -54,9 +54,7 @@ export class PersistImportedRuleset {
     private readonly lease: RulesetImportLease,
   ) {}
 
-  async execute(
-    request: ImportArchivedRulesetRequest = {},
-  ): Promise<PersistImportedRulesetResult> {
+  async execute(request: ImportArchivedRulesetRequest = {}): Promise<PersistImportedRulesetResult> {
     const lease = await this.lease.acquire();
     if (!lease) {
       throw new RulesetImportInProgressError();

@@ -178,8 +178,7 @@ function readArchiveXml(
 
     extractor.on('entry', (header, stream, next) => {
       void (async () => {
-        const remainingDecompressedBytes =
-          limits.remainingDecompressedBytes - decompressedBytes;
+        const remainingDecompressedBytes = limits.remainingDecompressedBytes - decompressedBytes;
         if (header.size > remainingDecompressedBytes) {
           throw new Error(
             `archive decompressed data exceeds the configured ${limits.maxDecompressedBytes}-byte limit`,
