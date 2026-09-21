@@ -6,6 +6,7 @@ import {
   PersistImportedRuleset,
   RulesetImportInProgressError,
   type RulesetArchiveSource,
+  type RulesetImportLease,
   type RulesetSnapshotStore,
 } from '@mercure/rules-backend-application';
 import type { RulesUseCase } from '@mercure/rules-backend-domain';
@@ -83,11 +84,24 @@ describe('PersistImportedRuleset', () => {
       },
     };
 
+    let leaseHeld = false;
+    const lease: RulesetImportLease = {
+      async acquire() {
+        if (leaseHeld) return null;
+        leaseHeld = true;
+        return {
+          async release() {
+            leaseHeld = false;
+          },
+        };
+      },
+    };
+
     const importer = new ImportArchivedRuleset(
       source,
       new AnalyzeRuleset(new WazuhXmlRulesetAnalyzer()),
     );
-    const persist = new PersistImportedRuleset(importer, store);
+    const persist = new PersistImportedRuleset(importer, store, lease);
 
     const first = persist.execute({ useCases: [useCase('First')] });
 

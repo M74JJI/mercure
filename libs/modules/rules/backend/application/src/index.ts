@@ -1,3 +1,5 @@
+export { BoundedAsyncCache } from './lib/bounded-async-cache';
+
 export {
   AnalyzeRuleset,
   ImportArchivedRuleset,
@@ -15,10 +17,13 @@ export {
 
 export {
   PersistImportedRuleset,
+  RULESET_IMPORT_LEASE,
   RULESET_SNAPSHOT_STORE,
   RulesetImportInProgressError,
   RulesetImportUnavailableError,
   type PersistImportedRulesetResult,
+  type RulesetImportLease,
+  type RulesetImportLeaseHandle,
   type RulesetSnapshotIdentity,
   type RulesetSnapshotStore,
 } from './lib/persist-ruleset-snapshot';
@@ -48,6 +53,7 @@ export {
   type AnalyzeRulesetSnapshotRoundtripResult,
   type CompareRulesetSnapshotsRequest,
   type CompareRulesetSnapshotsResult,
+  type RulesetSnapshotAnalysisProfile,
   type RulesetSnapshotAnalysisSource,
 } from './lib/analyze-ruleset-snapshots';
 

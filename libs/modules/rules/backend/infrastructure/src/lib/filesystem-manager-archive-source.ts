@@ -19,6 +19,9 @@ const ARCHIVE_READ_TIMEOUT_MS = 30_000;
 
 interface ManagerArchiveSourceOptions {
   readonly rootPath: string;
+  readonly maxArchives: number;
+  readonly maxCompressedBytes: number;
+  readonly maxDecompressedBytes: number;
   readonly maxFiles: number;
   readonly maxEntryBytes: number;
   readonly maxTotalBytes: number;
@@ -26,10 +29,15 @@ interface ManagerArchiveSourceOptions {
 
 interface ArchiveReadLimits {
   readonly maxFiles: number;
+  readonly maxDecompressedBytes: number;
   readonly remainingFiles: number;
   readonly maxEntryBytes: number;
   readonly maxTotalBytes: number;
   readonly remainingTotalBytes: number;
+}
+
+interface ArchiveReadBudget {
+  remainingDecompressedBytes: number;
 }
 
 interface ArchiveReadFile {
@@ -42,6 +50,7 @@ interface ArchiveReadResult {
   readonly xmlFiles: number;
   readonly files: readonly ArchiveReadFile[];
   readonly totalBytes: number;
+  readonly decompressedBytes: number;
   readonly errors: readonly string[];
 }
 
@@ -74,15 +83,53 @@ function normalizeArchiveEntry(entry: string): string | null {
   return XML_SOURCE_PATTERN.test(normalized) ? normalized : null;
 }
 
-async function drainArchiveEntry(stream: ArchiveEntryStream): Promise<void> {
-  for await (const chunk of stream) {
-    void chunk;
+function consumeDecompressedBytes(
+  budget: ArchiveReadBudget,
+  bytes: number,
+  maxDecompressedBytes: number,
+): void {
+  if (bytes > budget.remainingDecompressedBytes) {
+    budget.remainingDecompressedBytes = 0;
+    throw new Error(
+      `archive decompressed data exceeds the configured ${maxDecompressedBytes}-byte limit`,
+    );
   }
+
+  budget.remainingDecompressedBytes -= bytes;
+}
+
+async function drainArchiveEntry(
+  stream: ArchiveEntryStream,
+  expectedBytes: number,
+  consumeBytes: (bytes: number) => void,
+): Promise<number> {
+  let bytes = 0;
+
+  for await (const chunk of stream) {
+    if (!Buffer.isBuffer(chunk) && !(chunk instanceof Uint8Array)) {
+      throw new Error('archive member emitted an unsupported stream chunk');
+    }
+
+    consumeBytes(chunk.length);
+    bytes += chunk.length;
+    if (bytes > expectedBytes) {
+      throw new Error(`archive member exceeded its declared ${expectedBytes}-byte size`);
+    }
+  }
+
+  if (bytes !== expectedBytes) {
+    throw new Error(
+      `archive member size mismatch: expected ${expectedBytes} bytes but read ${bytes}`,
+    );
+  }
+
+  return bytes;
 }
 
 async function readArchiveEntry(
   stream: ArchiveEntryStream,
   expectedBytes: number,
+  consumeBytes: (bytes: number) => void,
 ): Promise<Buffer> {
   const chunks: Buffer[] = [];
   let bytes = 0;
@@ -93,6 +140,7 @@ async function readArchiveEntry(
     }
 
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    consumeBytes(buffer.length);
     bytes += buffer.length;
 
     if (bytes > expectedBytes) {
@@ -118,6 +166,7 @@ function isRegularArchiveFile(type: string): boolean {
 function readArchiveXml(
   archivePath: string,
   limits: ArchiveReadLimits,
+  budget: ArchiveReadBudget,
 ): Promise<ArchiveReadResult> {
   return new Promise((resolve, reject) => {
     const input = createReadStream(archivePath);
@@ -128,6 +177,7 @@ function readArchiveXml(
     const errors: string[] = [];
     let xmlFiles = 0;
     let totalBytes = 0;
+    let decompressedBytes = 0;
     let settled = false;
 
     const timeout = setTimeout(() => {
@@ -147,10 +197,25 @@ function readArchiveXml(
 
     extractor.on('entry', (header, stream, next) => {
       void (async () => {
+        if (header.size > budget.remainingDecompressedBytes) {
+          throw new Error(
+            `archive decompressed data exceeds the configured ${limits.maxDecompressedBytes}-byte limit`,
+          );
+        }
+
+        const consumeBytes = (bytes: number): void => {
+          consumeDecompressedBytes(budget, bytes, limits.maxDecompressedBytes);
+          decompressedBytes += bytes;
+        };
+
+        const drain = async (): Promise<void> => {
+          await drainArchiveEntry(stream, header.size, consumeBytes);
+          next();
+        };
+
         const sourcePath = normalizeArchiveEntry(header.name);
         if (!sourcePath) {
-          await drainArchiveEntry(stream);
-          next();
+          await drain();
           return;
         }
 
@@ -168,8 +233,7 @@ function readArchiveXml(
 
         if (!isRegularArchiveFile(header.type)) {
           errors.push(`${sourcePath}: archive member is not a regular file`);
-          await drainArchiveEntry(stream);
-          next();
+          await drain();
           return;
         }
 
@@ -177,8 +241,7 @@ function readArchiveXml(
           errors.push(
             `${sourcePath}: XML member exceeds the configured ${limits.maxEntryBytes}-byte limit`,
           );
-          await drainArchiveEntry(stream);
-          next();
+          await drain();
           return;
         }
 
@@ -186,12 +249,11 @@ function readArchiveXml(
           errors.push(
             `${sourcePath}: snapshot exceeds the configured ${limits.maxTotalBytes}-byte XML limit`,
           );
-          await drainArchiveEntry(stream);
-          next();
+          await drain();
           return;
         }
 
-        const content = await readArchiveEntry(stream, header.size);
+        const content = await readArchiveEntry(stream, header.size, consumeBytes);
         totalBytes += content.length;
         files.push({
           sourcePath,
@@ -217,6 +279,7 @@ function readArchiveXml(
         xmlFiles,
         files,
         totalBytes,
+        decompressedBytes,
         errors,
       });
     });
@@ -279,6 +342,16 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
       .map((entry) => entry.name)
       .sort((left, right) => left.localeCompare(right));
 
+    if (archiveNames.length > this.options.maxArchives) {
+      return this.emptySnapshot(loadedAt, [
+        `Rules source contains ${archiveNames.length} archives, above the configured ${this.options.maxArchives}-archive limit.`,
+      ]);
+    }
+
+    let totalCompressedBytes = 0;
+    const decompressionBudget: ArchiveReadBudget = {
+      remainingDecompressedBytes: this.options.maxDecompressedBytes,
+    };
     let totalXmlFiles = 0;
     let totalBytes = 0;
 
@@ -287,13 +360,25 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
 
       try {
         const archiveStat = await stat(archivePath);
-        const result = await readArchiveXml(archivePath, {
-          maxFiles: this.options.maxFiles,
-          remainingFiles: this.options.maxFiles - totalXmlFiles,
-          maxEntryBytes: this.options.maxEntryBytes,
-          maxTotalBytes: this.options.maxTotalBytes,
-          remainingTotalBytes: this.options.maxTotalBytes - totalBytes,
-        });
+        totalCompressedBytes += archiveStat.size;
+        if (totalCompressedBytes > this.options.maxCompressedBytes) {
+          return this.emptySnapshot(loadedAt, [
+            `Rules archives exceed the configured ${this.options.maxCompressedBytes}-byte compressed-input limit.`,
+          ]);
+        }
+
+        const result = await readArchiveXml(
+          archivePath,
+          {
+            maxFiles: this.options.maxFiles,
+            maxDecompressedBytes: this.options.maxDecompressedBytes,
+            remainingFiles: this.options.maxFiles - totalXmlFiles,
+            maxEntryBytes: this.options.maxEntryBytes,
+            maxTotalBytes: this.options.maxTotalBytes,
+            remainingTotalBytes: this.options.maxTotalBytes - totalBytes,
+          },
+          decompressionBudget,
+        );
 
         totalXmlFiles += result.xmlFiles;
         totalBytes += result.totalBytes;

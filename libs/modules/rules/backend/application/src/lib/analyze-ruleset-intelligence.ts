@@ -8,11 +8,19 @@ import {
   type RulesGraphFilters,
 } from '@mercure/rules-backend-domain';
 
-import type { RulesetSnapshotAnalysisSource } from './analyze-ruleset-snapshots';
+import { BoundedAsyncCache } from './bounded-async-cache';
+import type {
+  RulesetSnapshotAnalysisProfile,
+  RulesetSnapshotAnalysisSource,
+} from './analyze-ruleset-snapshots';
 import { RulesetSnapshotNotFoundError } from './query-ruleset-snapshots';
 
-async function requireSnapshot(source: RulesetSnapshotAnalysisSource, snapshotId: string) {
-  const ruleset = await source.load(snapshotId);
+async function requireSnapshot(
+  source: RulesetSnapshotAnalysisSource,
+  snapshotId: string,
+  profile: RulesetSnapshotAnalysisProfile,
+) {
+  const ruleset = await source.load(snapshotId, profile);
   if (!ruleset) {
     throw new RulesetSnapshotNotFoundError(snapshotId);
   }
@@ -25,14 +33,18 @@ export interface AnalyzeRulesetSnapshotFieldsResult {
 }
 
 export class AnalyzeRulesetSnapshotFields {
+  private readonly cache = new BoundedAsyncCache<AnalyzeRulesetSnapshotFieldsResult>(4);
+
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 
-  async execute(snapshotId: string): Promise<AnalyzeRulesetSnapshotFieldsResult> {
-    const ruleset = await requireSnapshot(this.source, snapshotId);
-    return {
-      snapshotId,
-      intelligence: buildFieldIntelligence(ruleset),
-    };
+  execute(snapshotId: string): Promise<AnalyzeRulesetSnapshotFieldsResult> {
+    return this.cache.getOrLoad(snapshotId, async () => {
+      const ruleset = await requireSnapshot(this.source, snapshotId, 'fields');
+      return {
+        snapshotId,
+        intelligence: buildFieldIntelligence(ruleset),
+      };
+    });
   }
 }
 
@@ -42,14 +54,18 @@ export interface ScoreRulesetSnapshotQualityResult {
 }
 
 export class ScoreRulesetSnapshotQuality {
+  private readonly cache = new BoundedAsyncCache<ScoreRulesetSnapshotQualityResult>(4);
+
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 
-  async execute(snapshotId: string): Promise<ScoreRulesetSnapshotQualityResult> {
-    const ruleset = await requireSnapshot(this.source, snapshotId);
-    return {
-      snapshotId,
-      quality: buildQualitySummary(ruleset),
-    };
+  execute(snapshotId: string): Promise<ScoreRulesetSnapshotQualityResult> {
+    return this.cache.getOrLoad(snapshotId, async () => {
+      const ruleset = await requireSnapshot(this.source, snapshotId, 'quality');
+      return {
+        snapshotId,
+        quality: buildQualitySummary(ruleset),
+      };
+    });
   }
 }
 
@@ -63,16 +79,34 @@ export interface BuildRulesetSnapshotGraphResult {
   readonly graph: RulesGraphData;
 }
 
+function graphCacheKey(request: BuildRulesetSnapshotGraphRequest): string {
+  const filters = request.filters;
+  return JSON.stringify([
+    request.snapshotId,
+    filters.mode,
+    filters.query ?? null,
+    filters.tenant ?? null,
+    filters.useCaseId ?? null,
+    filters.status ?? null,
+    filters.role ?? null,
+    filters.jiraOnly ?? null,
+    filters.includeExternal ?? null,
+    filters.limit ?? null,
+  ]);
+}
+
 export class BuildRulesetSnapshotGraph {
+  private readonly cache = new BoundedAsyncCache<BuildRulesetSnapshotGraphResult>(16);
+
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 
-  async execute(
-    request: BuildRulesetSnapshotGraphRequest,
-  ): Promise<BuildRulesetSnapshotGraphResult> {
-    const ruleset = await requireSnapshot(this.source, request.snapshotId);
-    return {
-      snapshotId: request.snapshotId,
-      graph: buildRulesGraph(ruleset, request.filters),
-    };
+  execute(request: BuildRulesetSnapshotGraphRequest): Promise<BuildRulesetSnapshotGraphResult> {
+    return this.cache.getOrLoad(graphCacheKey(request), async () => {
+      const ruleset = await requireSnapshot(this.source, request.snapshotId, 'graph');
+      return {
+        snapshotId: request.snapshotId,
+        graph: buildRulesGraph(ruleset, request.filters),
+      };
+    });
   }
 }

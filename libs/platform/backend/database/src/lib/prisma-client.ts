@@ -1,4 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg';
+import { Client } from 'pg';
 
 import { PrismaClient } from '../generated/prisma/client';
 
@@ -7,6 +8,18 @@ export interface PrismaConnectionOptions {
   readonly max: number;
   readonly connectionTimeoutMillis: number;
   readonly idleTimeoutMillis: number;
+}
+
+export interface PostgresSessionOptions {
+  readonly connectionString: string;
+  readonly connectionTimeoutMillis: number;
+}
+
+export function createPostgresSession(options: PostgresSessionOptions): Client {
+  return new Client({
+    connectionString: options.connectionString,
+    connectionTimeoutMillis: options.connectionTimeoutMillis,
+  });
 }
 
 export function createPrismaClient(options: PrismaConnectionOptions): PrismaClient {
