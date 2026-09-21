@@ -77,7 +77,7 @@ export async function loadComparisonSnapshotSelection(
     page.items.find((snapshot) => snapshot.id !== fallbackAfter?.id) ??
     options.find((snapshot) => snapshot.id !== fallbackAfter?.id);
 
-  let selectedAfter =
+  const selectedAfter =
     requestedAfter && byId.has(requestedAfter) ? requestedAfter : fallbackAfter?.id;
   let selectedBefore =
     requestedBefore && byId.has(requestedBefore) ? requestedBefore : fallbackBefore?.id;
