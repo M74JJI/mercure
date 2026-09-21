@@ -1,6 +1,5 @@
+import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import {
-  CanActivate,
-  ExecutionContext,
   HttpException,
   HttpStatus,
   Inject,

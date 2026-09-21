@@ -12,7 +12,7 @@ export class BoundedAsyncCache<T> {
   constructor(
     private readonly maxEntries: number,
     private readonly maxInFlight: number = Math.min(maxEntries, 2),
-    private readonly retainCompleted: boolean = true,
+    private readonly retainCompleted = true,
   ) {
     if (!Number.isInteger(maxEntries) || maxEntries < 1) {
       throw new Error('BoundedAsyncCache maxEntries must be a positive integer.');
