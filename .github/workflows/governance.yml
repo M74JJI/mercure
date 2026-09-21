@@ -70,3 +70,16 @@ jobs:
             fi
             scripts/ci/validate-commit-messages.sh "$BEFORE_SHA" "$CURRENT_SHA"
           fi
+
+      - name: Verify rewritten-history fallback
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          FALLBACK_BASE: origin/${{ github.event.repository.default_branch }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          COMMIT_POLICY_FALLBACK_BASE="$FALLBACK_BASE" \
+            bash scripts/ci/validate-commit-messages.sh \
+            ffffffffffffffffffffffffffffffffffffffff \
+            "$HEAD_SHA"
