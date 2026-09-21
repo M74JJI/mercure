@@ -319,6 +319,41 @@ describe('FilesystemManagerArchiveSource', () => {
     });
   });
 
+  it('preserves the decompression budget after a failed archive', async () => {
+    await withTempDirectory(async (root) => {
+      const archiveRoot = path.join(root, 'archives');
+      const firstRoot = path.join(root, 'first');
+      const secondRoot = path.join(root, 'second');
+      await mkdir(archiveRoot, { recursive: true });
+      await mkdir(path.join(firstRoot, 'other'), { recursive: true });
+      await mkdir(path.join(secondRoot, 'other'), { recursive: true });
+
+      await writeFile(path.join(firstRoot, 'other', 'a.bin'), 'a'.repeat(1200));
+      await writeFile(path.join(firstRoot, 'other', 'b.bin'), 'b'.repeat(1200));
+      await writeFile(path.join(secondRoot, 'other', 'c.bin'), 'c'.repeat(1200));
+
+      await createArchive(path.join(archiveRoot, 'manager-a.tar.gz'), firstRoot);
+      await createArchive(path.join(archiveRoot, 'manager-b.tar.gz'), secondRoot);
+
+      const source = new FilesystemManagerArchiveSource({
+        rootPath: archiveRoot,
+        maxArchives: 8,
+        maxCompressedBytes: 8 * 1024 * 1024,
+        maxDecompressedBytes: 2048,
+        maxFiles: 10,
+        maxEntryBytes: 1024 * 1024,
+        maxTotalBytes: 1024,
+      });
+
+      const snapshot = await source.readSnapshot();
+
+      expect(snapshot.archives).toEqual([]);
+      expect(snapshot.files).toEqual([]);
+      expect(snapshot.errors).toHaveLength(2);
+      expect(snapshot.errors.every((error) => error.includes('2048-byte limit'))).toBe(true);
+    });
+  });
+
   it('returns a non-fatal empty snapshot when the configured root is unavailable', async () => {
     await withTempDirectory(async (root) => {
       const missingRoot = path.join(root, 'missing');
