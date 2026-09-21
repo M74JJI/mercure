@@ -14,7 +14,7 @@ export class PrismaRulesetImportLease implements RulesetImportLease {
 
   async acquire(): Promise<RulesetImportLeaseHandle | null> {
     const owner = randomUUID();
-    const rows = await this.database.$queryRaw<Array<{ owner: string }>>`
+    const rows = await this.database.$queryRaw<{ owner: string }[]>`
       INSERT INTO "ruleset_import_leases" ("key", "owner", "acquired_at", "expires_at")
       VALUES (
         ${IMPORT_LEASE_KEY},
