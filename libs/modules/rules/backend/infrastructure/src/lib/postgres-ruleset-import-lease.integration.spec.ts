@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { PostgresRulesetImportLease } from './prisma-ruleset-import-lease';
+import { PostgresRulesetImportLease } from './postgres-ruleset-import-lease';
 
 const integrationEnabled = process.env['RULES_PERSISTENCE_INTEGRATION'] === '1';
 
