@@ -20,10 +20,7 @@ export type RulesetSnapshotAnalysisProfile =
   | 'roundtrip';
 
 export interface RulesetSnapshotAnalysisSource {
-  load(
-    snapshotId: string,
-    profile?: RulesetSnapshotAnalysisProfile,
-  ): Promise<ParsedRuleset | null>;
+  load(snapshotId: string, profile?: RulesetSnapshotAnalysisProfile): Promise<ParsedRuleset | null>;
 }
 
 export interface CompareRulesetSnapshotsRequest {

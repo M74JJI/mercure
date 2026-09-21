@@ -97,11 +97,9 @@ export class PrismaRulesetSnapshotAnalysisSource implements RulesetSnapshotAnaly
 
     if (!snapshot) return null;
 
-    const includeFiles =
-      profile === 'full' || profile === 'comparison' || profile === 'roundtrip';
+    const includeFiles = profile === 'full' || profile === 'comparison' || profile === 'roundtrip';
     const includeFileContent = profile === 'full' || profile === 'roundtrip';
-    const includeRuleXml =
-      profile === 'full' || profile === 'quality' || profile === 'roundtrip';
+    const includeRuleXml = profile === 'full' || profile === 'quality' || profile === 'roundtrip';
     const includeDecoders = profile !== 'roundtrip';
     const includeDecoderXml = profile === 'full';
     const includeUseCases = profile === 'full' || profile === 'graph';
