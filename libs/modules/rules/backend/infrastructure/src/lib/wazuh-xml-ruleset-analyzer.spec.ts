@@ -156,6 +156,83 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     );
   });
 
+  it('isolates duplicate and dependency validation by tenant', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-a/rules/a.xml',
+          tenant: 'manager-a',
+          type: 'rules',
+          content: [
+            '<group name="manager_a,">',
+            '  <rule id="100" level="5">',
+            '    <description>A base</description>',
+            '    <group>shared_group,</group>',
+            '  </rule>',
+            '  <rule id="200" level="5">',
+            '    <if_sid>999</if_sid>',
+            '    <if_group>other_group</if_group>',
+            '    <decoded_as>shared_decoder</decoded_as>',
+            '    <description>A dependencies</description>',
+            '  </rule>',
+            '</group>',
+          ].join('\n'),
+        },
+        {
+          name: 'manager-b/rules/b.xml',
+          tenant: 'manager-b',
+          type: 'rules',
+          content: [
+            '<group name="manager_b,">',
+            '  <rule id="100" level="5"><description>B base</description></rule>',
+            '  <rule id="999" level="5">',
+            '    <description>B dependency</description>',
+            '    <group>other_group,</group>',
+            '  </rule>',
+            '</group>',
+          ].join('\n'),
+        },
+        {
+          name: 'manager-a/decoders/a.xml',
+          tenant: 'manager-a',
+          type: 'decoders',
+          content: [
+            '<decoder name="child_decoder">',
+            '  <parent>shared_parent</parent>',
+            '  <regex>.+</regex>',
+            '</decoder>',
+          ].join('\n'),
+        },
+        {
+          name: 'manager-b/decoders/b.xml',
+          tenant: 'manager-b',
+          type: 'decoders',
+          content: [
+            '<decoder name="shared_decoder"><regex>.+</regex></decoder>',
+            '<decoder name="shared_parent"><regex>.+</regex></decoder>',
+          ].join('\n'),
+        },
+      ],
+    });
+
+    const scopedIssues = result.issues.filter((issue) => issue.tenant === 'manager-a');
+
+    expect(result.issues.some((issue) => issue.type === 'duplicate_rule_id')).toBe(false);
+    expect(result.issues.some((issue) => issue.type === 'duplicate_decoder_name')).toBe(false);
+    expect(scopedIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'external_or_missing_sid', ruleId: '200' }),
+        expect.objectContaining({ type: 'missing_group_dependency', ruleId: '200' }),
+        expect.objectContaining({ type: 'missing_decoder', ruleId: '200' }),
+        expect.objectContaining({
+          type: 'external_decoder_parent',
+          decoderName: 'child_decoder',
+        }),
+      ]),
+    );
+  });
+
   it('preserves correlation dependencies, explicit use cases, XML entities, and decoder patterns', async () => {
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const result = await analyzer.analyze({

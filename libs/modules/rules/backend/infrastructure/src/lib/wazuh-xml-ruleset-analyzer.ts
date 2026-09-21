@@ -480,6 +480,10 @@ function parseDecoders(source: RulesetSourceFile): DecoderRecord[] {
   return decoders;
 }
 
+function scopedKey(tenant: string, value: string): string {
+  return JSON.stringify([tenant, value]);
+}
+
 function validateRuleset(
   files: readonly RulesetSourceFile[],
   rules: readonly RuleRecord[],
@@ -506,45 +510,53 @@ function validateRuleset(
   const ruleGroups = new Map<string, RuleRecord[]>();
 
   for (const rule of rules) {
-    ruleGroups.set(rule.id, [...(ruleGroups.get(rule.id) ?? []), rule]);
+    const key = scopedKey(rule.tenant, rule.id);
+    ruleGroups.set(key, [...(ruleGroups.get(key) ?? []), rule]);
   }
 
-  for (const [id, duplicates] of ruleGroups) {
+  for (const duplicates of ruleGroups.values()) {
     if (duplicates.length <= 1) continue;
+    const duplicate = duplicates[0];
+    if (!duplicate) continue;
     issues.push({
       severity: 'error',
       type: 'duplicate_rule_id',
-      title: `Duplicate rule ID ${id}`,
-      detail: `${duplicates.length} rules share the same Wazuh rule ID.`,
-      ruleId: id,
-      ...(duplicates[0]?.tenant ? { tenant: duplicates[0].tenant } : {}),
+      title: `Duplicate rule ID ${duplicate.id}`,
+      detail: `${duplicates.length} rules in tenant ${duplicate.tenant} share the same Wazuh rule ID.`,
+      ruleId: duplicate.id,
+      tenant: duplicate.tenant,
     });
   }
 
   const decoderGroups = new Map<string, DecoderRecord[]>();
   for (const decoder of decoders) {
-    decoderGroups.set(decoder.name, [...(decoderGroups.get(decoder.name) ?? []), decoder]);
+    const key = scopedKey(decoder.tenant, decoder.name);
+    decoderGroups.set(key, [...(decoderGroups.get(key) ?? []), decoder]);
   }
 
-  for (const [name, duplicates] of decoderGroups) {
+  for (const duplicates of decoderGroups.values()) {
     if (duplicates.length <= 1) continue;
+    const duplicate = duplicates[0];
+    if (!duplicate) continue;
     issues.push({
       severity: 'warning',
       type: 'duplicate_decoder_name',
-      title: `Duplicate decoder ${name}`,
-      detail: `${duplicates.length} decoder blocks share the same decoder name.`,
-      decoderName: name,
-      ...(duplicates[0]?.tenant ? { tenant: duplicates[0].tenant } : {}),
+      title: `Duplicate decoder ${duplicate.name}`,
+      detail: `${duplicates.length} decoder blocks in tenant ${duplicate.tenant} share the same decoder name.`,
+      decoderName: duplicate.name,
+      tenant: duplicate.tenant,
     });
   }
 
   const producedGroups = new Set<string>();
   for (const rule of rules) {
-    for (const group of rule.groups) producedGroups.add(group);
+    for (const group of rule.groups) producedGroups.add(scopedKey(rule.tenant, group));
   }
 
-  const ruleIds = new Set(rules.map((rule) => rule.id));
-  const decoderNames = new Set(decoders.map((decoder) => decoder.name));
+  const ruleIds = new Set(rules.map((rule) => scopedKey(rule.tenant, rule.id)));
+  const decoderNames = new Set(
+    decoders.map((decoder) => scopedKey(decoder.tenant, decoder.name)),
+  );
 
   for (const rule of rules) {
     if (rule.useCaseId === 'unassigned') {
@@ -608,7 +620,7 @@ function validateRuleset(
     for (const dependency of rule.dependencies) {
       if (
         (dependency.type === 'if_sid' || dependency.type === 'if_matched_sid') &&
-        !ruleIds.has(dependency.value)
+        !ruleIds.has(scopedKey(rule.tenant, dependency.value))
       ) {
         issues.push({
           severity: 'warning',
@@ -623,7 +635,7 @@ function validateRuleset(
 
       if (
         (dependency.type === 'if_group' || dependency.type === 'if_matched_group') &&
-        !producedGroups.has(dependency.value)
+        !producedGroups.has(scopedKey(rule.tenant, dependency.value))
       ) {
         issues.push({
           severity: 'warning',
@@ -635,7 +647,10 @@ function validateRuleset(
         });
       }
 
-      if (dependency.type === 'decoded_as' && !decoderNames.has(dependency.value)) {
+      if (
+        dependency.type === 'decoded_as' &&
+        !decoderNames.has(scopedKey(rule.tenant, dependency.value))
+      ) {
         issues.push({
           severity: 'warning',
           type: 'missing_decoder',
@@ -649,7 +664,7 @@ function validateRuleset(
   }
 
   for (const decoder of decoders) {
-    if (decoder.parent && !decoderNames.has(decoder.parent)) {
+    if (decoder.parent && !decoderNames.has(scopedKey(decoder.tenant, decoder.parent))) {
       issues.push({
         severity: 'info',
         type: 'external_decoder_parent',
