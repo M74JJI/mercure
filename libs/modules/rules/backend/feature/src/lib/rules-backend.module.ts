@@ -21,6 +21,7 @@ import {
   ListRulesUseCases,
   PersistImportedRuleset,
   QueryRulesetSnapshots,
+  RULESET_IMPORT_LEASE,
   ScoreRulesetSnapshotQuality,
   RULESET_ANALYZER,
   RULESET_ARCHIVE_SOURCE,
@@ -36,6 +37,7 @@ import {
   type RulesAuthoringDraftStore,
   type RulesAuthoringSource,
   type RulesetArchiveSource,
+  type RulesetImportLease,
   type RulesetSnapshotAnalysisSource,
   type RulesetSnapshotQueryStore,
   type RulesetSnapshotStore,
@@ -44,6 +46,7 @@ import {
 } from '@mercure/rules-backend-application';
 import {
   FilesystemManagerArchiveSource,
+  PrismaRulesetImportLease,
   PrismaRulesetSnapshotAnalysisSource,
   PrismaRulesetSnapshotQueryStore,
   PrismaRulesAuthoringStore,
@@ -170,6 +173,15 @@ import {
       inject: [RULESET_ARCHIVE_SOURCE, AnalyzeRuleset, RULES_USE_CASE_CATALOG],
     },
     {
+      provide: PrismaRulesetImportLease,
+      useFactory: (database: PrismaService) => new PrismaRulesetImportLease(database),
+      inject: [PrismaService],
+    },
+    {
+      provide: RULESET_IMPORT_LEASE,
+      useExisting: PrismaRulesetImportLease,
+    },
+    {
       provide: PrismaRulesetSnapshotStore,
       useFactory: (database: PrismaService) => new PrismaRulesetSnapshotStore(database),
       inject: [PrismaService],
@@ -180,9 +192,12 @@ import {
     },
     {
       provide: PersistImportedRuleset,
-      useFactory: (importer: ImportArchivedRuleset, store: RulesetSnapshotStore) =>
-        new PersistImportedRuleset(importer, store),
-      inject: [ImportArchivedRuleset, RULESET_SNAPSHOT_STORE],
+      useFactory: (
+        importer: ImportArchivedRuleset,
+        store: RulesetSnapshotStore,
+        lease: RulesetImportLease,
+      ) => new PersistImportedRuleset(importer, store, lease),
+      inject: [ImportArchivedRuleset, RULESET_SNAPSHOT_STORE, RULESET_IMPORT_LEASE],
     },
     {
       provide: PrismaRulesetSnapshotQueryStore,

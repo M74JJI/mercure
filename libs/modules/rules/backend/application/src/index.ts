@@ -15,10 +15,13 @@ export {
 
 export {
   PersistImportedRuleset,
+  RULESET_IMPORT_LEASE,
   RULESET_SNAPSHOT_STORE,
   RulesetImportInProgressError,
   RulesetImportUnavailableError,
   type PersistImportedRulesetResult,
+  type RulesetImportLease,
+  type RulesetImportLeaseHandle,
   type RulesetSnapshotIdentity,
   type RulesetSnapshotStore,
 } from './lib/persist-ruleset-snapshot';

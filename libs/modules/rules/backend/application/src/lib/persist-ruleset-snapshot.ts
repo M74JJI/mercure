@@ -5,6 +5,7 @@ import type {
 } from './analyze-ruleset';
 
 export const RULESET_SNAPSHOT_STORE = Symbol('mercure.rules.ruleset-snapshot-store');
+export const RULESET_IMPORT_LEASE = Symbol('mercure.rules.ruleset-import-lease');
 
 export interface RulesetSnapshotIdentity {
   readonly id: string;
@@ -18,6 +19,14 @@ export interface RulesetSnapshotIdentity {
 
 export interface RulesetSnapshotStore {
   persist(imported: ImportArchivedRulesetResult): Promise<RulesetSnapshotIdentity>;
+}
+
+export interface RulesetImportLeaseHandle {
+  release(): Promise<void>;
+}
+
+export interface RulesetImportLease {
+  acquire(): Promise<RulesetImportLeaseHandle | null>;
 }
 
 export interface PersistImportedRulesetResult extends ImportArchivedRulesetResult {
@@ -39,22 +48,25 @@ export class RulesetImportInProgressError extends Error {
 }
 
 export class PersistImportedRuleset {
-  private inProgress = false;
-
   constructor(
     private readonly importer: ImportArchivedRuleset,
     private readonly store: RulesetSnapshotStore,
+    private readonly lease: RulesetImportLease,
   ) {}
 
-  execute(request: ImportArchivedRulesetRequest = {}): Promise<PersistImportedRulesetResult> {
-    if (this.inProgress) {
-      return Promise.reject(new RulesetImportInProgressError());
+  async execute(
+    request: ImportArchivedRulesetRequest = {},
+  ): Promise<PersistImportedRulesetResult> {
+    const lease = await this.lease.acquire();
+    if (!lease) {
+      throw new RulesetImportInProgressError();
     }
 
-    this.inProgress = true;
-    return this.persist(request).finally(() => {
-      this.inProgress = false;
-    });
+    try {
+      return await this.persist(request);
+    } finally {
+      await lease.release();
+    }
   }
 
   private async persist(
