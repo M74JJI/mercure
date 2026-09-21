@@ -50,6 +50,19 @@ zero='0000000000000000000000000000000000000000'
 if [[ "$base" == "$zero" ]]; then
   commits="$(git rev-list --reverse "$head")"
 else
+  if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+    fallback_base="${COMMIT_POLICY_FALLBACK_BASE:-}"
+
+    if [[ -n "$fallback_base" ]] && git cat-file -e "$fallback_base^{commit}" 2>/dev/null; then
+      base="$(git merge-base "$fallback_base" "$head")"
+      echo "Commit-policy base is unavailable; validating from fallback merge-base $base."
+    else
+      echo "Commit-policy base is unavailable; validating current head commit only." >&2
+      validate_commit "$head"
+      exit 0
+    fi
+  fi
+
   commits="$(git rev-list --reverse "$base..$head")"
 fi
 
