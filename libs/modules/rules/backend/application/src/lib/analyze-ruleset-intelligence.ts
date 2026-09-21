@@ -8,11 +8,18 @@ import {
   type RulesGraphFilters,
 } from '@mercure/rules-backend-domain';
 
-import type { RulesetSnapshotAnalysisSource } from './analyze-ruleset-snapshots';
+import type {
+  RulesetSnapshotAnalysisProfile,
+  RulesetSnapshotAnalysisSource,
+} from './analyze-ruleset-snapshots';
 import { RulesetSnapshotNotFoundError } from './query-ruleset-snapshots';
 
-async function requireSnapshot(source: RulesetSnapshotAnalysisSource, snapshotId: string) {
-  const ruleset = await source.load(snapshotId);
+async function requireSnapshot(
+  source: RulesetSnapshotAnalysisSource,
+  snapshotId: string,
+  profile: RulesetSnapshotAnalysisProfile,
+) {
+  const ruleset = await source.load(snapshotId, profile);
   if (!ruleset) {
     throw new RulesetSnapshotNotFoundError(snapshotId);
   }
@@ -28,7 +35,7 @@ export class AnalyzeRulesetSnapshotFields {
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 
   async execute(snapshotId: string): Promise<AnalyzeRulesetSnapshotFieldsResult> {
-    const ruleset = await requireSnapshot(this.source, snapshotId);
+    const ruleset = await requireSnapshot(this.source, snapshotId, 'fields');
     return {
       snapshotId,
       intelligence: buildFieldIntelligence(ruleset),
@@ -45,7 +52,7 @@ export class ScoreRulesetSnapshotQuality {
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 
   async execute(snapshotId: string): Promise<ScoreRulesetSnapshotQualityResult> {
-    const ruleset = await requireSnapshot(this.source, snapshotId);
+    const ruleset = await requireSnapshot(this.source, snapshotId, 'quality');
     return {
       snapshotId,
       quality: buildQualitySummary(ruleset),
@@ -69,7 +76,7 @@ export class BuildRulesetSnapshotGraph {
   async execute(
     request: BuildRulesetSnapshotGraphRequest,
   ): Promise<BuildRulesetSnapshotGraphResult> {
-    const ruleset = await requireSnapshot(this.source, request.snapshotId);
+    const ruleset = await requireSnapshot(this.source, request.snapshotId, 'graph');
     return {
       snapshotId: request.snapshotId,
       graph: buildRulesGraph(ruleset, request.filters),
