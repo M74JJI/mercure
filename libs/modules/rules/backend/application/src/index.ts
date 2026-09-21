@@ -1,4 +1,4 @@
-export { BoundedAsyncCache } from './lib/bounded-async-cache';
+export { BoundedAsyncCache, BoundedAsyncCacheCapacityError } from './lib/bounded-async-cache';
 
 export {
   AnalyzeRuleset,

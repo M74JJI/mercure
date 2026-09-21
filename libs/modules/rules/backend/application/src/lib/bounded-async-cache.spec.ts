@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { BoundedAsyncCache } from './bounded-async-cache';
+import { BoundedAsyncCache, BoundedAsyncCacheCapacityError } from './bounded-async-cache';
 
 describe('BoundedAsyncCache', () => {
   it('coalesces concurrent loads for the same immutable key', async () => {
@@ -38,5 +38,40 @@ describe('BoundedAsyncCache', () => {
     await load(2);
 
     expect(loads).toBe(4);
+  });
+
+  it('rejects distinct excess in-flight work while preserving same-key coalescing', async () => {
+    const cache = new BoundedAsyncCache<number>(2, 1);
+    let release: ((value: number) => void) | undefined;
+
+    const first = cache.getOrLoad(
+      'first',
+      () =>
+        new Promise<number>((resolve) => {
+          release = resolve;
+        }),
+    );
+    const same = cache.getOrLoad('first', async () => 99);
+
+    await expect(cache.getOrLoad('second', async () => 2)).rejects.toBeInstanceOf(
+      BoundedAsyncCacheCapacityError,
+    );
+
+    release?.(1);
+    await expect(first).resolves.toBe(1);
+    await expect(same).resolves.toBe(1);
+  });
+
+  it('supports single-flight work without retaining completed values', async () => {
+    const cache = new BoundedAsyncCache<number>(1, 1, false);
+    let loads = 0;
+    const load = () =>
+      cache.getOrLoad('large', async () => {
+        loads += 1;
+        return loads;
+      });
+
+    await expect(load()).resolves.toBe(1);
+    await expect(load()).resolves.toBe(2);
   });
 });

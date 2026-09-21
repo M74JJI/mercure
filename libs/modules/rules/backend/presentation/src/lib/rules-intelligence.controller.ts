@@ -1,4 +1,11 @@
-import { Controller, Get, Inject, NotFoundException, SetMetadata } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Inject,
+  NotFoundException,
+  ServiceUnavailableException,
+  SetMetadata,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiExtraModels,
@@ -11,6 +18,7 @@ import { ZodSerializerDto } from 'nestjs-zod';
 
 import {
   AnalyzeRulesetSnapshotFields,
+  BoundedAsyncCacheCapacityError,
   AnalyzeRulesetSnapshotRoundtrip,
   BuildRulesetSnapshotGraph,
   CompareRulesetSnapshots,
@@ -62,6 +70,12 @@ async function translateReadErrors<T>(operation: () => Promise<T>): Promise<T> {
 
     if (error instanceof RulesUseCaseNotFoundError) {
       throw new NotFoundException('Rules use case not found.');
+    }
+
+    if (error instanceof BoundedAsyncCacheCapacityError) {
+      throw new ServiceUnavailableException(
+        'Rules intelligence is at its concurrent processing limit. Retry shortly.',
+      );
     }
 
     throw error;
