@@ -5,6 +5,7 @@ import type {
 } from '@mercure/rules-backend-domain';
 import { analyzeXmlRoundtrip, diffRulesets } from '@mercure/rules-backend-domain';
 
+import { BoundedAsyncCache } from './bounded-async-cache';
 import { RulesetSnapshotNotFoundError } from './query-ruleset-snapshots';
 
 export const RULESET_SNAPSHOT_ANALYSIS_SOURCE = Symbol(
@@ -30,26 +31,32 @@ export interface CompareRulesetSnapshotsResult {
 }
 
 export class CompareRulesetSnapshots {
+  private readonly cache = new BoundedAsyncCache<CompareRulesetSnapshotsResult>(8);
+
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 
-  async execute(request: CompareRulesetSnapshotsRequest): Promise<CompareRulesetSnapshotsResult> {
-    const [before, after] = await Promise.all([
-      this.source.load(request.beforeSnapshotId, 'comparison'),
-      this.source.load(request.afterSnapshotId, 'comparison'),
-    ]);
+  execute(request: CompareRulesetSnapshotsRequest): Promise<CompareRulesetSnapshotsResult> {
+    const cacheKey = JSON.stringify([request.beforeSnapshotId, request.afterSnapshotId]);
 
-    if (!before) {
-      throw new RulesetSnapshotNotFoundError(request.beforeSnapshotId);
-    }
-    if (!after) {
-      throw new RulesetSnapshotNotFoundError(request.afterSnapshotId);
-    }
+    return this.cache.getOrLoad(cacheKey, async () => {
+      const [before, after] = await Promise.all([
+        this.source.load(request.beforeSnapshotId, 'comparison'),
+        this.source.load(request.afterSnapshotId, 'comparison'),
+      ]);
 
-    return {
-      beforeSnapshotId: request.beforeSnapshotId,
-      afterSnapshotId: request.afterSnapshotId,
-      diff: diffRulesets(before, after),
-    };
+      if (!before) {
+        throw new RulesetSnapshotNotFoundError(request.beforeSnapshotId);
+      }
+      if (!after) {
+        throw new RulesetSnapshotNotFoundError(request.afterSnapshotId);
+      }
+
+      return {
+        beforeSnapshotId: request.beforeSnapshotId,
+        afterSnapshotId: request.afterSnapshotId,
+        diff: diffRulesets(before, after),
+      };
+    });
   }
 }
 
@@ -59,17 +66,21 @@ export interface AnalyzeRulesetSnapshotRoundtripResult {
 }
 
 export class AnalyzeRulesetSnapshotRoundtrip {
+  private readonly cache = new BoundedAsyncCache<AnalyzeRulesetSnapshotRoundtripResult>(4);
+
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 
-  async execute(snapshotId: string): Promise<AnalyzeRulesetSnapshotRoundtripResult> {
-    const ruleset = await this.source.load(snapshotId, 'roundtrip');
-    if (!ruleset) {
-      throw new RulesetSnapshotNotFoundError(snapshotId);
-    }
+  execute(snapshotId: string): Promise<AnalyzeRulesetSnapshotRoundtripResult> {
+    return this.cache.getOrLoad(snapshotId, async () => {
+      const ruleset = await this.source.load(snapshotId, 'roundtrip');
+      if (!ruleset) {
+        throw new RulesetSnapshotNotFoundError(snapshotId);
+      }
 
-    return {
-      snapshotId,
-      analysis: analyzeXmlRoundtrip(ruleset),
-    };
+      return {
+        snapshotId,
+        analysis: analyzeXmlRoundtrip(ruleset),
+      };
+    });
   }
 }

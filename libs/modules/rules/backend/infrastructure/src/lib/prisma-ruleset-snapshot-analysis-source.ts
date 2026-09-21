@@ -1,7 +1,8 @@
 import type { PrismaClient } from '@mercure/platform-backend-database/client';
-import type {
-  RulesetSnapshotAnalysisProfile,
-  RulesetSnapshotAnalysisSource,
+import {
+  BoundedAsyncCache,
+  type RulesetSnapshotAnalysisProfile,
+  type RulesetSnapshotAnalysisSource,
 } from '@mercure/rules-backend-application';
 import type {
   ParsedRuleset,
@@ -72,12 +73,33 @@ function safeNumber(value: bigint, label: string): number {
   return converted;
 }
 
+type CachedAnalysisProfile = 'full' | 'analysis' | 'comparison' | 'roundtrip';
+
+function cachedProfile(profile: RulesetSnapshotAnalysisProfile): CachedAnalysisProfile {
+  if (profile === 'fields' || profile === 'quality' || profile === 'graph') {
+    return 'analysis';
+  }
+  return profile;
+}
+
 export class PrismaRulesetSnapshotAnalysisSource implements RulesetSnapshotAnalysisSource {
+  private readonly cache = new BoundedAsyncCache<ParsedRuleset | null>(4);
+
   constructor(private readonly database: PrismaClient) {}
 
-  async load(
+  load(
     snapshotId: string,
     profile: RulesetSnapshotAnalysisProfile = 'full',
+  ): Promise<ParsedRuleset | null> {
+    const projection = cachedProfile(profile);
+    return this.cache.getOrLoad(`${snapshotId}:${projection}`, () =>
+      this.loadUncached(snapshotId, projection),
+    );
+  }
+
+  private async loadUncached(
+    snapshotId: string,
+    profile: CachedAnalysisProfile,
   ): Promise<ParsedRuleset | null> {
     const snapshot = await this.database.rulesetSnapshot.findUnique({
       where: { id: snapshotId },
@@ -99,10 +121,11 @@ export class PrismaRulesetSnapshotAnalysisSource implements RulesetSnapshotAnaly
 
     const includeFiles = profile === 'full' || profile === 'comparison' || profile === 'roundtrip';
     const includeFileContent = profile === 'full' || profile === 'roundtrip';
-    const includeRuleXml = profile === 'full' || profile === 'quality' || profile === 'roundtrip';
+    const includeRuleXml = profile === 'full' || profile === 'roundtrip';
     const includeDecoders = profile !== 'roundtrip';
     const includeDecoderXml = profile === 'full';
-    const includeUseCases = profile === 'full' || profile === 'graph';
+    const includeUseCases =
+      profile === 'full' || profile === 'analysis' || profile === 'comparison';
     const includeIssues = profile === 'full' || profile === 'comparison';
 
     const [files, fileContents, rules, ruleXml, decoders, decoderXml, useCases, issues] =

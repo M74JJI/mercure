@@ -1,3 +1,5 @@
+export { BoundedAsyncCache } from './lib/bounded-async-cache';
+
 export {
   AnalyzeRuleset,
   ImportArchivedRuleset,

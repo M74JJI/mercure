@@ -169,10 +169,7 @@ function scoreRule(rule: RuleRecord, context: TenantQualityContext): RuleQuality
     recommendations.push('Assign a canonical Rules use case.');
   }
 
-  if (
-    rule.rawXml.includes('<options>no_full_log</options>') ||
-    rule.options.includes('no_full_log')
-  ) {
+  if (rule.options.includes('no_full_log')) {
     quality += 2;
   }
 

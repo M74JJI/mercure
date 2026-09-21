@@ -232,6 +232,18 @@ describe.runIf(integrationEnabled)('PrismaRulesetSnapshotStore', () => {
         createdAt: '2026-09-18T12:00:00.000Z',
       });
 
+      const fieldProjection = await analysisSource.load(saved.id, 'fields');
+      const qualityProjection = await analysisSource.load(saved.id, 'quality');
+      const graphProjection = await analysisSource.load(saved.id, 'graph');
+      expect(fieldProjection).not.toBeNull();
+      expect(qualityProjection).toBe(fieldProjection);
+      expect(graphProjection).toBe(fieldProjection);
+
+      const comparisonProjection = await analysisSource.load(saved.id, 'comparison');
+      expect(comparisonProjection?.useCases).toContainEqual(
+        expect.objectContaining({ id: 'uc_snapshot' }),
+      );
+
       const selfDiff = await compareSnapshots.execute({
         beforeSnapshotId: saved.id,
         afterSnapshotId: saved.id,
