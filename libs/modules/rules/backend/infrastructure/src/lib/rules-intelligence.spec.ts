@@ -203,6 +203,26 @@ describe('Rules intelligence', () => {
     expect(quality.useCases.map((item) => item.tenant).sort()).toEqual(['manager-a', 'manager-b']);
   });
 
+  it('filters field graph rows before applying the graph limit', () => {
+    const graph = buildRulesGraph(collection(), {
+      mode: 'fields',
+      tenant: 'manager-b',
+      query: 'srcip',
+      limit: 1,
+    });
+
+    expect(graph.nodes).toContainEqual(
+      expect.objectContaining({
+        type: 'field',
+        tenant: 'manager-b',
+        entityId: 'srcip',
+      }),
+    );
+    expect(
+      graph.nodes.some((node) => node.type === 'field' && node.tenant === 'manager-a'),
+    ).toBe(false);
+  });
+
   it('builds a layout-free semantic graph without cross-tenant dependency links', () => {
     const graph = buildRulesGraph(collection(), {
       mode: 'all',

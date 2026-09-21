@@ -124,6 +124,37 @@ describe('WazuhXmlRulesetAnalyzer', () => {
     );
   });
 
+  it('counts only normalized catalog-backed use cases in snapshot stats', async () => {
+    const analyzer = new WazuhXmlRulesetAnalyzer();
+    const result = await analyzer.analyze({
+      files: [
+        {
+          name: 'manager-a/rules/unknown-use-case.xml',
+          tenant: 'manager-a',
+          type: 'rules',
+          content: [
+            '<group name="production,">',
+            '  <rule id="170001" level="5">',
+            '    <description>Unknown catalog use case</description>',
+            '    <info type="text">use_case:uc_missing_catalog_entry</info>',
+            '  </rule>',
+            '</group>',
+          ].join('\n'),
+        },
+      ],
+      useCases: [adminConfigUseCase],
+    });
+
+    expect(result.useCases).toEqual([]);
+    expect(result.stats.useCases).toBe(0);
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({
+        type: 'unknown_use_case_registry',
+        ruleId: '170001',
+      }),
+    );
+  });
+
   it('reports structural validation problems without treating stock dependencies as fatal', async () => {
     const analyzer = new WazuhXmlRulesetAnalyzer();
     const result = await analyzer.analyze({

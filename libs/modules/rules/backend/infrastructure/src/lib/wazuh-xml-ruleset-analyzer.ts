@@ -717,7 +717,7 @@ export class WazuhXmlRulesetAnalyzer implements RulesetAnalyzer {
       stats: {
         rules: rules.length,
         decoders: decoders.length,
-        useCases: usedUseCases.size,
+        useCases: activeUseCases.length,
         jiraVisible: rules.filter((rule) => rule.jiraVisible).length,
         testing: rules.filter((rule) => rule.status === 'testing').length,
         production: rules.filter((rule) => rule.status === 'production').length,
