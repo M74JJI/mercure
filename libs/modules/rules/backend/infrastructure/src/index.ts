@@ -13,3 +13,5 @@ export { PrismaRulesetSnapshotAnalysisSource } from './lib/prisma-ruleset-snapsh
 export { PrismaRulesUseCaseCatalog } from './lib/prisma-rules-use-case-catalog';
 
 export { PrismaRulesAuthoringStore } from './lib/prisma-rules-authoring-store';
+
+export { PrismaRulesIntelligenceRateLimiter } from './lib/prisma-rules-intelligence-rate-limiter';

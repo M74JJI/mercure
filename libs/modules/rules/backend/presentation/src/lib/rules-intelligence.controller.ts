@@ -1,4 +1,12 @@
-import { Controller, Get, Inject, NotFoundException, SetMetadata } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Inject,
+  NotFoundException,
+  ServiceUnavailableException,
+  SetMetadata,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiExtraModels,
@@ -11,6 +19,7 @@ import { ZodSerializerDto } from 'nestjs-zod';
 
 import {
   AnalyzeRulesetSnapshotFields,
+  BoundedAsyncCacheCapacityError,
   AnalyzeRulesetSnapshotRoundtrip,
   BuildRulesetSnapshotGraph,
   CompareRulesetSnapshots,
@@ -50,6 +59,7 @@ import {
   presentSnapshotComparison,
   presentUseCases,
 } from './rules-intelligence.presenter';
+import { RulesIntelligenceRateLimitGuard } from './rules-intelligence-rate-limit.guard';
 import { ZodParam, ZodQuery } from './zod-route-parameters';
 
 async function translateReadErrors<T>(operation: () => Promise<T>): Promise<T> {
@@ -62,6 +72,12 @@ async function translateReadErrors<T>(operation: () => Promise<T>): Promise<T> {
 
     if (error instanceof RulesUseCaseNotFoundError) {
       throw new NotFoundException('Rules use case not found.');
+    }
+
+    if (error instanceof BoundedAsyncCacheCapacityError) {
+      throw new ServiceUnavailableException(
+        'Rules intelligence is at its concurrent processing limit. Retry shortly.',
+      );
     }
 
     throw error;
@@ -82,6 +98,7 @@ const rulesReadRequirement = ['rules:read'] satisfies readonly MercureCapability
   RulesRoundtripQueryDto,
 )
 @Controller('rules/intelligence')
+@UseGuards(RulesIntelligenceRateLimitGuard)
 export class RulesIntelligenceController {
   constructor(
     @Inject(AnalyzeRulesetSnapshotFields) private readonly fields: AnalyzeRulesetSnapshotFields,

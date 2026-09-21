@@ -33,7 +33,7 @@ export interface AnalyzeRulesetSnapshotFieldsResult {
 }
 
 export class AnalyzeRulesetSnapshotFields {
-  private readonly cache = new BoundedAsyncCache<AnalyzeRulesetSnapshotFieldsResult>(4);
+  private readonly cache = new BoundedAsyncCache<AnalyzeRulesetSnapshotFieldsResult>(2, 2);
 
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 
@@ -54,7 +54,7 @@ export interface ScoreRulesetSnapshotQualityResult {
 }
 
 export class ScoreRulesetSnapshotQuality {
-  private readonly cache = new BoundedAsyncCache<ScoreRulesetSnapshotQualityResult>(4);
+  private readonly cache = new BoundedAsyncCache<ScoreRulesetSnapshotQualityResult>(2, 2);
 
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 
@@ -96,7 +96,7 @@ function graphCacheKey(request: BuildRulesetSnapshotGraphRequest): string {
 }
 
 export class BuildRulesetSnapshotGraph {
-  private readonly cache = new BoundedAsyncCache<BuildRulesetSnapshotGraphResult>(16);
+  private readonly cache = new BoundedAsyncCache<BuildRulesetSnapshotGraphResult>(8, 2);
 
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 

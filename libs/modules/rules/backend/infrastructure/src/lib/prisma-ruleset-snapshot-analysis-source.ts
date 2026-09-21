@@ -83,7 +83,8 @@ function cachedProfile(profile: RulesetSnapshotAnalysisProfile): CachedAnalysisP
 }
 
 export class PrismaRulesetSnapshotAnalysisSource implements RulesetSnapshotAnalysisSource {
-  private readonly cache = new BoundedAsyncCache<ParsedRuleset | null>(4);
+  private readonly cache = new BoundedAsyncCache<ParsedRuleset | null>(2, 2);
+  private readonly transientCache = new BoundedAsyncCache<ParsedRuleset | null>(1, 1, false);
 
   constructor(private readonly database: PrismaClient) {}
 
@@ -92,7 +93,10 @@ export class PrismaRulesetSnapshotAnalysisSource implements RulesetSnapshotAnaly
     profile: RulesetSnapshotAnalysisProfile = 'full',
   ): Promise<ParsedRuleset | null> {
     const projection = cachedProfile(profile);
-    return this.cache.getOrLoad(`${snapshotId}:${projection}`, () =>
+    const cache =
+      projection === 'full' || projection === 'roundtrip' ? this.transientCache : this.cache;
+
+    return cache.getOrLoad(`${snapshotId}:${projection}`, () =>
       this.loadUncached(snapshotId, projection),
     );
   }

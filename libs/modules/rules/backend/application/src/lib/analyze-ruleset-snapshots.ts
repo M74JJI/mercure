@@ -31,7 +31,7 @@ export interface CompareRulesetSnapshotsResult {
 }
 
 export class CompareRulesetSnapshots {
-  private readonly cache = new BoundedAsyncCache<CompareRulesetSnapshotsResult>(8);
+  private readonly cache = new BoundedAsyncCache<CompareRulesetSnapshotsResult>(1, 1);
 
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 
@@ -66,7 +66,11 @@ export interface AnalyzeRulesetSnapshotRoundtripResult {
 }
 
 export class AnalyzeRulesetSnapshotRoundtrip {
-  private readonly cache = new BoundedAsyncCache<AnalyzeRulesetSnapshotRoundtripResult>(4);
+  private readonly cache = new BoundedAsyncCache<AnalyzeRulesetSnapshotRoundtripResult>(
+    1,
+    1,
+    false,
+  );
 
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 

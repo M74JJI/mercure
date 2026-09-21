@@ -380,10 +380,15 @@ export function buildRulesGraph(data: ParsedRuleset, filters: RulesGraphFilters)
     }
 
     if (filters.mode === 'fields' || filters.mode === 'all') {
-      for (const row of intelligence.rows.slice(0, limit)) {
-        if (filters.tenant && row.tenant !== filters.tenant) continue;
-        if (query && !row.field.includes(query)) continue;
+      const fieldRows = intelligence.rows
+        .filter((row) => {
+          if (filters.tenant && row.tenant !== filters.tenant) return false;
+          if (query && !row.field.includes(query)) return false;
+          return true;
+        })
+        .slice(0, limit);
 
+      for (const row of fieldRows) {
         const fieldId = fieldNodeId(row.tenant, row.field);
         addNode({
           id: fieldId,

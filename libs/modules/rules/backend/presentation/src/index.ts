@@ -58,3 +58,5 @@ export {
   RulesAuthoringDraftUpdateDto,
   RulesAuthoringExportDocument,
 } from './lib/rules-authoring.dto';
+
+export { RulesIntelligenceRateLimitGuard } from './lib/rules-intelligence-rate-limit.guard';

@@ -22,6 +22,7 @@ import {
   PersistImportedRuleset,
   QueryRulesetSnapshots,
   RULESET_IMPORT_LEASE,
+  RULES_INTELLIGENCE_RATE_LIMITER,
   ScoreRulesetSnapshotQuality,
   RULESET_ANALYZER,
   RULESET_ARCHIVE_SOURCE,
@@ -38,6 +39,7 @@ import {
   type RulesAuthoringSource,
   type RulesetArchiveSource,
   type RulesetImportLease,
+  type RulesIntelligenceRateLimiter,
   type RulesetSnapshotAnalysisSource,
   type RulesetSnapshotQueryStore,
   type RulesetSnapshotStore,
@@ -50,6 +52,7 @@ import {
   PrismaRulesetSnapshotAnalysisSource,
   PrismaRulesetSnapshotQueryStore,
   PrismaRulesAuthoringStore,
+  PrismaRulesIntelligenceRateLimiter,
   PrismaRulesetSnapshotStore,
   PrismaRulesUseCaseCatalog,
   WazuhXmlRulesetAnalyzer,
@@ -57,6 +60,7 @@ import {
 import {
   RulesAuthoringController,
   RulesIntelligenceController,
+  RulesIntelligenceRateLimitGuard,
   RulesSnapshotsController,
   RulesUseCaseAdministrationController,
   RulesUseCasesController,
@@ -216,6 +220,26 @@ import {
       provide: QueryRulesetSnapshots,
       useFactory: (store: RulesetSnapshotQueryStore) => new QueryRulesetSnapshots(store),
       inject: [RULESET_SNAPSHOT_QUERY_STORE],
+    },
+    {
+      provide: PrismaRulesIntelligenceRateLimiter,
+      useFactory: (database: PrismaService, config: PlatformConfig) =>
+        new PrismaRulesIntelligenceRateLimiter(
+          database,
+          config.rulesIntelligenceRateLimitMaxRequests,
+          config.rulesIntelligenceRateLimitWindowSeconds,
+        ),
+      inject: [PrismaService, PlatformConfig],
+    },
+    {
+      provide: RULES_INTELLIGENCE_RATE_LIMITER,
+      useExisting: PrismaRulesIntelligenceRateLimiter,
+    },
+    {
+      provide: RulesIntelligenceRateLimitGuard,
+      useFactory: (limiter: RulesIntelligenceRateLimiter) =>
+        new RulesIntelligenceRateLimitGuard(limiter),
+      inject: [RULES_INTELLIGENCE_RATE_LIMITER],
     },
     {
       provide: PrismaRulesetSnapshotAnalysisSource,

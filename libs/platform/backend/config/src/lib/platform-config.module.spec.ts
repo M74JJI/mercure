@@ -14,6 +14,8 @@ describe('platform OIDC configuration', () => {
     });
 
     expect(config.API_BODY_LIMIT_BYTES).toBe(4 * 1024 * 1024);
+    expect(config.RULES_INTELLIGENCE_RATE_LIMIT_MAX_REQUESTS).toBe(120);
+    expect(config.RULES_INTELLIGENCE_RATE_LIMIT_WINDOW_SECONDS).toBe(60);
     expect(config.RULES_ARCHIVE_MAX_ARCHIVES).toBe(64);
     expect(config.RULES_ARCHIVE_MAX_COMPRESSED_BYTES).toBe(512 * 1024 * 1024);
     expect(config.RULES_ARCHIVE_MAX_DECOMPRESSED_BYTES).toBe(512 * 1024 * 1024);
