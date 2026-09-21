@@ -554,9 +554,7 @@ function validateRuleset(
   }
 
   const ruleIds = new Set(rules.map((rule) => scopedKey(rule.tenant, rule.id)));
-  const decoderNames = new Set(
-    decoders.map((decoder) => scopedKey(decoder.tenant, decoder.name)),
-  );
+  const decoderNames = new Set(decoders.map((decoder) => scopedKey(decoder.tenant, decoder.name)));
 
   for (const rule of rules) {
     if (rule.useCaseId === 'unassigned') {

@@ -26,10 +26,7 @@ export class PrismaRulesIntelligenceRateLimiter implements RulesIntelligenceRate
   }
 
   async consume(subject: string): Promise<RulesIntelligenceRateLimitDecision> {
-    const key = createHash('sha256')
-      .update('rules-intelligence:')
-      .update(subject)
-      .digest('hex');
+    const key = createHash('sha256').update('rules-intelligence:').update(subject).digest('hex');
     const cappedCount = this.maxRequests + 1;
 
     const rows = await this.database.$queryRaw<RateLimitRow[]>`

@@ -66,7 +66,11 @@ export interface AnalyzeRulesetSnapshotRoundtripResult {
 }
 
 export class AnalyzeRulesetSnapshotRoundtrip {
-  private readonly cache = new BoundedAsyncCache<AnalyzeRulesetSnapshotRoundtripResult>(1, 1, false);
+  private readonly cache = new BoundedAsyncCache<AnalyzeRulesetSnapshotRoundtripResult>(
+    1,
+    1,
+    false,
+  );
 
   constructor(private readonly source: RulesetSnapshotAnalysisSource) {}
 

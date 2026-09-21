@@ -122,8 +122,8 @@ export function RulesSnapshotComparison({
                   <span />
                 )}
                 <span>
-                  {snapshotPage.offset + 1}–
-                  {snapshotPage.offset + snapshotPage.shown} of {snapshotPage.total}
+                  {snapshotPage.offset + 1}–{snapshotPage.offset + snapshotPage.shown} of{' '}
+                  {snapshotPage.total}
                 </span>
                 {snapshotNextHref ? (
                   <a className={styles.actionLink} href={snapshotNextHref}>

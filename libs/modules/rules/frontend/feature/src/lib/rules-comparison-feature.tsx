@@ -68,12 +68,7 @@ export async function RulesComparisonFeature({
     const effectiveSnapshotOffset = selection.page.offset;
 
     if (!selectedAfter || !selectedBefore) {
-      return (
-        <RulesSnapshotComparison
-          snapshots={selection.options}
-          selectedKind={selectedKind}
-        />
-      );
+      return <RulesSnapshotComparison snapshots={selection.options} selectedKind={selectedKind} />;
     }
 
     const comparison = await intelligenceApi.compare({

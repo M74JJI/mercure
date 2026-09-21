@@ -18,8 +18,7 @@ export interface ComparisonSnapshotSelection {
   readonly selectedAfter?: string;
 }
 
-const uuid =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function comparisonSnapshotOffset(value: string | undefined): number {
   if (value === undefined) return 0;
@@ -45,8 +44,7 @@ export async function loadComparisonSnapshotSelection(
   });
   if (page.total > 0 && page.items.length === 0 && offset >= page.total) {
     const lastPageOffset =
-      Math.floor((page.total - 1) / COMPARISON_SNAPSHOT_PAGE_SIZE) *
-      COMPARISON_SNAPSHOT_PAGE_SIZE;
+      Math.floor((page.total - 1) / COMPARISON_SNAPSHOT_PAGE_SIZE) * COMPARISON_SNAPSHOT_PAGE_SIZE;
     page = await source.listSnapshots({
       offset: lastPageOffset,
       limit: COMPARISON_SNAPSHOT_PAGE_SIZE,

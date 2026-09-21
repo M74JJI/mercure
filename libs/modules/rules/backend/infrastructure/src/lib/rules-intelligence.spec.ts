@@ -218,9 +218,9 @@ describe('Rules intelligence', () => {
         entityId: 'srcip',
       }),
     );
-    expect(
-      graph.nodes.some((node) => node.type === 'field' && node.tenant === 'manager-a'),
-    ).toBe(false);
+    expect(graph.nodes.some((node) => node.type === 'field' && node.tenant === 'manager-a')).toBe(
+      false,
+    );
   });
 
   it('builds a layout-free semantic graph without cross-tenant dependency links', () => {

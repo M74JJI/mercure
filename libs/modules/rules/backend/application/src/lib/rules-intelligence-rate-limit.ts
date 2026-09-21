@@ -1,6 +1,4 @@
-export const RULES_INTELLIGENCE_RATE_LIMITER = Symbol(
-  'mercure.rules.intelligence-rate-limiter',
-);
+export const RULES_INTELLIGENCE_RATE_LIMITER = Symbol('mercure.rules.intelligence-rate-limiter');
 
 export interface RulesIntelligenceRateLimitDecision {
   readonly allowed: boolean;
