@@ -105,137 +105,129 @@ export class PrismaRulesetSnapshotAnalysisSource implements RulesetSnapshotAnaly
     const includeUseCases = profile === 'full' || profile === 'graph';
     const includeIssues = profile === 'full' || profile === 'comparison';
 
-    const [
-      files,
-      fileContents,
-      rules,
-      ruleXml,
-      decoders,
-      decoderXml,
-      useCases,
-      issues,
-    ] = await Promise.all([
-      includeFiles
-        ? this.database.rulesetSnapshotFile.findMany({
-            where: { snapshotId },
-            orderBy: { position: 'asc' },
-            select: {
-              position: true,
-              name: true,
-              tenant: true,
-              size: true,
-              sourceType: true,
-              sha256: true,
+    const [files, fileContents, rules, ruleXml, decoders, decoderXml, useCases, issues] =
+      await Promise.all([
+        includeFiles
+          ? this.database.rulesetSnapshotFile.findMany({
+              where: { snapshotId },
+              orderBy: { position: 'asc' },
+              select: {
+                position: true,
+                name: true,
+                tenant: true,
+                size: true,
+                sourceType: true,
+                sha256: true,
+              },
+            })
+          : Promise.resolve([]),
+        includeFileContent
+          ? this.database.rulesetSnapshotFile.findMany({
+              where: { snapshotId },
+              orderBy: { position: 'asc' },
+              select: { position: true, content: true },
+            })
+          : Promise.resolve([]),
+        this.database.rulesetSnapshotRule.findMany({
+          where: { snapshotId },
+          orderBy: { position: 'asc' },
+          select: {
+            position: true,
+            ruleId: true,
+            level: true,
+            description: true,
+            status: true,
+            role: true,
+            severity: true,
+            jiraVisible: true,
+            tenant: true,
+            sourceSection: true,
+            useCaseId: true,
+            useCaseConfidence: true,
+            frequency: true,
+            timeframe: true,
+            sourceFile: { select: { name: true } },
+            groups: { orderBy: { position: 'asc' }, select: { value: true } },
+            mitreIds: { orderBy: { position: 'asc' }, select: { value: true } },
+            dependencies: {
+              orderBy: { position: 'asc' },
+              select: { type: true, value: true },
             },
-          })
-        : Promise.resolve([]),
-      includeFileContent
-        ? this.database.rulesetSnapshotFile.findMany({
-            where: { snapshotId },
-            orderBy: { position: 'asc' },
-            select: { position: true, content: true },
-          })
-        : Promise.resolve([]),
-      this.database.rulesetSnapshotRule.findMany({
-        where: { snapshotId },
-        orderBy: { position: 'asc' },
-        select: {
-          position: true,
-          ruleId: true,
-          level: true,
-          description: true,
-          status: true,
-          role: true,
-          severity: true,
-          jiraVisible: true,
-          tenant: true,
-          sourceSection: true,
-          useCaseId: true,
-          useCaseConfidence: true,
-          frequency: true,
-          timeframe: true,
-          sourceFile: { select: { name: true } },
-          groups: { orderBy: { position: 'asc' }, select: { value: true } },
-          mitreIds: { orderBy: { position: 'asc' }, select: { value: true } },
-          dependencies: {
-            orderBy: { position: 'asc' },
-            select: { type: true, value: true },
+            fields: {
+              orderBy: { position: 'asc' },
+              select: { name: true, fieldType: true, value: true },
+            },
+            decodedAs: { orderBy: { position: 'asc' }, select: { value: true } },
+            options: { orderBy: { position: 'asc' }, select: { value: true } },
           },
-          fields: {
-            orderBy: { position: 'asc' },
-            select: { name: true, fieldType: true, value: true },
-          },
-          decodedAs: { orderBy: { position: 'asc' }, select: { value: true } },
-          options: { orderBy: { position: 'asc' }, select: { value: true } },
-        },
-      }),
-      includeRuleXml
-        ? this.database.rulesetSnapshotRule.findMany({
-            where: { snapshotId },
-            orderBy: { position: 'asc' },
-            select: { position: true, rawXml: true },
-          })
-        : Promise.resolve([]),
-      includeDecoders
-        ? this.database.rulesetSnapshotDecoder.findMany({
-            where: { snapshotId },
-            orderBy: { position: 'asc' },
-            select: {
-              position: true,
-              name: true,
-              parent: true,
-              tenant: true,
-              sourceFile: { select: { name: true } },
-              prematches: { orderBy: { position: 'asc' }, select: { value: true } },
-              regexValues: { orderBy: { position: 'asc' }, select: { value: true } },
-              orderFields: { orderBy: { position: 'asc' }, select: { value: true } },
-            },
-          })
-        : Promise.resolve([]),
-      includeDecoderXml
-        ? this.database.rulesetSnapshotDecoder.findMany({
-            where: { snapshotId },
-            orderBy: { position: 'asc' },
-            select: { position: true, rawXml: true },
-          })
-        : Promise.resolve([]),
-      includeUseCases
-        ? this.database.rulesetSnapshotUseCase.findMany({
-            where: { snapshotId },
-            orderBy: { position: 'asc' },
-            select: {
-              useCaseId: true,
-              name: true,
-              shortName: true,
-              description: true,
-              component: true,
-              vendor: true,
-              product: true,
-              domain: true,
-              category: true,
-              source: true,
-              createdBy: true,
-              originalCreatedAt: true,
-            },
-          })
-        : Promise.resolve([]),
-      includeIssues
-        ? this.database.rulesetSnapshotIssue.findMany({
-            where: { snapshotId },
-            orderBy: { position: 'asc' },
-            select: {
-              severity: true,
-              type: true,
-              title: true,
-              detail: true,
-              ruleId: true,
-              decoderName: true,
-              fileName: true,
-              tenant: true,
-            },
-          })
-        : Promise.resolve([]),
-    ]);
+        }),
+        includeRuleXml
+          ? this.database.rulesetSnapshotRule.findMany({
+              where: { snapshotId },
+              orderBy: { position: 'asc' },
+              select: { position: true, rawXml: true },
+            })
+          : Promise.resolve([]),
+        includeDecoders
+          ? this.database.rulesetSnapshotDecoder.findMany({
+              where: { snapshotId },
+              orderBy: { position: 'asc' },
+              select: {
+                position: true,
+                name: true,
+                parent: true,
+                tenant: true,
+                sourceFile: { select: { name: true } },
+                prematches: { orderBy: { position: 'asc' }, select: { value: true } },
+                regexValues: { orderBy: { position: 'asc' }, select: { value: true } },
+                orderFields: { orderBy: { position: 'asc' }, select: { value: true } },
+              },
+            })
+          : Promise.resolve([]),
+        includeDecoderXml
+          ? this.database.rulesetSnapshotDecoder.findMany({
+              where: { snapshotId },
+              orderBy: { position: 'asc' },
+              select: { position: true, rawXml: true },
+            })
+          : Promise.resolve([]),
+        includeUseCases
+          ? this.database.rulesetSnapshotUseCase.findMany({
+              where: { snapshotId },
+              orderBy: { position: 'asc' },
+              select: {
+                useCaseId: true,
+                name: true,
+                shortName: true,
+                description: true,
+                component: true,
+                vendor: true,
+                product: true,
+                domain: true,
+                category: true,
+                source: true,
+                createdBy: true,
+                originalCreatedAt: true,
+              },
+            })
+          : Promise.resolve([]),
+        includeIssues
+          ? this.database.rulesetSnapshotIssue.findMany({
+              where: { snapshotId },
+              orderBy: { position: 'asc' },
+              select: {
+                severity: true,
+                type: true,
+                title: true,
+                detail: true,
+                ruleId: true,
+                decoderName: true,
+                fileName: true,
+                tenant: true,
+              },
+            })
+          : Promise.resolve([]),
+      ]);
 
     const fileContentByPosition = new Map(
       fileContents.map((file) => [file.position, file.content] as const),

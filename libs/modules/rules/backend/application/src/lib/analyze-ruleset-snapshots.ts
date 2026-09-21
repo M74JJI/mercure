@@ -12,12 +12,7 @@ export const RULESET_SNAPSHOT_ANALYSIS_SOURCE = Symbol(
 );
 
 export type RulesetSnapshotAnalysisProfile =
-  | 'full'
-  | 'fields'
-  | 'quality'
-  | 'graph'
-  | 'comparison'
-  | 'roundtrip';
+  'full' | 'fields' | 'quality' | 'graph' | 'comparison' | 'roundtrip';
 
 export interface RulesetSnapshotAnalysisSource {
   load(snapshotId: string, profile?: RulesetSnapshotAnalysisProfile): Promise<ParsedRuleset | null>;

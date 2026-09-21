@@ -350,8 +350,7 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
         const result = await readArchiveXml(archivePath, {
           maxFiles: this.options.maxFiles,
           maxDecompressedBytes: this.options.maxDecompressedBytes,
-          remainingDecompressedBytes:
-            this.options.maxDecompressedBytes - totalDecompressedBytes,
+          remainingDecompressedBytes: this.options.maxDecompressedBytes - totalDecompressedBytes,
           remainingFiles: this.options.maxFiles - totalXmlFiles,
           maxEntryBytes: this.options.maxEntryBytes,
           maxTotalBytes: this.options.maxTotalBytes,
