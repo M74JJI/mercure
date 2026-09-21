@@ -1,5 +1,7 @@
-import { Client } from 'pg';
-
+import {
+  createPostgresSession,
+  type PostgresSessionOptions,
+} from '@mercure/platform-backend-database/client';
 import type {
   RulesetImportLease,
   RulesetImportLeaseHandle,
@@ -8,19 +10,13 @@ import type {
 const IMPORT_LOCK_NAMESPACE = 1_296_384_579;
 const IMPORT_LOCK_KEY = 1_381_320_773;
 
-export interface PostgresRulesetImportLeaseOptions {
-  readonly connectionString: string;
-  readonly connectionTimeoutMillis: number;
-}
+export type PostgresRulesetImportLeaseOptions = PostgresSessionOptions;
 
 export class PostgresRulesetImportLease implements RulesetImportLease {
   constructor(private readonly options: PostgresRulesetImportLeaseOptions) {}
 
   async acquire(): Promise<RulesetImportLeaseHandle | null> {
-    const client = new Client({
-      connectionString: this.options.connectionString,
-      connectionTimeoutMillis: this.options.connectionTimeoutMillis,
-    });
+    const client = createPostgresSession(this.options);
 
     try {
       await client.connect();

@@ -9,7 +9,6 @@
   "dependencies": {
     "@mercure/rules-backend-application": "workspace:*",
     "@mercure/rules-backend-domain": "workspace:*",
-    "@mercure/platform-backend-database": "workspace:*",
-    "pg": "8.23.0"
+    "@mercure/platform-backend-database": "workspace:*"
   }
 }
