@@ -1,9 +1,10 @@
 import {
   CanActivate,
   ExecutionContext,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
-  TooManyRequestsException,
   UnauthorizedException,
 } from '@nestjs/common';
 
@@ -45,7 +46,10 @@ export class RulesIntelligenceRateLimitGuard implements CanActivate {
 
     if (!decision.allowed) {
       reply.header('Retry-After', String(decision.retryAfterSeconds));
-      throw new TooManyRequestsException('Rules intelligence request rate exceeded.');
+      throw new HttpException(
+        'Rules intelligence request rate exceeded.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
 
     return true;

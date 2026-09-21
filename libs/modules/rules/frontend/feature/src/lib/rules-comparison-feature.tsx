@@ -65,6 +65,7 @@ export async function RulesComparisonFeature({
     );
     const selectedAfter = selection.selectedAfter;
     const selectedBefore = selection.selectedBefore;
+    const effectiveSnapshotOffset = selection.page.offset;
 
     if (!selectedAfter || !selectedBefore) {
       return (
@@ -92,12 +93,12 @@ export async function RulesComparisonFeature({
         snapshotOffset: String(snapshotPageOffset),
       }).toString();
     const snapshotPreviousHref =
-      selectedSnapshotOffset > 0
-        ? snapshotHref(Math.max(0, selectedSnapshotOffset - COMPARISON_SNAPSHOT_PAGE_SIZE))
+      effectiveSnapshotOffset > 0
+        ? snapshotHref(Math.max(0, effectiveSnapshotOffset - COMPARISON_SNAPSHOT_PAGE_SIZE))
         : undefined;
     const snapshotNextHref =
-      selectedSnapshotOffset + selection.page.items.length < selection.page.total
-        ? snapshotHref(selectedSnapshotOffset + COMPARISON_SNAPSHOT_PAGE_SIZE)
+      effectiveSnapshotOffset + selection.page.items.length < selection.page.total
+        ? snapshotHref(effectiveSnapshotOffset + COMPARISON_SNAPSHOT_PAGE_SIZE)
         : undefined;
 
     const previousHref =
@@ -129,7 +130,7 @@ export async function RulesComparisonFeature({
         selectedAfter={selectedAfter}
         selectedKind={selectedKind}
         snapshotPage={{
-          offset: selectedSnapshotOffset,
+          offset: effectiveSnapshotOffset,
           shown: selection.page.items.length,
           total: selection.page.total,
         }}

@@ -93,6 +93,15 @@ describe('comparison snapshot selection', () => {
     expect(selection.selectedAfter).toBe(after?.id);
   });
 
+  it('clamps an out-of-range page to the last available snapshot page', async () => {
+    const snapshots = Array.from({ length: 30 }, (_value, index) => snapshot(index + 1));
+
+    const selection = await loadComparisonSnapshotSelection(source(snapshots), 1_000);
+
+    expect(selection.page.offset).toBe(25);
+    expect(selection.page.items).toHaveLength(5);
+  });
+
   it('bounds invalid snapshot-page offsets', () => {
     expect(comparisonSnapshotOffset('-1')).toBe(0);
     expect(comparisonSnapshotOffset('invalid')).toBe(0);

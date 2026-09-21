@@ -1,5 +1,5 @@
 import type { ExecutionContext } from '@nestjs/common';
-import { TooManyRequestsException } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
 
 import type { RulesIntelligenceRateLimiter } from '@mercure/rules-backend-application';
@@ -61,9 +61,13 @@ describe('RulesIntelligenceRateLimitGuard', () => {
     const headers: Record<string, string> = {};
     const guard = new RulesIntelligenceRateLimitGuard(limiter);
 
-    await expect(guard.canActivate(context(headers))).rejects.toBeInstanceOf(
-      TooManyRequestsException,
-    );
+    try {
+      await guard.canActivate(context(headers));
+      throw new Error('Expected rate-limit rejection.');
+    } catch (error) {
+      expect(error).toBeInstanceOf(HttpException);
+      expect((error as HttpException).getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);
+    }
     expect(headers).toMatchObject({
       'X-RateLimit-Limit': '2',
       'X-RateLimit-Remaining': '0',

@@ -39,10 +39,20 @@ export async function loadComparisonSnapshotSelection(
   beforeSnapshotId?: string,
   afterSnapshotId?: string,
 ): Promise<ComparisonSnapshotSelection> {
-  const page = await source.listSnapshots({
+  let page = await source.listSnapshots({
     offset,
     limit: COMPARISON_SNAPSHOT_PAGE_SIZE,
   });
+  if (page.total > 0 && page.items.length === 0 && offset >= page.total) {
+    const lastPageOffset =
+      Math.floor((page.total - 1) / COMPARISON_SNAPSHOT_PAGE_SIZE) *
+      COMPARISON_SNAPSHOT_PAGE_SIZE;
+    page = await source.listSnapshots({
+      offset: lastPageOffset,
+      limit: COMPARISON_SNAPSHOT_PAGE_SIZE,
+    });
+  }
+
   const byId = new Map(page.items.map((snapshot) => [snapshot.id, snapshot] as const));
   const requestedBefore = requestedSnapshotId(beforeSnapshotId);
   const requestedAfter = requestedSnapshotId(afterSnapshotId);
