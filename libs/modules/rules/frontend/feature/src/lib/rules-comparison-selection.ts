@@ -44,10 +44,11 @@ export async function loadComparisonSnapshotSelection(
     limit: COMPARISON_SNAPSHOT_PAGE_SIZE,
   });
   const byId = new Map(page.items.map((snapshot) => [snapshot.id, snapshot] as const));
-  const requestedIds = [
-    requestedSnapshotId(beforeSnapshotId),
-    requestedSnapshotId(afterSnapshotId),
-  ].filter((value): value is string => value !== undefined);
+  const requestedBefore = requestedSnapshotId(beforeSnapshotId);
+  const requestedAfter = requestedSnapshotId(afterSnapshotId);
+  const requestedIds = [requestedBefore, requestedAfter].filter(
+    (value): value is string => value !== undefined,
+  );
 
   await Promise.all(
     [...new Set(requestedIds)].map(async (snapshotId) => {
@@ -69,9 +70,9 @@ export async function loadComparisonSnapshotSelection(
     options.find((snapshot) => snapshot.id !== fallbackAfter?.id);
 
   let selectedAfter =
-    requestedIds[1] && byId.has(requestedIds[1]) ? requestedIds[1] : fallbackAfter?.id;
+    requestedAfter && byId.has(requestedAfter) ? requestedAfter : fallbackAfter?.id;
   let selectedBefore =
-    requestedIds[0] && byId.has(requestedIds[0]) ? requestedIds[0] : fallbackBefore?.id;
+    requestedBefore && byId.has(requestedBefore) ? requestedBefore : fallbackBefore?.id;
 
   if (selectedBefore && selectedAfter && selectedBefore === selectedAfter) {
     selectedBefore = options.find((snapshot) => snapshot.id !== selectedAfter)?.id;
