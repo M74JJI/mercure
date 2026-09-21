@@ -146,6 +146,19 @@ const platformEnvironmentSchema = z.object({
   DATABASE_IDLE_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(600_000).default(10_000),
   DATABASE_HEALTH_TIMEOUT_MS: z.coerce.number().int().min(100).max(30_000).default(2_000),
   RULES_MANAGER_ARCHIVE_DIR: z.string().trim().min(1).default('/opt/mercure/siem-managers'),
+  RULES_ARCHIVE_MAX_ARCHIVES: z.coerce.number().int().min(1).max(512).default(64),
+  RULES_ARCHIVE_MAX_COMPRESSED_BYTES: z.coerce
+    .number()
+    .int()
+    .min(1_024)
+    .max(4 * 1024 * 1024 * 1024)
+    .default(512 * 1024 * 1024),
+  RULES_ARCHIVE_MAX_DECOMPRESSED_BYTES: z.coerce
+    .number()
+    .int()
+    .min(1_024)
+    .max(4 * 1024 * 1024 * 1024)
+    .default(512 * 1024 * 1024),
   RULES_ARCHIVE_MAX_FILES: z.coerce.number().int().min(1).max(50_000).default(10_000),
   RULES_ARCHIVE_MAX_ENTRY_BYTES: z.coerce
     .number()
@@ -167,6 +180,12 @@ export function parsePlatformEnvironment(
   environment: Record<string, unknown>,
 ): PlatformEnvironment {
   const parsed = platformEnvironmentSchema.parse(environment);
+
+  if (parsed.RULES_ARCHIVE_MAX_DECOMPRESSED_BYTES < parsed.RULES_ARCHIVE_MAX_TOTAL_BYTES) {
+    throw new Error(
+      'RULES_ARCHIVE_MAX_DECOMPRESSED_BYTES must be greater than or equal to RULES_ARCHIVE_MAX_TOTAL_BYTES.',
+    );
+  }
 
   if (parsed.NODE_ENV === 'production') {
     const required = [
@@ -300,6 +319,18 @@ export class PlatformConfig {
 
   get rulesManagerArchiveDir(): string {
     return this.config.getOrThrow('RULES_MANAGER_ARCHIVE_DIR', { infer: true });
+  }
+
+  get rulesArchiveMaxArchives(): number {
+    return this.config.getOrThrow('RULES_ARCHIVE_MAX_ARCHIVES', { infer: true });
+  }
+
+  get rulesArchiveMaxCompressedBytes(): number {
+    return this.config.getOrThrow('RULES_ARCHIVE_MAX_COMPRESSED_BYTES', { infer: true });
+  }
+
+  get rulesArchiveMaxDecompressedBytes(): number {
+    return this.config.getOrThrow('RULES_ARCHIVE_MAX_DECOMPRESSED_BYTES', { infer: true });
   }
 
   get rulesArchiveMaxFiles(): number {

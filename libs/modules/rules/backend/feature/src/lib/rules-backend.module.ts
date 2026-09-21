@@ -151,6 +151,9 @@ import {
       useFactory: (config: PlatformConfig) =>
         new FilesystemManagerArchiveSource({
           rootPath: config.rulesManagerArchiveDir,
+          maxArchives: config.rulesArchiveMaxArchives,
+          maxCompressedBytes: config.rulesArchiveMaxCompressedBytes,
+          maxDecompressedBytes: config.rulesArchiveMaxDecompressedBytes,
           maxFiles: config.rulesArchiveMaxFiles,
           maxEntryBytes: config.rulesArchiveMaxEntryBytes,
           maxTotalBytes: config.rulesArchiveMaxTotalBytes,

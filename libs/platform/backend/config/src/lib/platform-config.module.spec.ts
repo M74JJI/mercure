@@ -14,6 +14,9 @@ describe('platform OIDC configuration', () => {
     });
 
     expect(config.API_BODY_LIMIT_BYTES).toBe(4 * 1024 * 1024);
+    expect(config.RULES_ARCHIVE_MAX_ARCHIVES).toBe(64);
+    expect(config.RULES_ARCHIVE_MAX_COMPRESSED_BYTES).toBe(512 * 1024 * 1024);
+    expect(config.RULES_ARCHIVE_MAX_DECOMPRESSED_BYTES).toBe(512 * 1024 * 1024);
     expect(config.OIDC_ISSUER_URL).toBe('https://identity.example.test/realms/mercure');
     expect(config.OIDC_AUDIENCE).toBe('mercure-api');
     expect(config.OIDC_CLIENT_ID).toBe('mercure-api');
@@ -29,6 +32,19 @@ describe('platform OIDC configuration', () => {
         API_BODY_LIMIT_BYTES: 2 * 1024 * 1024,
       }),
     ).toThrow();
+  });
+
+  it('rejects decompressed archive limits smaller than the accepted XML budget', () => {
+    expect(() =>
+      parsePlatformEnvironment({
+        ...baseEnvironment,
+        NODE_ENV: 'test',
+        RULES_ARCHIVE_MAX_TOTAL_BYTES: 4096,
+        RULES_ARCHIVE_MAX_DECOMPRESSED_BYTES: 2048,
+      }),
+    ).toThrow(
+      'RULES_ARCHIVE_MAX_DECOMPRESSED_BYTES must be greater than or equal to RULES_ARCHIVE_MAX_TOTAL_BYTES.',
+    );
   });
 
   it('requires explicit production OIDC identity settings', () => {

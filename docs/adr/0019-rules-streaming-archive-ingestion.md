@@ -29,6 +29,9 @@ Accepted members remain restricted to normalized top-level `rules/*.xml` and `de
 
 The existing limits remain authoritative:
 
+- `RULES_ARCHIVE_MAX_ARCHIVES`;
+- `RULES_ARCHIVE_MAX_COMPRESSED_BYTES`;
+- `RULES_ARCHIVE_MAX_DECOMPRESSED_BYTES`;
 - `RULES_ARCHIVE_MAX_FILES`;
 - `RULES_ARCHIVE_MAX_ENTRY_BYTES`;
 - `RULES_ARCHIVE_MAX_TOTAL_BYTES`.
