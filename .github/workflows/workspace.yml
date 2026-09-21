@@ -142,6 +142,7 @@ jobs:
         run: >-
           pnpm exec vitest run
           libs/modules/rules/backend/infrastructure/src/lib/prisma-ruleset-snapshot-store.integration.spec.ts
+          libs/modules/rules/backend/infrastructure/src/lib/prisma-ruleset-import-lease.integration.spec.ts
           libs/modules/rules/backend/infrastructure/src/lib/prisma-rules-use-case-catalog.integration.spec.ts
           libs/modules/rules/backend/infrastructure/src/lib/prisma-rules-authoring-store.integration.spec.ts
           --config libs/modules/rules/backend/infrastructure/vitest.config.ts
