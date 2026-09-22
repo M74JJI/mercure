@@ -72,6 +72,20 @@ jobs:
       - name: Prepare release artifacts
         run: pnpm release:prepare
 
+      - name: Build production container images
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build --file deploy/production/api.Dockerfile --tag mercure-api:ci .
+          docker build --file deploy/production/web.Dockerfile --tag mercure-web:ci .
+
+      - name: Verify production containers run as non-root
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$(docker image inspect --format '{{.Config.User}}' mercure-api:ci)" == "node" ]]
+          [[ "$(docker image inspect --format '{{.Config.User}}' mercure-web:ci)" == "node" ]]
+
   database:
     name: Database integration
     runs-on: ubuntu-latest
