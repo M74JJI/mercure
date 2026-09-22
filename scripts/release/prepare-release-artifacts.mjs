@@ -1,4 +1,5 @@
 import { cp, mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 
 const workspaceRoot = process.cwd();
@@ -67,7 +68,7 @@ await requireDirectory('Next static output', staticSource);
 
 await rm(webOutputRoot, { recursive: true, force: true });
 await mkdir(path.dirname(webOutputRoot), { recursive: true });
-await cp(standaloneSource, webOutputRoot, { recursive: true });
+await cp(standaloneSource, webOutputRoot, { recursive: true, verbatimSymlinks: true });
 
 const servers = await findGeneratedServers(webOutputRoot);
 if (servers.length !== 1) {
@@ -76,6 +77,31 @@ if (servers.length !== 1) {
 
 const webServerFile = servers[0];
 const webServerDirectory = path.dirname(webServerFile);
+const require = createRequire(import.meta.url);
+
+let nextRuntime;
+try {
+  nextRuntime = require.resolve('next/package.json', { paths: [webServerDirectory] });
+} catch {
+  throw new Error(
+    `Prepared Next standalone output cannot resolve the Next.js runtime from ${path.relative(
+      workspaceRoot,
+      webServerDirectory,
+    )}.`,
+  );
+}
+
+const relativeNextRuntime = path.relative(webOutputRoot, nextRuntime);
+if (
+  relativeNextRuntime.startsWith(`..${path.sep}`) ||
+  relativeNextRuntime === '..' ||
+  path.isAbsolute(relativeNextRuntime)
+) {
+  throw new Error(
+    `Prepared Next standalone output resolves Next.js outside the release artifact: ${nextRuntime}`,
+  );
+}
+
 await mkdir(path.join(webServerDirectory, '.next'), { recursive: true });
 await cp(staticSource, path.join(webServerDirectory, '.next/static'), { recursive: true });
 
