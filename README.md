@@ -48,6 +48,14 @@ Rules architecture and migration decisions are documented under `docs/adr` and `
 
 Controlled authoring is defined by `docs/adr/0018-rules-controlled-authoring.md`.
 
+## Security
+
+Security vulnerabilities should be reported privately according to `SECURITY.md`. Repository secret scanning, dependency audit, CodeQL, critical-regression inventory, and protected-branch checks are blocking controls.
+
 ## Production readiness
 
-A successful build is not by itself a production approval. Follow `docs/operations/production-readiness.md` for the required CI, database migration, backup/restore, Keycloak, authorization, health, snapshot import, and authoring validation gates.
+A successful build is not by itself a production approval. Follow `docs/operations/production-readiness.md` for the required CI, database migration, backup/restore, Keycloak, authorization, health, snapshot import, authoring, release-integrity, and rollback validation gates.
+
+The production observability expectations are defined in `docs/operations/observability.md`.
+
+Contribution and repository workflow requirements are documented in `CONTRIBUTING.md`.

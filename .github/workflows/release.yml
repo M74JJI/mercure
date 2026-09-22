@@ -1,6 +1,15 @@
 name: Release integrity
 
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - 'scripts/release/**'
+      - 'deploy/production/**'
+      - '.dockerignore'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
   push:
     tags:
       - 'v*'
@@ -8,9 +17,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-  attestations: write
-  artifact-metadata: write
 
 concurrency:
   group: release-integrity-${{ github.ref }}
@@ -21,6 +27,8 @@ jobs:
     name: Release artifacts
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    permissions:
+      contents: read
     env:
       AUTH_SECRET: mercure-release-auth-secret-not-a-production-secret-000000
       AUTH_URL: https://mercure-release.example.test
@@ -64,13 +72,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          export LC_ALL=C
+          export TZ=UTC
           mkdir -p dist/release
-          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
-            -czf dist/release/mercure-api.tar.gz -C dist/apps api
-          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
-            -czf dist/release/mercure-web.tar.gz -C dist/apps web-standalone
-          sha256sum dist/release/mercure-api.tar.gz dist/release/mercure-web.tar.gz \
-            > dist/release/SHA256SUMS
+
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner             -cf - -C dist/apps api | gzip -n > dist/release/mercure-api.tar.gz
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner             -cf - -C dist/apps web-standalone | gzip -n > dist/release/mercure-web.tar.gz
+
+          sha256sum dist/release/mercure-api.tar.gz dist/release/mercure-web.tar.gz             > dist/release/SHA256SUMS
 
       - name: Generate API SBOM
         uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
@@ -90,18 +99,6 @@ jobs:
           upload-artifact: false
           upload-release-assets: false
 
-      - name: Attest API provenance and SBOM
-        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
-        with:
-          subject-path: dist/release/mercure-api.tar.gz
-          sbom-path: dist/release/mercure-api.cdx.json
-
-      - name: Attest web provenance and SBOM
-        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
-        with:
-          subject-path: dist/release/mercure-web.tar.gz
-          sbom-path: dist/release/mercure-web.cdx.json
-
       - name: Upload release integrity bundle
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -114,3 +111,45 @@ jobs:
             dist/release/SHA256SUMS
           if-no-files-found: error
           retention-days: 30
+
+  attest:
+    name: Release attestations
+    if: github.event_name != 'pull_request'
+    needs: artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+
+    steps:
+      - name: Download release integrity bundle
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: mercure-release-integrity-${{ github.sha }}
+          path: dist/release
+
+      - name: Attest API provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/release/mercure-api.tar.gz
+
+      - name: Attest API SBOM
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/release/mercure-api.tar.gz
+          sbom-path: dist/release/mercure-api.cdx.json
+
+      - name: Attest web provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/release/mercure-web.tar.gz
+
+      - name: Attest web SBOM
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/release/mercure-web.tar.gz
+          sbom-path: dist/release/mercure-web.cdx.json
