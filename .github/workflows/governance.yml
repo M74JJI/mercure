@@ -31,6 +31,9 @@ jobs:
       - name: Validate critical security regression inventory
         run: scripts/ci/validate-critical-security-tests.sh
 
+      - name: Verify commit policy regression tests
+        run: scripts/ci/test-commit-policy.sh
+
       - name: Validate branch name
         shell: bash
         env:
