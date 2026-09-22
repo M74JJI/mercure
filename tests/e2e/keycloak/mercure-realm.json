@@ -1,0 +1,91 @@
+{
+  "realm": "mercure-e2e",
+  "enabled": true,
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": false,
+  "clients": [
+    {
+      "clientId": "mercure-api",
+      "name": "Mercure API",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "mercure-e2e",
+      "name": "Mercure E2E token client",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "mercure-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "mercure-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "roles": {
+    "client": {
+      "mercure-api": [
+        {
+          "name": "user"
+        },
+        {
+          "name": "admin"
+        }
+      ]
+    }
+  },
+  "users": [
+    {
+      "username": "mercure-user",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "mercure-user-e2e-password",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "mercure-api": [
+          "user"
+        ]
+      }
+    },
+    {
+      "username": "mercure-admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "mercure-admin-e2e-password",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "mercure-api": [
+          "user",
+          "admin"
+        ]
+      }
+    }
+  ]
+}
