@@ -28,6 +28,9 @@ jobs:
       - name: Validate repository hygiene
         run: scripts/ci/validate-repository-hygiene.sh
 
+      - name: Validate critical security regression inventory
+        run: scripts/ci/validate-critical-security-tests.sh
+
       - name: Validate branch name
         shell: bash
         env:

@@ -1,0 +1,10 @@
+**
+!dist/
+!dist/apps/
+!dist/apps/api/
+!dist/apps/api/**
+!dist/apps/web-standalone/
+!dist/apps/web-standalone/**
+!deploy/
+!deploy/production/
+!deploy/production/**

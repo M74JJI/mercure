@@ -1,0 +1,155 @@
+name: Release integrity
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - 'scripts/release/**'
+      - 'deploy/production/**'
+      - '.dockerignore'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-integrity-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  artifacts:
+    name: Release artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    env:
+      AUTH_SECRET: mercure-release-auth-secret-not-a-production-secret-000000
+      AUTH_URL: https://mercure-release.example.test
+      AUTH_TRUST_HOST: 'true'
+      AUTH_KEYCLOAK_ID: mercure-web-release
+      AUTH_KEYCLOAK_SECRET: release-only-not-a-production-secret
+      AUTH_KEYCLOAK_ISSUER: https://identity.example.test/realms/mercure
+      WEB_AUTH_AUTHORITY_CLIENT_ID: mercure-api
+      WEB_AUTH_ADMIN_AUTHORITIES: mercure-admin
+      WEB_AUTH_USER_AUTHORITIES: mercure-user
+      NEXT_PUBLIC_API_BASE_URL: https://api.example.test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: 12.4.2
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and prepare release artifacts
+        run: |
+          pnpm build
+          pnpm release:prepare
+
+      - name: Package deterministic release archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          export LC_ALL=C
+          export TZ=UTC
+          mkdir -p dist/release
+
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner             -cf - -C dist/apps api | gzip -n > dist/release/mercure-api.tar.gz
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner             -cf - -C dist/apps web-standalone | gzip -n > dist/release/mercure-web.tar.gz
+
+          sha256sum dist/release/mercure-api.tar.gz dist/release/mercure-web.tar.gz             > dist/release/SHA256SUMS
+
+      - name: Generate API SBOM
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        with:
+          path: dist/apps/api
+          format: cyclonedx-json
+          output-file: dist/release/mercure-api.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Generate web SBOM
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        with:
+          path: dist/apps/web-standalone
+          format: cyclonedx-json
+          output-file: dist/release/mercure-web.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Upload release integrity bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: mercure-release-integrity-${{ github.sha }}
+          path: |
+            dist/release/mercure-api.tar.gz
+            dist/release/mercure-web.tar.gz
+            dist/release/mercure-api.cdx.json
+            dist/release/mercure-web.cdx.json
+            dist/release/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 30
+
+  attest:
+    name: Release attestations
+    if: github.event_name != 'pull_request'
+    needs: artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+
+    steps:
+      - name: Download release integrity bundle
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: mercure-release-integrity-${{ github.sha }}
+          path: dist/release
+
+      - name: Attest API provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/release/mercure-api.tar.gz
+
+      - name: Attest API SBOM
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/release/mercure-api.tar.gz
+          sbom-path: dist/release/mercure-api.cdx.json
+
+      - name: Attest web provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/release/mercure-web.tar.gz
+
+      - name: Attest web SBOM
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/release/mercure-web.tar.gz
+          sbom-path: dist/release/mercure-web.cdx.json

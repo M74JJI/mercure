@@ -1,0 +1,15 @@
+# Mercure repository ownership.
+# Keep security-sensitive areas explicitly owned even while the project has one maintainer.
+* @M74JJI
+
+/.github/ @M74JJI
+/security/ @M74JJI
+/scripts/ci/ @M74JJI
+/scripts/release/ @M74JJI
+/prisma/ @M74JJI
+/deploy/ @M74JJI
+/libs/platform/backend/identity/ @M74JJI
+/libs/platform/backend/config/ @M74JJI
+/libs/platform/backend/logging/ @M74JJI
+/libs/platform/backend/presentation/ @M74JJI
+/libs/modules/rules/backend/ @M74JJI
