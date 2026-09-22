@@ -2,14 +2,6 @@ name: Release integrity
 
 on:
   pull_request:
-    paths:
-      - '.github/workflows/release.yml'
-      - 'scripts/release/**'
-      - 'deploy/production/**'
-      - '.dockerignore'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
   push:
     tags:
       - 'v*'
@@ -23,8 +15,53 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  changes:
+    name: Release change detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      release_sensitive: ${{ steps.release-scope.outputs.release_sensitive }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Detect release-sensitive changes
+        id: release-scope
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" != 'pull_request' ]]; then
+            echo 'release_sensitive=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          release_sensitive=false
+          while IFS= read -r changed_path; do
+            case "$changed_path" in
+              .github/workflows/release.yml|scripts/release/*|deploy/production/*|.dockerignore|package.json|pnpm-lock.yaml|pnpm-workspace.yaml)
+                release_sensitive=true
+                break
+                ;;
+            esac
+          done < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+
+          echo "release_sensitive=$release_sensitive" >> "$GITHUB_OUTPUT"
+
   artifacts:
     name: Release artifacts
+    needs: changes
+    if: needs.changes.outputs.release_sensitive == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     permissions:
@@ -76,10 +113,13 @@ jobs:
           export TZ=UTC
           mkdir -p dist/release
 
-          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner             -cf - -C dist/apps api | gzip -n > dist/release/mercure-api.tar.gz
-          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner             -cf - -C dist/apps web-standalone | gzip -n > dist/release/mercure-web.tar.gz
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
+            -cf - -C dist/apps api | gzip -n > dist/release/mercure-api.tar.gz
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
+            -cf - -C dist/apps web-standalone | gzip -n > dist/release/mercure-web.tar.gz
 
-          sha256sum dist/release/mercure-api.tar.gz dist/release/mercure-web.tar.gz             > dist/release/SHA256SUMS
+          sha256sum dist/release/mercure-api.tar.gz dist/release/mercure-web.tar.gz \
+            > dist/release/SHA256SUMS
 
       - name: Generate API SBOM
         uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
@@ -111,6 +151,35 @@ jobs:
             dist/release/SHA256SUMS
           if-no-files-found: error
           retention-days: 30
+
+  release-integrity:
+    name: Release integrity
+    if: always() && github.event_name == 'pull_request'
+    needs:
+      - changes
+      - artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - name: Enforce release validation outcome
+        shell: bash
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          RELEASE_SENSITIVE: ${{ needs.changes.outputs.release_sensitive }}
+          ARTIFACTS_RESULT: ${{ needs.artifacts.result }}
+        run: |
+          set -euo pipefail
+
+          [[ "$CHANGES_RESULT" == 'success' ]]
+
+          if [[ "$RELEASE_SENSITIVE" == 'true' ]]; then
+            [[ "$ARTIFACTS_RESULT" == 'success' ]]
+          else
+            [[ "$ARTIFACTS_RESULT" == 'skipped' ]]
+          fi
 
   attest:
     name: Release attestations
