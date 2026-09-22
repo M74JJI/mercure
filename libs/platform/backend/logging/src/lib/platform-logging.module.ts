@@ -21,31 +21,37 @@ export const PLATFORM_LOG_REDACTION_PATHS = [
   'req.body.rawXml',
 ] as const;
 
+type PlatformLoggingConfig = Pick<PlatformConfig, 'logLevel' | 'nodeEnvironment' | 'serviceName'>;
+
+export function createPlatformLoggingParams(config: PlatformLoggingConfig): Params {
+  return {
+    pinoHttp: {
+      level: config.logLevel,
+      base: {
+        service: config.serviceName,
+        environment: config.nodeEnvironment,
+      },
+      autoLogging: true,
+      quietReqLogger: false,
+      genReqId: (_request, response) => {
+        const requestId = randomUUID();
+        response.setHeader('x-request-id', requestId);
+        return requestId;
+      },
+      redact: {
+        paths: [...PLATFORM_LOG_REDACTION_PATHS],
+        remove: true,
+      },
+    },
+  };
+}
+
 @Module({
   imports: [
     LoggerModule.forRootAsync({
       imports: [PlatformConfigModule],
       inject: [PlatformConfig],
-      useFactory: (config: PlatformConfig): Params => ({
-        pinoHttp: {
-          level: config.logLevel,
-          base: {
-            service: config.serviceName,
-            environment: config.nodeEnvironment,
-          },
-          autoLogging: true,
-          quietReqLogger: false,
-          genReqId: (_request, response) => {
-            const requestId = randomUUID();
-            response.setHeader('x-request-id', requestId);
-            return requestId;
-          },
-          redact: {
-            paths: [...PLATFORM_LOG_REDACTION_PATHS],
-            remove: true,
-          },
-        },
-      }),
+      useFactory: createPlatformLoggingParams,
     }),
   ],
 })

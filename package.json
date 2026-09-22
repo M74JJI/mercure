@@ -29,7 +29,8 @@
     "api:client:check": "pnpm db:generate && node tools/openapi/generate-client.mjs --check",
     "ops:verify-auth": "bash scripts/ops/verify-production-auth.sh",
     "release:prepare": "pnpm release:prepare-api && node scripts/release/prepare-release-artifacts.mjs",
-    "release:prepare-api": "pnpm exec nx run api:prune && node scripts/release/sync-api-build-policy.mjs"
+    "release:prepare-api": "pnpm exec nx run api:prune && node scripts/release/sync-api-build-policy.mjs",
+    "test:coverage:critical": "vitest run --config vitest.critical.config.ts --coverage"
   },
   "dependencies": {
     "@fastify/cors": "11.3.0",
@@ -72,6 +73,7 @@
     "@types/pg": "8.23.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@vitest/coverage-v8": "5.0.0",
     "dotenv": "17.4.2",
     "esbuild": "0.28.2",
     "eslint": "10.10.0",

@@ -21,9 +21,12 @@ pnpm lint
 pnpm api:client:check
 pnpm typecheck
 pnpm test
+pnpm test:coverage:critical
 pnpm build
 pnpm release:prepare
 ```
+
+Critical coverage intentionally targets the backend identity, logging, HTTP presentation, and Rules presentation boundaries. The gate combines an aggregate no-regression floor with stricter thresholds for security-sensitive files. Add or improve tests when coverage drops; do not lower thresholds merely to make a change pass.
 
 ## Git policy
 

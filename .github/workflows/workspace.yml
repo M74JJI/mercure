@@ -66,6 +66,9 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Verify critical coverage
+        run: pnpm test:coverage:critical
+
       - name: Build
         run: pnpm build
 
