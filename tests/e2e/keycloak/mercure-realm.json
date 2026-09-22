@@ -41,14 +41,7 @@
   ],
   "roles": {
     "client": {
-      "mercure-api": [
-        {
-          "name": "user"
-        },
-        {
-          "name": "admin"
-        }
-      ]
+      "mercure-api": [{ "name": "user" }, { "name": "admin" }]
     }
   },
   "users": [
@@ -56,6 +49,9 @@
       "username": "mercure-user",
       "enabled": true,
       "emailVerified": true,
+      "firstName": "Mercure",
+      "lastName": "User",
+      "email": "mercure-user@example.test",
       "credentials": [
         {
           "type": "password",
@@ -64,18 +60,16 @@
         }
       ],
       "clientRoles": {
-        "mercure-api": [
-          "user"
-        ]
-      },
-      "firstName": "Mercure",
-      "lastName": "User",
-      "email": "mercure-user@example.test"
+        "mercure-api": ["user"]
+      }
     },
     {
       "username": "mercure-admin",
       "enabled": true,
       "emailVerified": true,
+      "firstName": "Mercure",
+      "lastName": "Admin",
+      "email": "mercure-admin@example.test",
       "credentials": [
         {
           "type": "password",
@@ -84,14 +78,8 @@
         }
       ],
       "clientRoles": {
-        "mercure-api": [
-          "user",
-          "admin"
-        ]
-      },
-      "firstName": "Mercure",
-      "lastName": "Admin",
-      "email": "mercure-admin@example.test"
+        "mercure-api": ["user", "admin"]
+      }
     }
   ]
 }
