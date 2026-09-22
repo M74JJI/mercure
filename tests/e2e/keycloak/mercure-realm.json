@@ -37,6 +37,33 @@
           }
         }
       ]
+    },
+    {
+      "clientId": "mercure-web-e2e",
+      "name": "Mercure Web E2E",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "mercure-web-e2e-secret",
+      "clientAuthenticatorType": "client-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "redirectUris": ["http://127.0.0.1:3000/api/auth/callback/keycloak"],
+      "webOrigins": ["http://127.0.0.1:3000"],
+      "protocolMappers": [
+        {
+          "name": "mercure-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "mercure-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
     }
   ],
   "roles": {
