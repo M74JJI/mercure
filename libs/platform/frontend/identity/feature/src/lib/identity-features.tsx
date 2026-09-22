@@ -90,15 +90,21 @@ export async function IdentityForbiddenFeature() {
     redirect('/auth/sign-in');
   }
 
-  if (identity.role) {
-    redirect('/');
-  }
+  const hasMappedRole = identity.role !== null;
 
   return (
     <IdentityFrame
       eyebrow="Access denied"
-      title="No Mercure role is mapped to this identity"
-      detail="Your Keycloak session is valid, but it does not map to an authorized Mercure application role."
+      title={
+        hasMappedRole
+          ? 'Your Mercure role does not permit this action'
+          : 'No Mercure role is mapped to this identity'
+      }
+      detail={
+        hasMappedRole
+          ? 'Your Mercure session is valid, but your assigned application role does not permit the requested page or operation.'
+          : 'Your Keycloak session is valid, but it does not map to an authorized Mercure application role.'
+      }
     >
       <IdentitySignOutButton />
     </IdentityFrame>
