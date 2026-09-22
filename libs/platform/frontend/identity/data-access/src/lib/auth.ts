@@ -8,6 +8,10 @@ import { browserFacingSession } from './browser-session';
 import type { MercureSessionToken } from './auth-types';
 import { canonicalAuthRedirect, signInRedirect } from './auth-navigation';
 import {
+  createContentSecurityPolicyContext,
+  isPublicIdentityPath,
+} from './content-security-policy';
+import {
   ProviderTokenRefreshError,
   initialProviderSession,
   refreshProviderSession,
@@ -158,24 +162,48 @@ export function createIdentityAuthConfig(
       },
       authorized({ request, auth }) {
         const requestedPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+        const contentSecurityPolicy = createContentSecurityPolicyContext(request.headers);
+
+        const withContentSecurityPolicy = (response: NextResponse) => {
+          response.headers.set('Content-Security-Policy', contentSecurityPolicy.value);
+          return response;
+        };
+
+        const continueRequest = () =>
+          withContentSecurityPolicy(
+            NextResponse.next({
+              request: {
+                headers: contentSecurityPolicy.requestHeaders,
+              },
+            }),
+          );
+
+        const redirectWithContentSecurityPolicy = (url: URL) =>
+          withContentSecurityPolicy(NextResponse.redirect(url));
+
+        if (isPublicIdentityPath(request.nextUrl.pathname)) {
+          return continueRequest();
+        }
 
         if (!auth?.user || auth.error === 'RefreshTokenError') {
-          return NextResponse.redirect(signInRedirect(requestedPath, environment.authOrigin));
+          return redirectWithContentSecurityPolicy(
+            signInRedirect(requestedPath, environment.authOrigin),
+          );
         }
 
         if (!auth.user.mercureRole) {
-          return NextResponse.redirect(
+          return redirectWithContentSecurityPolicy(
             canonicalAuthRedirect('/auth/forbidden', environment.authOrigin),
           );
         }
 
         if (auth.refreshBoundary) {
-          return NextResponse.redirect(
+          return redirectWithContentSecurityPolicy(
             canonicalAuthRedirect(requestedPath, environment.authOrigin),
           );
         }
 
-        return true;
+        return continueRequest();
       },
     },
   };
