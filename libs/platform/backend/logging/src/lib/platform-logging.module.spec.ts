@@ -57,14 +57,19 @@ describe('platform log redaction policy', () => {
       serviceName: 'mercure-test-api',
     });
 
-    if (!params.pinoHttp || typeof params.pinoHttp === 'function') {
+    if (!params.pinoHttp || typeof params.pinoHttp !== 'object') {
       throw new Error('Expected object-based pino HTTP configuration.');
+    }
+
+    const genReqId = Reflect.get(params.pinoHttp, 'genReqId');
+    if (typeof genReqId !== 'function') {
+      throw new Error('Expected pino HTTP request-ID generator.');
     }
 
     const response = {
       setHeader: vi.fn(),
     };
-    const requestId = params.pinoHttp.genReqId?.({} as never, response as never);
+    const requestId = Reflect.apply(genReqId, params.pinoHttp, [{}, response]);
 
     expect(requestId).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
