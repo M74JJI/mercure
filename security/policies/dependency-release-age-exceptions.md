@@ -20,4 +20,12 @@ Mercure applies a seven-day minimum release age to npm dependencies. An exceptio
 - Resolution policy: `pnpm-workspace.yaml` overrides Fastify to this exact version so NestJS and all Fastify plugins use one patched runtime/type version rather than retaining Nest's older transitive 5.x patch.
 - Review: remove the release-age exception after 5.12.5 has aged past the workspace threshold. Keep or update the single-version override until the selected NestJS release resolves an equally patched Fastify version by default.
 
+### Next.js 16.3.6 critical security release
+
+- Added: 2026-09-22
+- Package: `next@16.3.6`
+- Required exact-version runtime packages: `@next/env@16.3.6` and the platform-specific `@next/swc-*@16.3.6` packages resolved by the shared lockfile.
+- Reason: Next.js advisory GHSA-vcvr-r3jv-pc5j / CVE-2026-94545 affects `next >=16.2.0 <16.3.6`. The Node.js `ImageResponse` implementation can permit remote code execution when attacker-controlled values reach generated SVG content, attributes, or styles. Mercure does not currently import `next/og` or `ImageResponse`, but pinning the patched framework release removes the vulnerable implementation before such a route can be introduced.
+- Review: remove these release-age exceptions after 16.3.6 has aged past the workspace threshold and the lockfile has been regenerated successfully.
+
 Exceptions are exact-version scoped. Do not replace them with broad package-name or namespace exclusions.
