@@ -62,13 +62,8 @@ async function verifyApiRuntimeDependencyClosure(sourceApiPackage) {
     if (!manifest?.name || visited.has(manifest.name)) continue;
     visited.add(manifest.name);
 
-    for (const [dependencyName, dependencyVersion] of Object.entries(
-      manifest.dependencies ?? {},
-    )) {
-      if (
-        typeof dependencyVersion === 'string' &&
-        dependencyVersion.startsWith('workspace:')
-      ) {
+    for (const [dependencyName, dependencyVersion] of Object.entries(manifest.dependencies ?? {})) {
+      if (typeof dependencyVersion === 'string' && dependencyVersion.startsWith('workspace:')) {
         const workspaceDependency = packagesByName.get(dependencyName);
         if (!workspaceDependency) {
           throw new Error(
