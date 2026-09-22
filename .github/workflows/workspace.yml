@@ -189,7 +189,7 @@ jobs:
   database:
     name: Database integration
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       DATABASE_URL: postgresql://mercure:mercure-ci@127.0.0.1:5432/mercure
       DATABASE_DIRECT_URL: postgresql://mercure:mercure-ci@127.0.0.1:5432/mercure
@@ -200,7 +200,7 @@ jobs:
       NODE_ENV: test
       API_HOST: 127.0.0.1
       API_PORT: 3001
-      API_CORS_ORIGINS: http://localhost:3000
+      API_CORS_ORIGINS: http://127.0.0.1:3000
       OPENAPI_ENABLED: 'false'
       RULES_MANAGER_ARCHIVE_DIR: /tmp/mercure-ci-missing-rules-source
       OIDC_ISSUER_URL: http://127.0.0.1:8080/realms/mercure-e2e
@@ -209,6 +209,16 @@ jobs:
       OIDC_CLIENT_ID: mercure-api
       OIDC_ADMIN_AUTHORITIES: admin
       OIDC_USER_AUTHORITIES: user
+      AUTH_SECRET: mercure-browser-e2e-auth-secret-not-production-000000
+      AUTH_URL: http://127.0.0.1:3000
+      AUTH_TRUST_HOST: 'true'
+      AUTH_KEYCLOAK_ID: mercure-web-e2e
+      AUTH_KEYCLOAK_SECRET: mercure-web-e2e-secret
+      AUTH_KEYCLOAK_ISSUER: http://127.0.0.1:8080/realms/mercure-e2e
+      WEB_AUTH_AUTHORITY_CLIENT_ID: mercure-api
+      WEB_AUTH_ADMIN_AUTHORITIES: admin
+      WEB_AUTH_USER_AUTHORITIES: user
+      NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:3001
 
     services:
       postgres:
@@ -412,6 +422,59 @@ jobs:
             --header "authorization: Bearer $admin_token" \
             'http://127.0.0.1:3001/api/v1/rules/authoring/drafts?offset=0&limit=1')"
           [[ "$admin_authoring_status" == "200" ]]
+
+      - name: Set up pinned Chrome for full-stack browser auth
+        id: setup-auth-chrome
+        uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        with:
+          chrome-version: 153.0.8010.52
+
+      - name: Verify full-stack browser authentication
+        shell: bash
+        env:
+          CHROME_PATH: ${{ steps.setup-auth-chrome.outputs.chrome-path }}
+        run: |
+          set -euo pipefail
+
+          pnpm exec nx serve api > browser-api.log 2>&1 &
+          api_pid=$!
+
+          NODE_ENV=development \
+            pnpm exec next dev apps/web --hostname 127.0.0.1 --port 3000 \
+            > browser-web.log 2>&1 &
+          web_pid=$!
+
+          cleanup() {
+            kill "$web_pid" "$api_pid" 2>/dev/null || true
+            echo '--- API browser E2E log ---'
+            tail -n 120 browser-api.log 2>/dev/null || true
+            echo '--- Web browser E2E log ---'
+            tail -n 120 browser-web.log 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          api_ready=0
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3001/api/v1/health/live >/dev/null &&
+               curl --fail --silent http://127.0.0.1:3001/api/v1/health/ready >/dev/null; then
+              api_ready=1
+              break
+            fi
+            sleep 1
+          done
+          [[ "$api_ready" == "1" ]]
+
+          web_ready=0
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:3000/auth/sign-in >/dev/null; then
+              web_ready=1
+              break
+            fi
+            sleep 1
+          done
+          [[ "$web_ready" == "1" ]]
+
+          node tests/e2e/browser/verify-auth-journeys.mjs
 
       - name: Stop disposable Keycloak
         if: always()
