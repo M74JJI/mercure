@@ -129,7 +129,7 @@ jobs:
           grep -Eiq '^location: .*auth/sign-in' "$headers"
 
           rendered_dom="$(
-            "$CHROME_PATH"               --headless=new               --disable-gpu               --disable-dev-shm-usage               --no-sandbox               --no-first-run               --dump-dom               http://127.0.0.1:3000/
+            "$CHROME_PATH"               --headless=new               --disable-gpu               --disable-dev-shm-usage               --no-sandbox               --no-first-run               --dump-dom               http://127.0.0.1:3000/auth/sign-in
           )"
           grep -Fq 'Sign in to the security workspace' <<<"$rendered_dom"
           grep -Fq 'Authentication is delegated to the configured Keycloak identity provider.' <<<"$rendered_dom"
