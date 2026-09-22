@@ -7,7 +7,7 @@
     "@mercure/platform-frontend-identity-feature": "workspace:*",
     "@mercure/platform-frontend-shell": "workspace:*",
     "@mercure/rules-frontend-feature": "workspace:*",
-    "next": "16.3.3",
+    "next": "16.3.6",
     "react": "19.3.0"
   }
 }
