@@ -151,6 +151,12 @@ jobs:
       API_CORS_ORIGINS: http://localhost:3000
       OPENAPI_ENABLED: 'false'
       RULES_MANAGER_ARCHIVE_DIR: /tmp/mercure-ci-missing-rules-source
+      OIDC_ISSUER_URL: http://127.0.0.1:8080/realms/mercure-e2e
+      OIDC_JWKS_URL: http://127.0.0.1:8080/realms/mercure-e2e/protocol/openid-connect/certs
+      OIDC_AUDIENCE: mercure-api
+      OIDC_CLIENT_ID: mercure-api
+      OIDC_ADMIN_AUTHORITIES: admin
+      OIDC_USER_AUTHORITIES: user
 
     services:
       postgres:
@@ -240,7 +246,30 @@ jobs:
           protected_status="$(curl --silent --output /dev/null --write-out '%{http_code}'             'http://127.0.0.1:3011/api/v1/rules/snapshots?offset=0&limit=1')"
           [[ "$protected_status" == "401" ]]
 
-      - name: Verify database-backed readiness
+      - name: Start disposable Keycloak
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach \
+            --name mercure-keycloak-e2e \
+            --publish 127.0.0.1:8080:8080 \
+            --volume "$PWD/tests/e2e/keycloak/mercure-realm.json:/opt/keycloak/data/import/mercure-realm.json:ro" \
+            quay.io/keycloak/keycloak:26.7.4@sha256:82a77884f3af238beab1e7afd63b5f530e1b5c0590bd7aa60b40a40463e29b2c \
+            start-dev --import-realm >/dev/null
+
+          ready=0
+          for attempt in {1..60}; do
+            if curl --fail --silent \
+              http://127.0.0.1:8080/realms/mercure-e2e/.well-known/openid-configuration \
+              >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          [[ "$ready" == "1" ]]
+
+      - name: Verify database-backed readiness and Keycloak authorization
         shell: bash
         run: |
           set -euo pipefail
@@ -289,3 +318,52 @@ jobs:
             --data '{"fileName":"4300-smoke_rules.xml","tenant":"smoke","sourceType":"rules"}' \
             'http://127.0.0.1:3001/api/v1/rules/authoring/drafts/new')"
           [[ "$authoring_create_status" == "401" ]]
+
+          token_endpoint='http://127.0.0.1:8080/realms/mercure-e2e/protocol/openid-connect/token'
+
+          user_response="$(curl --fail --silent \
+            --request POST \
+            --header 'content-type: application/x-www-form-urlencoded' \
+            --data-urlencode 'grant_type=password' \
+            --data-urlencode 'client_id=mercure-e2e' \
+            --data-urlencode 'username=mercure-user' \
+            --data-urlencode 'password=mercure-user-e2e-password' \
+            "$token_endpoint")"
+          user_token="$(node -e "const chunks=[];process.stdin.on('data',c=>chunks.push(c)).on('end',()=>{const value=JSON.parse(Buffer.concat(chunks).toString('utf8')).access_token;if(!value)process.exit(1);process.stdout.write(value)})" <<<"$user_response")"
+
+          admin_response="$(curl --fail --silent \
+            --request POST \
+            --header 'content-type: application/x-www-form-urlencoded' \
+            --data-urlencode 'grant_type=password' \
+            --data-urlencode 'client_id=mercure-e2e' \
+            --data-urlencode 'username=mercure-admin' \
+            --data-urlencode 'password=mercure-admin-e2e-password' \
+            "$token_endpoint")"
+          admin_token="$(node -e "const chunks=[];process.stdin.on('data',c=>chunks.push(c)).on('end',()=>{const value=JSON.parse(Buffer.concat(chunks).toString('utf8')).access_token;if(!value)process.exit(1);process.stdout.write(value)})" <<<"$admin_response")"
+
+          user_read_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --header "authorization: Bearer $user_token" \
+            'http://127.0.0.1:3001/api/v1/rules/snapshots?offset=0&limit=1')"
+          [[ "$user_read_status" == "200" ]]
+
+          user_admin_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --header "authorization: Bearer $user_token" \
+            'http://127.0.0.1:3001/api/v1/rules/authoring/drafts?offset=0&limit=1')"
+          [[ "$user_admin_status" == "403" ]]
+
+          admin_read_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --header "authorization: Bearer $admin_token" \
+            'http://127.0.0.1:3001/api/v1/rules/snapshots?offset=0&limit=1')"
+          [[ "$admin_read_status" == "200" ]]
+
+          admin_authoring_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --header "authorization: Bearer $admin_token" \
+            'http://127.0.0.1:3001/api/v1/rules/authoring/drafts?offset=0&limit=1')"
+          [[ "$admin_authoring_status" == "200" ]]
+
+      - name: Stop disposable Keycloak
+        if: always()
+        shell: bash
+        run: |
+          docker logs mercure-keycloak-e2e 2>&1 || true
+          docker rm --force mercure-keycloak-e2e >/dev/null 2>&1 || true
