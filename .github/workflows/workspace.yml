@@ -126,10 +126,59 @@ jobs:
           done
           [[ "$ready" == "1" ]]
 
-          headers="$(mktemp)"
-          status="$(curl --silent --output /dev/null --dump-header "$headers" --write-out '%{http_code}' http://127.0.0.1:3000/)"
+          sign_in_headers="$(mktemp)"
+          sign_in_body="$(mktemp)"
+          curl --fail --silent \
+            --dump-header "$sign_in_headers" \
+            --output "$sign_in_body" \
+            http://127.0.0.1:3000/auth/sign-in
+
+          csp="$(
+            awk 'BEGIN { IGNORECASE=1 } /^content-security-policy:/ {
+              sub(/^[^:]+:[[:space:]]*/, "")
+              sub(/\r$/, "")
+              print
+              exit
+            }' "$sign_in_headers"
+          )"
+          [[ -n "$csp" ]]
+
+          script_policy="$(
+            tr ';' '\n' <<<"$csp" |
+              sed -n 's/^[[:space:]]*\(script-src [^;]*\)[[:space:]]*$/\1/p'
+          )"
+          [[ "$script_policy" == *"'nonce-"* ]]
+          [[ "$script_policy" == *"'strict-dynamic'"* ]]
+          [[ "$script_policy" != *"'unsafe-inline'"* ]]
+
+          nonce="$(sed -n "s/.*'nonce-\([^']*\)'.*/\1/p" <<<"$script_policy")"
+          [[ -n "$nonce" ]]
+          grep -Fq "nonce=\"$nonce\"" "$sign_in_body"
+
+          second_headers="$(mktemp)"
+          curl --fail --silent --output /dev/null --dump-header "$second_headers" \
+            http://127.0.0.1:3000/auth/sign-in
+          second_csp="$(
+            awk 'BEGIN { IGNORECASE=1 } /^content-security-policy:/ {
+              sub(/^[^:]+:[[:space:]]*/, "")
+              sub(/\r$/, "")
+              print
+              exit
+            }' "$second_headers"
+          )"
+          second_script_policy="$(
+            tr ';' '\n' <<<"$second_csp" |
+              sed -n 's/^[[:space:]]*\(script-src [^;]*\)[[:space:]]*$/\1/p'
+          )"
+          second_nonce="$(sed -n "s/.*'nonce-\([^']*\)'.*/\1/p" <<<"$second_script_policy")"
+          [[ -n "$second_nonce" ]]
+          [[ "$nonce" != "$second_nonce" ]]
+
+          root_headers="$(mktemp)"
+          status="$(curl --silent --output /dev/null --dump-header "$root_headers" --write-out '%{http_code}' http://127.0.0.1:3000/)"
           [[ "$status" =~ ^30[2378]$ ]]
-          grep -Eiq '^location: .*auth/sign-in' "$headers"
+          grep -Eiq '^location: .*auth/sign-in' "$root_headers"
+          grep -Eiq '^content-security-policy:' "$root_headers"
 
           rendered_dom="$(
             "$CHROME_PATH"               --headless=new               --disable-gpu               --disable-dev-shm-usage               --no-sandbox               --no-first-run               --dump-dom               http://127.0.0.1:3000/auth/sign-in
