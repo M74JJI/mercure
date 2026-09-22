@@ -33,6 +33,23 @@ validate_commit() {
   validate_attribution "$body"
 }
 
+fallback_range_or_head() {
+  local head="$1"
+  local reason="$2"
+  local fallback_base="${COMMIT_POLICY_FALLBACK_BASE:-}"
+
+  if [[ -n "$fallback_base" ]] && git cat-file -e "$fallback_base^{commit}" 2>/dev/null; then
+    base="$(git merge-base "$fallback_base" "$head")"
+    echo "$reason; validating from fallback merge-base $base."
+    commits="$(git rev-list --reverse "$base..$head")"
+    return 0
+  fi
+
+  echo "$reason and no usable fallback base is available; validating current head commit only." >&2
+  validate_commit "$head"
+  exit 0
+}
+
 if [[ $# -eq 1 ]]; then
   validate_commit "$1"
   exit 0
@@ -48,21 +65,10 @@ head="$2"
 zero='0000000000000000000000000000000000000000'
 
 if [[ "$base" == "$zero" ]]; then
-  commits="$(git rev-list --reverse "$head")"
+  fallback_range_or_head "$head" 'Commit-policy base is the zero SHA for a new branch'
+elif ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+  fallback_range_or_head "$head" 'Commit-policy base is unavailable'
 else
-  if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
-    fallback_base="${COMMIT_POLICY_FALLBACK_BASE:-}"
-
-    if [[ -n "$fallback_base" ]] && git cat-file -e "$fallback_base^{commit}" 2>/dev/null; then
-      base="$(git merge-base "$fallback_base" "$head")"
-      echo "Commit-policy base is unavailable; validating from fallback merge-base $base."
-    else
-      echo "Commit-policy base is unavailable; validating current head commit only." >&2
-      validate_commit "$head"
-      exit 0
-    fi
-  fi
-
   commits="$(git rev-list --reverse "$base..$head")"
 fi
 
