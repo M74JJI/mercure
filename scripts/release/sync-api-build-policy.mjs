@@ -59,9 +59,7 @@ const artifactDependencies = artifactPackage.dependencies ?? {};
 
 for (const dependencyName of Object.keys(sourceApiPackage.dependencies ?? {})) {
   if (!(dependencyName in artifactDependencies)) {
-    throw new Error(
-      `Pruned API package is missing declared runtime dependency: ${dependencyName}`,
-    );
+    throw new Error(`Pruned API package is missing declared runtime dependency: ${dependencyName}`);
   }
 }
 
