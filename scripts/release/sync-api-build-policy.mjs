@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const workspaceRoot = process.cwd();
@@ -29,6 +29,62 @@ function topLevelBlock(content, key) {
   };
 }
 
+async function collectWorkspacePackages(directoryPath, packagesByName) {
+  const entries = await readdir(directoryPath, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const entryPath = path.join(directoryPath, entry.name);
+    if (entry.isDirectory()) {
+      await collectWorkspacePackages(entryPath, packagesByName);
+      continue;
+    }
+
+    if (entry.isFile() && entry.name === 'package.json') {
+      const manifest = JSON.parse(await readFile(entryPath, 'utf8'));
+      if (manifest.name) {
+        packagesByName.set(manifest.name, manifest);
+      }
+    }
+  }
+}
+
+async function verifyApiRuntimeDependencyClosure(sourceApiPackage) {
+  const packagesByName = new Map();
+  await collectWorkspacePackages(path.join(workspaceRoot, 'apps'), packagesByName);
+  await collectWorkspacePackages(path.join(workspaceRoot, 'libs'), packagesByName);
+
+  const apiDependencies = sourceApiPackage.dependencies ?? {};
+  const visited = new Set();
+  const pending = [sourceApiPackage];
+
+  while (pending.length > 0) {
+    const manifest = pending.pop();
+    if (!manifest?.name || visited.has(manifest.name)) continue;
+    visited.add(manifest.name);
+
+    for (const [dependencyName, dependencyVersion] of Object.entries(
+      manifest.dependencies ?? {},
+    )) {
+      if (typeof dependencyVersion === 'string' && dependencyVersion.startsWith('workspace:')) {
+        const workspaceDependency = packagesByName.get(dependencyName);
+        if (!workspaceDependency) {
+          throw new Error(
+            `Workspace runtime dependency ${dependencyName} is missing its package manifest.`,
+          );
+        }
+        pending.push(workspaceDependency);
+        continue;
+      }
+
+      if (apiDependencies[dependencyName] !== dependencyVersion) {
+        throw new Error(
+          `API runtime dependency closure requires ${dependencyName}@${dependencyVersion}; apps/api/package.json must declare the same exact version.`,
+        );
+      }
+    }
+  }
+}
+
 const rootContent = await readFile(rootPolicyPath, 'utf8');
 const rootAllowBuilds = topLevelBlock(rootContent, 'allowBuilds');
 if (!rootAllowBuilds) {
@@ -54,6 +110,7 @@ await writeFile(artifactPolicyPath, `${artifactLines.join('\n').replace(/\n*$/, 
 process.stdout.write('Synchronized exact API artifact build-script policy.\n');
 
 const sourceApiPackage = JSON.parse(await readFile(sourceApiPackagePath, 'utf8'));
+await verifyApiRuntimeDependencyClosure(sourceApiPackage);
 const artifactPackage = JSON.parse(await readFile(artifactPackagePath, 'utf8'));
 const artifactDependencies = artifactPackage.dependencies ?? {};
 
