@@ -86,8 +86,16 @@ jobs:
           [[ "$(docker image inspect --format '{{.Config.User}}' mercure-api:ci)" == "node" ]]
           [[ "$(docker image inspect --format '{{.Config.User}}' mercure-web:ci)" == "node" ]]
 
+      - name: Set up pinned Chrome for browser smoke
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        with:
+          chrome-version: 153.0.8010.52
+
       - name: Smoke production web container
         shell: bash
+        env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
         run: |
           set -euo pipefail
           docker run --detach \
@@ -119,6 +127,12 @@ jobs:
           status="$(curl --silent --output /dev/null --dump-header "$headers" --write-out '%{http_code}' http://127.0.0.1:3000/)"
           [[ "$status" =~ ^30[2378]$ ]]
           grep -Eiq '^location: .*auth/sign-in' "$headers"
+
+          rendered_dom="$(
+            "$CHROME_PATH"               --headless=new               --disable-gpu               --disable-dev-shm-usage               --no-first-run               --dump-dom               http://127.0.0.1:3000/
+          )"
+          grep -Fq 'Sign in to the security workspace' <<<"$rendered_dom"
+          grep -Fq 'Authentication is delegated to the configured Keycloak identity provider.' <<<"$rendered_dom"
 
   database:
     name: Database integration
@@ -198,6 +212,33 @@ jobs:
 
       - name: Build API
         run: pnpm exec nx build api
+
+      - name: Prepare API production artifact
+        run: pnpm release:prepare-api
+
+      - name: Build API production image
+        run: docker build --file deploy/production/api.Dockerfile --tag mercure-api:db-smoke .
+
+      - name: Smoke API production container
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach             --name mercure-api-smoke             --network host             --env NODE_ENV=production             --env SERVICE_NAME=mercure-api             --env API_HOST=127.0.0.1             --env API_PORT=3011             --env API_CORS_ORIGINS=https://mercure-ci.example.test             --env DATABASE_URL="$DATABASE_URL"             --env DATABASE_POOL_MAX="$DATABASE_POOL_MAX"             --env DATABASE_CONNECTION_TIMEOUT_MS="$DATABASE_CONNECTION_TIMEOUT_MS"             --env DATABASE_IDLE_TIMEOUT_MS="$DATABASE_IDLE_TIMEOUT_MS"             --env DATABASE_HEALTH_TIMEOUT_MS="$DATABASE_HEALTH_TIMEOUT_MS"             --env OIDC_ISSUER_URL=https://identity.example.test/realms/mercure             --env OIDC_AUDIENCE=mercure-api             --env OIDC_CLIENT_ID=mercure-api             --env OIDC_ADMIN_AUTHORITIES=mercure-admin             --env OIDC_USER_AUTHORITIES=mercure-user             --env RULES_MANAGER_ARCHIVE_DIR=/tmp/mercure-ci-missing-rules-source             mercure-api:db-smoke >/dev/null
+          trap 'docker logs mercure-api-smoke 2>&1 || true; docker rm --force mercure-api-smoke >/dev/null 2>&1 || true' EXIT
+
+          ready=0
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3011/api/v1/health/live >/dev/null &&
+               curl --fail --silent http://127.0.0.1:3011/api/v1/health/ready >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          [[ "$ready" == "1" ]]
+
+          protected_status="$(curl --silent --output /dev/null --write-out '%{http_code}'             'http://127.0.0.1:3011/api/v1/rules/snapshots?offset=0&limit=1')"
+          [[ "$protected_status" == "401" ]]
 
       - name: Verify database-backed readiness
         shell: bash
