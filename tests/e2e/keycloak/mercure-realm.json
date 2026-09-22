@@ -41,14 +41,7 @@
   ],
   "roles": {
     "client": {
-      "mercure-api": [
-        {
-          "name": "user"
-        },
-        {
-          "name": "admin"
-        }
-      ]
+      "mercure-api": [{ "name": "user" }, { "name": "admin" }]
     }
   },
   "users": [
@@ -64,9 +57,7 @@
         }
       ],
       "clientRoles": {
-        "mercure-api": [
-          "user"
-        ]
+        "mercure-api": ["user"]
       }
     },
     {
@@ -81,10 +72,7 @@
         }
       ],
       "clientRoles": {
-        "mercure-api": [
-          "user",
-          "admin"
-        ]
+        "mercure-api": ["user", "admin"]
       }
     }
   ]
