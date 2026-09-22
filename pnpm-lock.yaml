@@ -330,6 +330,9 @@ importers:
         specifier: workspace:*
         version: link:../../libs/modules/rules/backend/feature
 
+      reflect-metadata:
+        specifier: 0.2.2
+        version: 0.2.2
   apps/web:
     dependencies:
       '@mercure/platform-frontend-identity-feature':

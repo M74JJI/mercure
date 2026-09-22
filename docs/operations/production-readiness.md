@@ -35,6 +35,8 @@ The repository includes hardened reference container definitions under `deploy/p
 
 The Workspace gate builds both reference images after `pnpm release:prepare` and verifies that their configured runtime user is non-root.
 
+The API reference image explicitly installs the Debian OpenSSL/CA trust packages required by Prisma/runtime TLS dependencies. The base Node image itself remains digest-pinned; OS security packages are refreshed from the image's configured Debian repositories at image-build time.
+
 After `pnpm build`, run `pnpm release:prepare`. This runs the API `prune` target, verifies the API entrypoint, and creates a self-contained Next standalone tree at `dist/apps/web-standalone`, including the generated static assets required by the minimal Next server. The exact web `server.js` location is written to `dist/release-manifest.json` so deployment automation does not hard-code monorepo output depth.
 
 The API bundle at `dist/apps/api/main.js` externalizes third-party runtime packages. The Nx `prune-lockfile` and `copy-workspace-modules` targets therefore emit a production `package.json`, pruned `pnpm-lock.yaml`, `pnpm-workspace.yaml`, and any required `workspace_modules/` beside the bundle. A deployment can copy `dist/apps/api`, run `pnpm install --prod --frozen-lockfile` inside that artifact, and then start `node main.js`. Do not replace the pruned lock/settings files or copied workspace modules with ad-hoc dependency installation.

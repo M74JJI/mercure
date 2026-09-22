@@ -3,6 +3,8 @@ import path from 'node:path';
 
 const workspaceRoot = process.cwd();
 const rootPolicyPath = path.join(workspaceRoot, 'pnpm-workspace.yaml');
+const sourceApiPackagePath = path.join(workspaceRoot, 'apps/api/package.json');
+const artifactPackagePath = path.join(workspaceRoot, 'dist/apps/api/package.json');
 const artifactPolicyPath = path.join(workspaceRoot, 'dist/apps/api/pnpm-workspace.yaml');
 
 function topLevelBlock(content, key) {
@@ -50,3 +52,17 @@ if (artifactAllowBuilds) {
 
 await writeFile(artifactPolicyPath, `${artifactLines.join('\n').replace(/\n*$/, '')}\n`, 'utf8');
 process.stdout.write('Synchronized exact API artifact build-script policy.\n');
+
+const sourceApiPackage = JSON.parse(await readFile(sourceApiPackagePath, 'utf8'));
+const artifactPackage = JSON.parse(await readFile(artifactPackagePath, 'utf8'));
+const artifactDependencies = artifactPackage.dependencies ?? {};
+
+for (const dependencyName of Object.keys(sourceApiPackage.dependencies ?? {})) {
+  if (!(dependencyName in artifactDependencies)) {
+    throw new Error(
+      `Pruned API package is missing declared runtime dependency: ${dependencyName}`,
+    );
+  }
+}
+
+process.stdout.write('Verified declared API runtime dependencies in pruned artifact.\n');
