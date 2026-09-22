@@ -90,7 +90,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          docker run --detach --rm \
+          docker run --detach \
             --name mercure-web-smoke \
             --publish 127.0.0.1:3000:3000 \
             --env AUTH_SECRET="$AUTH_SECRET" \
@@ -103,7 +103,7 @@ jobs:
             --env WEB_AUTH_ADMIN_AUTHORITIES="$WEB_AUTH_ADMIN_AUTHORITIES" \
             --env WEB_AUTH_USER_AUTHORITIES="$WEB_AUTH_USER_AUTHORITIES" \
             mercure-web:ci >/dev/null
-          trap 'docker logs mercure-web-smoke 2>&1 || true; docker stop mercure-web-smoke >/dev/null 2>&1 || true' EXIT
+          trap 'docker logs mercure-web-smoke 2>&1 || true; docker rm --force mercure-web-smoke >/dev/null 2>&1 || true' EXIT
 
           ready=0
           for attempt in {1..30}; do
