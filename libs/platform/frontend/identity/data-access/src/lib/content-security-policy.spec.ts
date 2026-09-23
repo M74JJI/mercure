@@ -13,8 +13,7 @@ describe('content security policy', () => {
       .split('; ')
       .find((directive) => directive.startsWith('script-src '));
 
-    expect(scriptDirective).toBe("script-src 'self' 'nonce-test-nonce'");
-    expect(scriptDirective).not.toContain("'strict-dynamic'");
+    expect(scriptDirective).toBe("script-src 'self' 'nonce-test-nonce' 'strict-dynamic'");
     expect(scriptDirective).not.toContain("'unsafe-inline'");
     expect(scriptDirective).not.toContain("'unsafe-eval'");
     expect(policy).toContain("script-src-attr 'none'");

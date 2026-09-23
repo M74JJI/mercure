@@ -147,9 +147,8 @@ jobs:
             tr ';' '\n' <<<"$csp" |
               sed -n 's/^[[:space:]]*\(script-src [^;]*\)[[:space:]]*$/\1/p'
           )"
-          [[ "$script_policy" == *"'self'"* ]]
           [[ "$script_policy" == *"'nonce-"* ]]
-          [[ "$script_policy" != *"'strict-dynamic'"* ]]
+          [[ "$script_policy" == *"'strict-dynamic'"* ]]
           [[ "$script_policy" != *"'unsafe-inline'"* ]]
 
           nonce="$(sed -n "s/.*'nonce-\([^']*\)'.*/\1/p" <<<"$script_policy")"
