@@ -257,9 +257,7 @@ function readArchiveXml(
         decompressedBytes += buffer.length;
       } catch (error) {
         fail(
-          error instanceof Error
-            ? error
-            : new Error('failed to meter decompressed archive data'),
+          error instanceof Error ? error : new Error('failed to meter decompressed archive data'),
         );
       }
     };
