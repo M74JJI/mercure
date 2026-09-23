@@ -118,7 +118,7 @@ jobs:
 
           ready=0
           for attempt in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:3000/auth/sign-in >/dev/null; then
+            if curl --fail --silent http://localhost:3000/auth/sign-in >/dev/null; then
               ready=1
               break
             fi
@@ -425,9 +425,9 @@ jobs:
         shell: bash
         env:
           NODE_ENV: development
-          API_CORS_ORIGINS: http://127.0.0.1:3000
+          API_CORS_ORIGINS: http://localhost:3000
           AUTH_SECRET: mercure-browser-e2e-auth-secret-not-a-production-secret-000000
-          AUTH_URL: http://127.0.0.1:3000
+          AUTH_URL: http://localhost:3000
           AUTH_TRUST_HOST: 'true'
           AUTH_KEYCLOAK_ID: mercure-web-e2e
           AUTH_KEYCLOAK_SECRET: mercure-web-e2e-secret
@@ -437,7 +437,7 @@ jobs:
           WEB_AUTH_USER_AUTHORITIES: user
           NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:3001
           CHROME_PATH: ${{ steps.setup-auth-chrome.outputs.chrome-path }}
-          E2E_WEB_URL: http://127.0.0.1:3000
+          E2E_WEB_URL: http://localhost:3000
           E2E_USERNAME: mercure-user
           E2E_PASSWORD: mercure-user-e2e-password
         run: |
