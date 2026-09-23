@@ -23,6 +23,9 @@ const nextConfig = {
   outputFileTracingRoot: workspaceRoot,
   poweredByHeader: false,
   reactStrictMode: true,
+  ...(process.env.NODE_ENV === 'development'
+    ? { allowedDevOrigins: ['127.0.0.1'] }
+    : {}),
   experimental: {
     serverActions: {
       bodySizeLimit: '4mb',
