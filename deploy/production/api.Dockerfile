@@ -14,9 +14,10 @@ RUN corepack enable && corepack prepare pnpm@12.4.2 --activate
 
 COPY --chown=node:node dist/apps/api/ ./
 
-RUN pnpm install --prod --frozen-lockfile \
+RUN pnpm install --prod --frozen-lockfile --no-optional \
     && pnpm store prune \
-    && chown -R node:node /app /pnpm
+    && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx /root/.cache/node/corepack /pnpm \
+    && chown -R node:node /app
 
 USER node
 

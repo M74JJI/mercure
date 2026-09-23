@@ -113,7 +113,7 @@ const releaseManifest = {
   api: {
     artifactRoot: path.relative(workspaceRoot, apiRoot).split(path.sep).join('/'),
     entrypoint: path.relative(apiRoot, apiEntrypoint).split(path.sep).join('/'),
-    installCommand: 'pnpm install --prod --frozen-lockfile',
+    installCommand: 'pnpm install --prod --frozen-lockfile --no-optional',
     startCommand: 'node main.js',
   },
   web: {
