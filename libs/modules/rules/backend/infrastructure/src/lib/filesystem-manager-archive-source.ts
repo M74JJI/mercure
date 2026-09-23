@@ -2,7 +2,6 @@ import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
-import { Transform } from 'node:stream';
 import { createGunzip } from 'node:zlib';
 
 import { extract, type ExtractEvents } from 'tar-stream';
@@ -176,21 +175,6 @@ function readArchiveXml(
     let totalBytes = 0;
     let decompressedBytes = 0;
     let settled = false;
-    const decompressionMeter = new Transform({
-      transform(chunk, _encoding, callback) {
-        try {
-          const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-          consumeDecompressedBytes(budget, buffer.length, limits.maxDecompressedBytes);
-          decompressedBytes += buffer.length;
-          callback(null, buffer);
-        } catch (error) {
-          callback(
-            error instanceof Error ? error : new Error('failed to meter decompressed archive data'),
-          );
-        }
-      },
-    });
-
     const timeout = setTimeout(() => {
       fail(new Error(`archive read exceeded the configured ${ARCHIVE_READ_TIMEOUT_MS}-ms timeout`));
     }, ARCHIVE_READ_TIMEOUT_MS);
@@ -202,7 +186,6 @@ function readArchiveXml(
       clearTimeout(timeout);
       input.destroy();
       gunzip.destroy();
-      decompressionMeter.destroy();
       extractor.destroy(error);
       reject(error);
     };
@@ -267,9 +250,23 @@ function readArchiveXml(
       });
     });
 
+    const meterDecompressedChunk = (chunk: Buffer | Uint8Array): void => {
+      try {
+        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        consumeDecompressedBytes(budget, buffer.length, limits.maxDecompressedBytes);
+        decompressedBytes += buffer.length;
+      } catch (error) {
+        fail(
+          error instanceof Error
+            ? error
+            : new Error('failed to meter decompressed archive data'),
+        );
+      }
+    };
+
     input.on('error', fail);
+    gunzip.on('data', meterDecompressedChunk);
     gunzip.on('error', fail);
-    decompressionMeter.on('error', fail);
     extractor.on('error', fail);
     extractor.on('finish', () => {
       if (settled) return;
@@ -286,7 +283,7 @@ function readArchiveXml(
       });
     });
 
-    input.pipe(gunzip).pipe(decompressionMeter).pipe(extractor);
+    input.pipe(gunzip).pipe(extractor);
   });
 }
 
