@@ -173,7 +173,10 @@ try {
   try {
     await waitFor('Keycloak provider redirect', async () => {
       const url = new URL(await currentUrl(sessionId));
-      return url.origin === 'http://127.0.0.1:8080' && url.pathname.includes('/realms/mercure-e2e/');
+      return (
+        url.origin === 'http://127.0.0.1:8080' &&
+        url.pathname.includes('/realms/mercure-e2e/')
+      );
     });
   } catch (error) {
     const diagnostic = await browserDiagnostic(sessionId);
