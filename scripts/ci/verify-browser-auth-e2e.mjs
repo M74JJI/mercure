@@ -95,6 +95,13 @@ async function pageSource(sessionId) {
   return webdriver(`/session/${sessionId}/source`);
 }
 
+async function executeScript(sessionId, script, args = []) {
+  return webdriver(`/session/${sessionId}/execute/sync`, {
+    method: 'POST',
+    body: JSON.stringify({ script, args }),
+  });
+}
+
 async function findElement(sessionId, using, value) {
   const element = await webdriver(`/session/${sessionId}/element`, {
     method: 'POST',
@@ -107,6 +114,114 @@ async function findElement(sessionId, using, value) {
   }
 
   return id;
+}
+
+async function waitForReactHydration(sessionId, elementId) {
+  await waitFor('React hydration', () =>
+    executeScript(
+      sessionId,
+      `const element = arguments[0];
+return Object.keys(element).some((key) => key.startsWith('__reactProps  await webdriver(`/session/${sessionId}/element/${elementId}/click`, {
+    method: 'POST',
+    body: '{}',
+  });
+}
+
+async function type(sessionId, elementId, text) {
+  await webdriver(`/session/${sessionId}/element/${elementId}/value`, {
+    method: 'POST',
+    body: JSON.stringify({
+      text,
+      value: [...text],
+    }),
+  });
+}
+
+async function browserDiagnostic(sessionId) {
+  const url = await currentUrl(sessionId).catch(() => '<unavailable>');
+  const source = await pageSource(sessionId).catch(() => '');
+  const compactSource = source.replace(/\s+/g, ' ').slice(0, 800);
+
+  return { url, source: compactSource };
+}
+
+async function deleteSession(sessionId) {
+  await webdriver(`/session/${sessionId}`, { method: 'DELETE' });
+}
+
+const sessionId = await createSession();
+
+try {
+  await navigate(sessionId, `${webBaseUrl}/auth/sign-in`);
+
+  const signInButton = await waitFor('Mercure sign-in button', () =>
+    findElement(
+      sessionId,
+      'xpath',
+      "//button[contains(normalize-space(.), 'Continue with Keycloak')]",
+    ),
+  );
+  await waitForReactHydration(sessionId, signInButton);
+  await click(sessionId, signInButton);
+
+  try {
+    await waitFor('Keycloak provider redirect', async () => {
+      const url = new URL(await currentUrl(sessionId));
+      return url.origin === 'http://127.0.0.1:8080' && url.pathname.includes('/realms/mercure-e2e/');
+    });
+  } catch (error) {
+    const diagnostic = await browserDiagnostic(sessionId);
+    throw new Error(
+      `Keycloak provider redirect failed at ${diagnostic.url}. Page: ${diagnostic.source}`,
+      { cause: error },
+    );
+  }
+
+  const usernameInput = await waitFor('Keycloak username field', () =>
+    findElement(sessionId, 'css selector', '#username'),
+  );
+  const passwordInput = await findElement(sessionId, 'css selector', '#password');
+
+  await type(sessionId, usernameInput, username);
+  await type(sessionId, passwordInput, password);
+
+  const loginButton = await findElement(sessionId, 'css selector', '#kc-login');
+  await click(sessionId, loginButton);
+
+  await waitFor('Mercure authenticated redirect', async () => {
+    const url = new URL(await currentUrl(sessionId));
+    return url.origin === webBaseUrl && url.pathname === '/';
+  });
+
+  const homeSource = await pageSource(sessionId);
+  if (!homeSource.includes('Security engineering workspace')) {
+    throw new Error('Authenticated Mercure shell was not rendered.');
+  }
+
+  await navigate(sessionId, `${webBaseUrl}/rules`);
+
+  await waitFor('Rules page', async () => {
+    const url = new URL(await currentUrl(sessionId));
+    return url.origin === webBaseUrl && url.pathname === '/rules';
+  });
+
+  const rulesSource = await pageSource(sessionId);
+  if (!rulesSource.includes('Configuration snapshots')) {
+    throw new Error('Rules page did not render authenticated API data.');
+  }
+
+  if (rulesSource.includes('Authoring drafts')) {
+    throw new Error('Normal user unexpectedly received administrator authoring controls.');
+  }
+
+  console.log('Browser Keycloak authentication E2E passed.');
+} finally {
+  await deleteSession(sessionId).catch(() => undefined);
+}
+));`,
+      [{ [elementKey]: elementId }],
+    ),
+  );
 }
 
 async function click(sessionId, elementId) {
