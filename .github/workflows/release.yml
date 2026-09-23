@@ -105,6 +105,13 @@ jobs:
           pnpm build
           pnpm release:prepare
 
+      - name: Build production container images for image SBOMs
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build --file deploy/production/api.Dockerfile --tag mercure-api:release .
+          docker build --file deploy/production/web.Dockerfile --tag mercure-web:release .
+
       - name: Package deterministic release archives
         shell: bash
         run: |
@@ -118,10 +125,7 @@ jobs:
           tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
             -cf - -C dist/apps web-standalone | gzip -n > dist/release/mercure-web.tar.gz
 
-          sha256sum dist/release/mercure-api.tar.gz dist/release/mercure-web.tar.gz \
-            > dist/release/SHA256SUMS
-
-      - name: Generate API SBOM
+      - name: Generate API artifact SBOM
         uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
         with:
           path: dist/apps/api
@@ -130,7 +134,7 @@ jobs:
           upload-artifact: false
           upload-release-assets: false
 
-      - name: Generate web SBOM
+      - name: Generate web artifact SBOM
         uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
         with:
           path: dist/apps/web-standalone
@@ -138,6 +142,37 @@ jobs:
           output-file: dist/release/mercure-web.cdx.json
           upload-artifact: false
           upload-release-assets: false
+
+      - name: Generate API image SBOM
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        with:
+          image: mercure-api:release
+          format: cyclonedx-json
+          output-file: dist/release/mercure-api-image.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Generate web image SBOM
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        with:
+          image: mercure-web:release
+          format: cyclonedx-json
+          output-file: dist/release/mercure-web-image.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Generate release checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum \
+            dist/release/mercure-api.tar.gz \
+            dist/release/mercure-web.tar.gz \
+            dist/release/mercure-api.cdx.json \
+            dist/release/mercure-web.cdx.json \
+            dist/release/mercure-api-image.cdx.json \
+            dist/release/mercure-web-image.cdx.json \
+            > dist/release/SHA256SUMS
 
       - name: Upload release integrity bundle
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -148,6 +183,8 @@ jobs:
             dist/release/mercure-web.tar.gz
             dist/release/mercure-api.cdx.json
             dist/release/mercure-web.cdx.json
+            dist/release/mercure-api-image.cdx.json
+            dist/release/mercure-web-image.cdx.json
             dist/release/SHA256SUMS
           if-no-files-found: error
           retention-days: 30

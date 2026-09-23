@@ -15,7 +15,8 @@ RUN set -eu; \
     server_dir="$(dirname "$server")"; \
     server_file="$(basename "$server")"; \
     printf '#!/bin/sh\nset -eu\ncd "%s"\nexec node "%s"\n' "$server_dir" "$server_file" > /usr/local/bin/start-mercure-web; \
-    chmod 0555 /usr/local/bin/start-mercure-web
+    chmod 0555 /usr/local/bin/start-mercure-web; \
+    rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx /root/.cache/node/corepack
 
 USER node
 

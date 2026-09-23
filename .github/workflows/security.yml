@@ -65,7 +65,7 @@ jobs:
 
       - name: Install deployable API dependencies
         working-directory: dist/apps/api
-        run: pnpm install --prod --frozen-lockfile
+        run: pnpm install --prod --frozen-lockfile --no-optional
 
       - name: Verify ignored advisory packages are not imported by API bundle
         shell: bash
