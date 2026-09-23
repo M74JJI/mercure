@@ -164,6 +164,7 @@ settings:
 
 overrides:
   fastify: 5.12.5
+  smol-toml: 1.7.1
 
 importers:
 
