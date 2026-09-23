@@ -120,8 +120,14 @@ async function waitForReactHydration(sessionId, elementId) {
   await waitFor('React hydration', () =>
     executeScript(
       sessionId,
-      `const element = arguments[0];
-return Object.keys(element).some((key) => key.startsWith('__reactProps  await webdriver(`/session/${sessionId}/element/${elementId}/click`, {
+      "const element = arguments[0]; return Object.keys(element).some((key) => key.startsWith('__reactProps$'));",
+      [{ [elementKey]: elementId }],
+    ),
+  );
+}
+
+async function click(sessionId, elementId) {
+  await webdriver(`/session/${sessionId}/element/${elementId}/click`, {
     method: 'POST',
     body: '{}',
   });
