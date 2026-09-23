@@ -46,15 +46,10 @@ jobs:
             exit 0
           fi
 
-          release_sensitive=false
-          while IFS= read -r changed_path; do
-            case "$changed_path" in
-              .github/workflows/release.yml|scripts/release/*|deploy/production/*|.dockerignore|package.json|pnpm-lock.yaml|pnpm-workspace.yaml)
-                release_sensitive=true
-                break
-                ;;
-            esac
-          done < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          release_sensitive="$(
+            git diff --name-only "$BASE_SHA" "$HEAD_SHA" |
+              scripts/release/detect-release-sensitive-changes.sh
+          )"
 
           echo "release_sensitive=$release_sensitive" >> "$GITHUB_OUTPUT"
 
