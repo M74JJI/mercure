@@ -439,6 +439,8 @@ jobs:
           E2E_WEB_URL: http://localhost:3000
           E2E_USERNAME: mercure-user
           E2E_PASSWORD: mercure-user-e2e-password
+          E2E_ADMIN_USERNAME: mercure-admin
+          E2E_ADMIN_PASSWORD: mercure-admin-e2e-password
         run: |
           set -euo pipefail
 

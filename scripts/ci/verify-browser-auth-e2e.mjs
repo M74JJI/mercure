@@ -1,8 +1,10 @@
 const webdriverBaseUrl = process.env.WEBDRIVER_URL ?? 'http://127.0.0.1:9515';
-const webBaseUrl = process.env.E2E_WEB_URL ?? 'http://127.0.0.1:3000';
+const webBaseUrl = process.env.E2E_WEB_URL ?? 'http://localhost:3000';
 const chromePath = process.env.CHROME_PATH;
-const username = process.env.E2E_USERNAME ?? 'mercure-user';
-const password = process.env.E2E_PASSWORD ?? 'mercure-user-e2e-password';
+const userUsername = process.env.E2E_USERNAME ?? 'mercure-user';
+const userPassword = process.env.E2E_PASSWORD ?? 'mercure-user-e2e-password';
+const adminUsername = process.env.E2E_ADMIN_USERNAME ?? 'mercure-admin';
+const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? 'mercure-admin-e2e-password';
 
 if (!chromePath) {
   throw new Error('CHROME_PATH is required.');
@@ -155,12 +157,10 @@ async function deleteSession(sessionId) {
   await webdriver(`/session/${sessionId}`, { method: 'DELETE' });
 }
 
-const sessionId = await createSession();
-
-try {
+async function login(sessionId, username, password, label) {
   await navigate(sessionId, `${webBaseUrl}/auth/sign-in`);
 
-  const signInButton = await waitFor('Mercure sign-in button', () =>
+  const signInButton = await waitFor(`${label} Mercure sign-in button`, () =>
     findElement(
       sessionId,
       'xpath',
@@ -171,7 +171,7 @@ try {
   await click(sessionId, signInButton);
 
   try {
-    await waitFor('Keycloak provider redirect', async () => {
+    await waitFor(`${label} Keycloak provider redirect`, async () => {
       const url = new URL(await currentUrl(sessionId));
       return (
         url.origin === 'http://127.0.0.1:8080' && url.pathname.includes('/realms/mercure-e2e/')
@@ -180,12 +180,12 @@ try {
   } catch (error) {
     const diagnostic = await browserDiagnostic(sessionId);
     throw new Error(
-      `Keycloak provider redirect failed at ${diagnostic.url}. Page: ${diagnostic.source}`,
+      `${label} Keycloak provider redirect failed at ${diagnostic.url}. Page: ${diagnostic.source}`,
       { cause: error },
     );
   }
 
-  const usernameInput = await waitFor('Keycloak username field', () =>
+  const usernameInput = await waitFor(`${label} Keycloak username field`, () =>
     findElement(sessionId, 'css selector', '#username'),
   );
   const passwordInput = await findElement(sessionId, 'css selector', '#password');
@@ -196,33 +196,90 @@ try {
   const loginButton = await findElement(sessionId, 'css selector', '#kc-login');
   await click(sessionId, loginButton);
 
-  await waitFor('Mercure authenticated redirect', async () => {
+  await waitFor(`${label} Mercure authenticated redirect`, async () => {
     const url = new URL(await currentUrl(sessionId));
     return url.origin === webBaseUrl && url.pathname === '/';
   });
 
   const homeSource = await pageSource(sessionId);
   if (!homeSource.includes('Security engineering workspace')) {
-    throw new Error('Authenticated Mercure shell was not rendered.');
+    throw new Error(`${label} authenticated Mercure shell was not rendered.`);
   }
+}
 
+async function verifyRulesAccess(sessionId, label, expectAdminControls) {
   await navigate(sessionId, `${webBaseUrl}/rules`);
 
-  await waitFor('Rules page', async () => {
+  await waitFor(`${label} Rules page`, async () => {
     const url = new URL(await currentUrl(sessionId));
     return url.origin === webBaseUrl && url.pathname === '/rules';
   });
 
   const rulesSource = await pageSource(sessionId);
   if (!rulesSource.includes('Configuration snapshots')) {
-    throw new Error('Rules page did not render authenticated API data.');
+    throw new Error(`${label} Rules page did not render authenticated API data.`);
   }
 
-  if (rulesSource.includes('Authoring drafts')) {
-    throw new Error('Normal user unexpectedly received administrator authoring controls.');
+  const hasAdminControls = rulesSource.includes('Authoring drafts');
+  if (hasAdminControls !== expectAdminControls) {
+    throw new Error(
+      expectAdminControls
+        ? `${label} did not receive expected administrator authoring controls.`
+        : `${label} unexpectedly received administrator authoring controls.`,
+    );
   }
-
-  console.log('Browser Keycloak authentication E2E passed.');
-} finally {
-  await deleteSession(sessionId).catch(() => undefined);
 }
+
+async function verifyAdminBoundary(sessionId, label, expectAdminAccess) {
+  await navigate(sessionId, `${webBaseUrl}/rules/drafts`);
+
+  if (!expectAdminAccess) {
+    await waitFor(`${label} forbidden redirect`, async () => {
+      const url = new URL(await currentUrl(sessionId));
+      return url.origin === webBaseUrl && url.pathname === '/auth/forbidden';
+    });
+    return;
+  }
+
+  await waitFor(`${label} authoring page`, async () => {
+    const url = new URL(await currentUrl(sessionId));
+    return url.origin === webBaseUrl && url.pathname === '/rules/drafts';
+  });
+
+  const authoringSource = await pageSource(sessionId);
+  if (
+    !authoringSource.includes('Authoring drafts') ||
+    !authoringSource.includes('Create a blank XML draft')
+  ) {
+    throw new Error(`${label} administrator authoring page was not rendered.`);
+  }
+}
+
+async function runScenario({ label, username, password, expectAdminAccess }) {
+  const sessionId = await createSession();
+
+  try {
+    await login(sessionId, username, password, label);
+    await verifyRulesAccess(sessionId, label, expectAdminAccess);
+    await verifyAdminBoundary(sessionId, label, expectAdminAccess);
+    console.log(`${label} browser authentication E2E passed.`);
+  } finally {
+    await deleteSession(sessionId).catch(() => undefined);
+  }
+}
+
+await runScenario({
+  label: 'Normal user',
+  username: userUsername,
+  password: userPassword,
+  expectAdminAccess: false,
+});
+
+await runScenario({
+  label: 'Administrator',
+  username: adminUsername,
+  password: adminPassword,
+  expectAdminAccess: true,
+});
+
+console.log('Browser Keycloak user/admin authentication E2E passed.');
