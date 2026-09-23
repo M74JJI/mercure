@@ -19,7 +19,11 @@ export function createContentSecurityPolicy(
   nonce: string,
   nodeEnvironment: string | undefined = process.env.NODE_ENV,
 ): string {
-  const scriptSources = ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"];
+  // Keep same-origin external chunks allowed in addition to nonce-gated inline
+  // scripts. Next.js App Router can currently emit loading/error boundary
+  // chunks without a nonce; strict-dynamic would cause modern browsers to
+  // ignore the 'self' fallback and block those framework chunks.
+  const scriptSources = ["'self'", `'nonce-${nonce}'`];
 
   if (nodeEnvironment === 'development') {
     scriptSources.push("'unsafe-eval'");
