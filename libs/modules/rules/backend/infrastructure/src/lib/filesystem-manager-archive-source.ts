@@ -160,22 +160,26 @@ function readArchiveXml(
     let xmlFiles = 0;
     let totalBytes = 0;
     let settled = false;
+    let timeout: NodeJS.Timeout | undefined;
     const decompressionMeter = createArchiveDecompressionMeter(budget, limits.maxDecompressedBytes);
-    const timeout = setTimeout(() => {
-      fail(new Error(`archive read exceeded the configured ${ARCHIVE_READ_TIMEOUT_MS}-ms timeout`));
-    }, ARCHIVE_READ_TIMEOUT_MS);
-    timeout.unref();
 
     const fail = (error: Error): void => {
       if (settled) return;
       settled = true;
-      clearTimeout(timeout);
+      if (timeout) clearTimeout(timeout);
       input.destroy();
       gunzip.destroy();
       decompressionMeter.stream.destroy();
       extractor.destroy(error);
       reject(error);
     };
+
+    timeout = setTimeout(
+      fail,
+      ARCHIVE_READ_TIMEOUT_MS,
+      new Error(`archive read exceeded the configured ${ARCHIVE_READ_TIMEOUT_MS}-ms timeout`),
+    );
+    timeout.unref();
 
     extractor.on('entry', (header, stream, next) => {
       void (async () => {
@@ -244,7 +248,7 @@ function readArchiveXml(
     extractor.on('finish', () => {
       if (settled) return;
       settled = true;
-      clearTimeout(timeout);
+      if (timeout) clearTimeout(timeout);
 
       files.sort((left, right) => left.sourcePath.localeCompare(right.sourcePath));
       resolve({
