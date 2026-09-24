@@ -160,10 +160,7 @@ function readArchiveXml(
     let xmlFiles = 0;
     let totalBytes = 0;
     let settled = false;
-    const decompressionMeter = createArchiveDecompressionMeter(
-      budget,
-      limits.maxDecompressedBytes,
-    );
+    const decompressionMeter = createArchiveDecompressionMeter(budget, limits.maxDecompressedBytes);
     const timeout = setTimeout(() => {
       fail(new Error(`archive read exceeded the configured ${ARCHIVE_READ_TIMEOUT_MS}-ms timeout`));
     }, ARCHIVE_READ_TIMEOUT_MS);
