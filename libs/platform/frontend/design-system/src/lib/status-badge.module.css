@@ -4,10 +4,10 @@
   align-items: center;
   border: 1px solid transparent;
   border-radius: 999px;
-  padding: 0.25rem 0.65rem;
-  font-size: var(--mc-font-xs);
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  padding: 0.25rem 0.62rem;
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.035em;
   line-height: 1;
 }
 
