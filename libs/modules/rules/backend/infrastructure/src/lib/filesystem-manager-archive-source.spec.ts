@@ -319,6 +319,39 @@ describe('FilesystemManagerArchiveSource', () => {
     });
   });
 
+  it('counts tar metadata and padding toward the decompressed byte limit', async () => {
+    await withTempDirectory(async (root) => {
+      const archiveRoot = path.join(root, 'archives');
+      const sourceRoot = path.join(root, 'source');
+      await mkdir(archiveRoot, { recursive: true });
+      await mkdir(path.join(sourceRoot, 'other'), { recursive: true });
+
+      for (let index = 0; index < 32; index += 1) {
+        await writeFile(path.join(sourceRoot, 'other', `empty-${index}.txt`), '');
+      }
+
+      await createArchive(path.join(archiveRoot, 'manager-metadata.tar.gz'), sourceRoot);
+
+      const source = new FilesystemManagerArchiveSource({
+        rootPath: archiveRoot,
+        maxArchives: 8,
+        maxCompressedBytes: 8 * 1024 * 1024,
+        maxDecompressedBytes: 2048,
+        maxFiles: 10,
+        maxEntryBytes: 1024 * 1024,
+        maxTotalBytes: 1024,
+      });
+
+      const snapshot = await source.readSnapshot();
+
+      expect(snapshot.archives).toEqual([]);
+      expect(snapshot.files).toEqual([]);
+      expect(snapshot.errors).toEqual([
+        expect.stringContaining('decompressed data exceeds the configured 2048-byte limit'),
+      ]);
+    });
+  });
+
   it('preserves the decompression budget after a failed archive', async () => {
     await withTempDirectory(async (root) => {
       const archiveRoot = path.join(root, 'archives');

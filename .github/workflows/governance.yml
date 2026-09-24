@@ -34,6 +34,9 @@ jobs:
       - name: Verify commit policy regression tests
         run: scripts/ci/test-commit-policy.sh
 
+      - name: Verify release scope regression tests
+        run: scripts/ci/test-release-scope.sh
+
       - name: Validate branch name
         shell: bash
         env:

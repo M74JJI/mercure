@@ -67,6 +67,15 @@ export class PrismaRulesIntelligenceRateLimiter implements RulesIntelligenceRate
       throw new Error('Rules intelligence rate limiter did not return a decision.');
     }
 
+    if (row.count === 1) {
+      const staleAfterSeconds = this.windowSeconds * 2;
+      await this.database.$executeRaw`
+        DELETE FROM "rules_intelligence_rate_limits"
+        WHERE "key" <> ${key}
+          AND "window_start" <= NOW() - (${staleAfterSeconds} * INTERVAL '1 second')
+      `;
+    }
+
     return {
       allowed: row.count <= this.maxRequests,
       limit: this.maxRequests,

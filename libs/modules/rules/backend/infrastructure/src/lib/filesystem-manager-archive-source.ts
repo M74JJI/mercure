@@ -6,6 +6,11 @@ import { createGunzip } from 'node:zlib';
 
 import { extract, type ExtractEvents } from 'tar-stream';
 
+import {
+  createArchiveDecompressionMeter,
+  type ArchiveDecompressionBudget,
+} from './archive-decompression-meter';
+
 import type {
   RulesetArchiveInfo,
   RulesetArchiveSnapshot,
@@ -34,10 +39,6 @@ interface ArchiveReadLimits {
   readonly maxEntryBytes: number;
   readonly maxTotalBytes: number;
   readonly remainingTotalBytes: number;
-}
-
-interface ArchiveReadBudget {
-  remainingDecompressedBytes: number;
 }
 
 interface ArchiveReadFile {
@@ -83,25 +84,9 @@ function normalizeArchiveEntry(entry: string): string | null {
   return XML_SOURCE_PATTERN.test(normalized) ? normalized : null;
 }
 
-function consumeDecompressedBytes(
-  budget: ArchiveReadBudget,
-  bytes: number,
-  maxDecompressedBytes: number,
-): void {
-  if (bytes > budget.remainingDecompressedBytes) {
-    budget.remainingDecompressedBytes = 0;
-    throw new Error(
-      `archive decompressed data exceeds the configured ${maxDecompressedBytes}-byte limit`,
-    );
-  }
-
-  budget.remainingDecompressedBytes -= bytes;
-}
-
 async function drainArchiveEntry(
   stream: ArchiveEntryStream,
   expectedBytes: number,
-  consumeBytes: (bytes: number) => void,
 ): Promise<number> {
   let bytes = 0;
 
@@ -110,7 +95,6 @@ async function drainArchiveEntry(
       throw new Error('archive member emitted an unsupported stream chunk');
     }
 
-    consumeBytes(chunk.length);
     bytes += chunk.length;
     if (bytes > expectedBytes) {
       throw new Error(`archive member exceeded its declared ${expectedBytes}-byte size`);
@@ -129,7 +113,6 @@ async function drainArchiveEntry(
 async function readArchiveEntry(
   stream: ArchiveEntryStream,
   expectedBytes: number,
-  consumeBytes: (bytes: number) => void,
 ): Promise<Buffer> {
   const chunks: Buffer[] = [];
   let bytes = 0;
@@ -140,7 +123,6 @@ async function readArchiveEntry(
     }
 
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-    consumeBytes(buffer.length);
     bytes += buffer.length;
 
     if (bytes > expectedBytes) {
@@ -166,7 +148,7 @@ function isRegularArchiveFile(type: string): boolean {
 function readArchiveXml(
   archivePath: string,
   limits: ArchiveReadLimits,
-  budget: ArchiveReadBudget,
+  budget: ArchiveDecompressionBudget,
 ): Promise<ArchiveReadResult> {
   return new Promise((resolve, reject) => {
     const input = createReadStream(archivePath);
@@ -177,39 +159,30 @@ function readArchiveXml(
     const errors: string[] = [];
     let xmlFiles = 0;
     let totalBytes = 0;
-    let decompressedBytes = 0;
     let settled = false;
-
-    const timeout = setTimeout(() => {
-      fail(new Error(`archive read exceeded the configured ${ARCHIVE_READ_TIMEOUT_MS}-ms timeout`));
-    }, ARCHIVE_READ_TIMEOUT_MS);
+    const decompressionMeter = createArchiveDecompressionMeter(budget, limits.maxDecompressedBytes);
+    const timeout = setTimeout(
+      fail,
+      ARCHIVE_READ_TIMEOUT_MS,
+      new Error(`archive read exceeded the configured ${ARCHIVE_READ_TIMEOUT_MS}-ms timeout`),
+    );
     timeout.unref();
 
-    const fail = (error: Error): void => {
+    function fail(error: Error): void {
       if (settled) return;
       settled = true;
       clearTimeout(timeout);
       input.destroy();
       gunzip.destroy();
+      decompressionMeter.stream.destroy();
       extractor.destroy(error);
       reject(error);
-    };
+    }
 
     extractor.on('entry', (header, stream, next) => {
       void (async () => {
-        if (header.size > budget.remainingDecompressedBytes) {
-          throw new Error(
-            `archive decompressed data exceeds the configured ${limits.maxDecompressedBytes}-byte limit`,
-          );
-        }
-
-        const consumeBytes = (bytes: number): void => {
-          consumeDecompressedBytes(budget, bytes, limits.maxDecompressedBytes);
-          decompressedBytes += bytes;
-        };
-
         const drain = async (): Promise<void> => {
-          await drainArchiveEntry(stream, header.size, consumeBytes);
+          await drainArchiveEntry(stream, header.size);
           next();
         };
 
@@ -253,7 +226,7 @@ function readArchiveXml(
           return;
         }
 
-        const content = await readArchiveEntry(stream, header.size, consumeBytes);
+        const content = await readArchiveEntry(stream, header.size);
         totalBytes += content.length;
         files.push({
           sourcePath,
@@ -268,6 +241,7 @@ function readArchiveXml(
 
     input.on('error', fail);
     gunzip.on('error', fail);
+    decompressionMeter.stream.on('error', fail);
     extractor.on('error', fail);
     extractor.on('finish', () => {
       if (settled) return;
@@ -279,12 +253,12 @@ function readArchiveXml(
         xmlFiles,
         files,
         totalBytes,
-        decompressedBytes,
+        decompressedBytes: decompressionMeter.state.decompressedBytes,
         errors,
       });
     });
 
-    input.pipe(gunzip).pipe(extractor);
+    input.pipe(gunzip).pipe(decompressionMeter.stream).pipe(extractor);
   });
 }
 
@@ -349,7 +323,7 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
     }
 
     let totalCompressedBytes = 0;
-    const decompressionBudget: ArchiveReadBudget = {
+    const decompressionBudget: ArchiveDecompressionBudget = {
       remainingDecompressedBytes: this.options.maxDecompressedBytes,
     };
     let totalXmlFiles = 0;

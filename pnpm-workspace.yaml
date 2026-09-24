@@ -12,10 +12,12 @@ sharedWorkspaceLockfile: true
 preferWorkspacePackages: true
 verifyStoreIntegrity: true
 
-# Force one patched Fastify runtime across Nest and all Fastify plugins. NestJS
-# 11.2.5 still resolves an older Fastify 5.x patch release by default.
+# Force reviewed patched transitive versions where an upstream package has not
+# yet moved its exact dependency. Keep each override exact and remove it once
+# the upstream dependency graph resolves an equally patched version by default.
 overrides:
   fastify: 5.12.5
+  smol-toml: 1.7.1
 
 # Do not install optional build systems we do not use. @nx/react is pulled by
 # @nx/next and declares @nx/vite as optional; Mercure uses Next.js, not Vite.
