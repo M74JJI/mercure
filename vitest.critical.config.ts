@@ -35,6 +35,7 @@ export default defineConfig({
         'libs/modules/rules/backend/presentation/src/lib/**/*.ts',
         'libs/modules/rules/backend/application/src/lib/persist-ruleset-snapshot.ts',
         'libs/modules/rules/backend/application/src/lib/rules-authoring.ts',
+        'libs/modules/rules/backend/infrastructure/src/lib/archive-decompression-meter.ts',
         'libs/modules/rules/backend/infrastructure/src/lib/filesystem-manager-archive-source.ts',
         'libs/modules/rules/backend/infrastructure/src/lib/wazuh-xml-ruleset-analyzer.ts',
       ],

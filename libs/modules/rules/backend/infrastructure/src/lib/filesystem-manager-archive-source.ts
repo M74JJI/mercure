@@ -6,6 +6,8 @@ import { createGunzip } from 'node:zlib';
 
 import { extract, type ExtractEvents } from 'tar-stream';
 
+import { createArchiveDecompressionMeter, type ArchiveDecompressionBudget } from './archive-decompression-meter';
+
 import type {
   RulesetArchiveInfo,
   RulesetArchiveSnapshot,
@@ -34,10 +36,6 @@ interface ArchiveReadLimits {
   readonly maxEntryBytes: number;
   readonly maxTotalBytes: number;
   readonly remainingTotalBytes: number;
-}
-
-interface ArchiveReadBudget {
-  remainingDecompressedBytes: number;
 }
 
 interface ArchiveReadFile {
@@ -81,21 +79,6 @@ function normalizeArchiveEntry(entry: string): string | null {
   }
 
   return XML_SOURCE_PATTERN.test(normalized) ? normalized : null;
-}
-
-function consumeDecompressedBytes(
-  budget: ArchiveReadBudget,
-  bytes: number,
-  maxDecompressedBytes: number,
-): void {
-  if (bytes > budget.remainingDecompressedBytes) {
-    budget.remainingDecompressedBytes = 0;
-    throw new Error(
-      `archive decompressed data exceeds the configured ${maxDecompressedBytes}-byte limit`,
-    );
-  }
-
-  budget.remainingDecompressedBytes -= bytes;
 }
 
 async function drainArchiveEntry(
@@ -162,7 +145,7 @@ function isRegularArchiveFile(type: string): boolean {
 function readArchiveXml(
   archivePath: string,
   limits: ArchiveReadLimits,
-  budget: ArchiveReadBudget,
+  budget: ArchiveDecompressionBudget,
 ): Promise<ArchiveReadResult> {
   return new Promise((resolve, reject) => {
     const input = createReadStream(archivePath);
@@ -173,8 +156,11 @@ function readArchiveXml(
     const errors: string[] = [];
     let xmlFiles = 0;
     let totalBytes = 0;
-    let decompressedBytes = 0;
     let settled = false;
+    const decompressionMeter = createArchiveDecompressionMeter(
+      budget,
+      limits.maxDecompressedBytes,
+    );
     const timeout = setTimeout(() => {
       fail(new Error(`archive read exceeded the configured ${ARCHIVE_READ_TIMEOUT_MS}-ms timeout`));
     }, ARCHIVE_READ_TIMEOUT_MS);
@@ -186,6 +172,7 @@ function readArchiveXml(
       clearTimeout(timeout);
       input.destroy();
       gunzip.destroy();
+      decompressionMeter.stream.destroy();
       extractor.destroy(error);
       reject(error);
     };
@@ -250,21 +237,9 @@ function readArchiveXml(
       });
     });
 
-    const meterDecompressedChunk = (chunk: Buffer | Uint8Array): void => {
-      try {
-        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-        consumeDecompressedBytes(budget, buffer.length, limits.maxDecompressedBytes);
-        decompressedBytes += buffer.length;
-      } catch (error) {
-        fail(
-          error instanceof Error ? error : new Error('failed to meter decompressed archive data'),
-        );
-      }
-    };
-
     input.on('error', fail);
-    gunzip.on('data', meterDecompressedChunk);
     gunzip.on('error', fail);
+    decompressionMeter.stream.on('error', fail);
     extractor.on('error', fail);
     extractor.on('finish', () => {
       if (settled) return;
@@ -276,12 +251,12 @@ function readArchiveXml(
         xmlFiles,
         files,
         totalBytes,
-        decompressedBytes,
+        decompressedBytes: decompressionMeter.state.decompressedBytes,
         errors,
       });
     });
 
-    input.pipe(gunzip).pipe(extractor);
+    input.pipe(gunzip).pipe(decompressionMeter.stream).pipe(extractor);
   });
 }
 
@@ -346,7 +321,7 @@ export class FilesystemManagerArchiveSource implements RulesetArchiveSource {
     }
 
     let totalCompressedBytes = 0;
-    const decompressionBudget: ArchiveReadBudget = {
+    const decompressionBudget: ArchiveDecompressionBudget = {
       remainingDecompressedBytes: this.options.maxDecompressedBytes,
     };
     let totalXmlFiles = 0;
