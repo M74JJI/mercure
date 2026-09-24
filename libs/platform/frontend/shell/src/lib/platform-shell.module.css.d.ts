@@ -5,17 +5,25 @@ declare const styles: {
   readonly brand: string;
   readonly brandMark: string;
   readonly brandCopy: string;
+  readonly workspaceLabel: string;
+  readonly workspacePulse: string;
   readonly navigation: string;
   readonly navigationLabel: string;
   readonly navigationLink: string;
   readonly navIcon: string;
   readonly sidebarFooter: string;
+  readonly footerCopy: string;
   readonly healthDot: string;
   readonly workspace: string;
   readonly topbar: string;
+  readonly topbarContext: string;
   readonly topbarEyebrow: string;
   readonly topbarTitle: string;
   readonly environment: string;
+  readonly account: string;
+  readonly avatar: string;
+  readonly accountCopy: string;
+  readonly accountAction: string;
   readonly main: string;
 };
 

@@ -8,6 +8,7 @@ declare const styles: {
   readonly actions: string;
   readonly primaryButton: string;
   readonly secondaryButton: string;
+  readonly compactButton: string;
 };
 
 export default styles;

@@ -16,14 +16,16 @@ export function IdentitySignInButton({ callbackPath }: { readonly callbackPath: 
   );
 }
 
-export function IdentitySignOutButton() {
+export function IdentitySignOutButton({ compact = false }: { readonly compact?: boolean }) {
   return (
     <button
-      className={styles.secondaryButton}
+      className={[styles.secondaryButton, compact ? styles.compactButton : '']
+        .filter(Boolean)
+        .join(' ')}
       type="button"
       onClick={() => void signOut({ redirectTo: '/auth/sign-in' })}
     >
-      Sign out
+      {compact ? 'Exit' : 'Sign out'}
     </button>
   );
 }

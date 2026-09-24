@@ -1,7 +1,7 @@
 .panel {
   border: 1px solid var(--mc-border-subtle);
   border-radius: var(--mc-radius-xl);
-  background: var(--mc-surface-primary);
+  background: linear-gradient(145deg, rgba(17, 26, 39, 0.96), rgba(10, 16, 25, 0.94));
   box-shadow: var(--mc-shadow-sm);
 }
 
@@ -10,11 +10,11 @@
 }
 
 .muted {
-  background: var(--mc-surface-muted);
+  background: linear-gradient(145deg, rgba(18, 27, 40, 0.74), rgba(11, 17, 26, 0.72));
 }
 
 .raised {
   border-color: var(--mc-border-strong);
-  background: var(--mc-surface-raised);
+  background: linear-gradient(145deg, rgba(22, 32, 47, 0.98), rgba(12, 19, 29, 0.98));
   box-shadow: var(--mc-shadow-lg);
 }
