@@ -6,7 +6,10 @@ import { createGunzip } from 'node:zlib';
 
 import { extract, type ExtractEvents } from 'tar-stream';
 
-import { createArchiveDecompressionMeter, type ArchiveDecompressionBudget } from './archive-decompression-meter';
+import {
+  createArchiveDecompressionMeter,
+  type ArchiveDecompressionBudget,
+} from './archive-decompression-meter';
 
 import type {
   RulesetArchiveInfo,
