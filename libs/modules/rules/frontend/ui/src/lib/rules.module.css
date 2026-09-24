@@ -1079,3 +1079,278 @@
     flex-direction: column;
   }
 }
+
+/* Product visual layer */
+.page {
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.snapshotList {
+  gap: 0.8rem;
+}
+
+.snapshotCard {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.15rem, 2.5vw, 1.65rem);
+  background: linear-gradient(140deg, rgba(19, 29, 43, 0.98), rgba(10, 16, 25, 0.96));
+  box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.13);
+}
+
+.snapshotCard::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: linear-gradient(var(--mc-accent), transparent 75%);
+  content: '';
+  opacity: 0.55;
+}
+
+.snapshotLink:hover .snapshotCard {
+  border-color: rgba(131, 227, 255, 0.32);
+  box-shadow: var(--mc-shadow-md);
+  transform: translateY(-2px);
+}
+
+.snapshotHeading h2,
+.sectionHeader h2,
+.statePanel h2,
+.empty h2 {
+  font-weight: 690;
+  letter-spacing: -0.025em;
+}
+
+.inlineStats {
+  gap: 0.65rem;
+}
+
+.inlineStats span {
+  display: inline-flex;
+  min-height: 2.15rem;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--mc-border-subtle);
+  border-radius: 999px;
+  padding: 0 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 0.73rem;
+}
+
+.snapshotFooter {
+  color: var(--mc-text-muted);
+  font-size: 0.72rem;
+}
+
+.metricGrid,
+.intelligenceMetrics,
+.comparisonMetrics {
+  gap: 0.75rem;
+}
+
+.metric {
+  position: relative;
+  min-height: 6.7rem;
+  align-content: space-between;
+  overflow: hidden;
+  padding: 1rem;
+  background: linear-gradient(145deg, rgba(18, 28, 42, 0.88), rgba(11, 17, 26, 0.82));
+}
+
+.metric::after {
+  position: absolute;
+  right: -1.7rem;
+  bottom: -2.1rem;
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  background: rgba(53, 205, 255, 0.045);
+  content: '';
+}
+
+.metric strong {
+  color: #f8fbff;
+  font-size: 1.7rem;
+  font-weight: 680;
+  letter-spacing: -0.04em;
+}
+
+.metric span {
+  font-size: 0.7rem;
+}
+
+.sectionPanel,
+.intelligenceSection,
+.compareControls,
+.adminFormPanel,
+.dangerPanel,
+.statePanel,
+.empty,
+.provenance,
+.formNotice {
+  padding: clamp(1.1rem, 2.5vw, 1.6rem);
+}
+
+.sectionPanel {
+  border-color: rgba(164, 184, 211, 0.15);
+  box-shadow: 0 1rem 2.75rem rgba(0, 0, 0, 0.16);
+}
+
+.sectionHeader {
+  align-items: center;
+  border-bottom: 1px solid var(--mc-border-subtle);
+  padding-bottom: 1rem;
+}
+
+.table {
+  font-size: 0.78rem;
+}
+
+.table th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  padding: 0.8rem;
+  background: rgba(12, 19, 29, 0.96);
+  color: #718199;
+  font-size: 0.63rem;
+}
+
+.table td {
+  padding: 0.85rem 0.8rem;
+}
+
+.table tbody tr {
+  transition: background var(--mc-motion-fast) ease;
+}
+
+.table tbody tr:hover {
+  background: rgba(53, 205, 255, 0.025);
+}
+
+.issueList li,
+.decoderList li,
+.comparisonList li,
+.graphNode {
+  border-color: rgba(164, 184, 211, 0.14);
+  background: rgba(255, 255, 255, 0.018);
+  transition:
+    border-color var(--mc-motion-fast) ease,
+    background var(--mc-motion-fast) ease;
+}
+
+.issueList li:hover,
+.decoderList li:hover,
+.comparisonList li:hover,
+.graphNode:hover {
+  border-color: var(--mc-border-strong);
+  background: rgba(255, 255, 255, 0.028);
+}
+
+.backLink {
+  color: var(--mc-text-accent);
+  font-weight: 620;
+  text-underline-offset: 0.2rem;
+}
+
+.headerActions {
+  justify-content: flex-end;
+}
+
+.actionLink,
+.actionButton,
+.compareForm button,
+.filterForm button,
+.graphFilterForm button,
+.catalogFilterForm button,
+.explorerFilterForm button,
+.adminForm button,
+.dangerForm button {
+  min-height: 2.55rem;
+  border-color: var(--mc-border-strong);
+  border-radius: 0.65rem;
+  background: linear-gradient(145deg, rgba(29, 42, 59, 0.86), rgba(17, 25, 37, 0.9));
+  color: var(--mc-text-primary);
+  font-size: 0.76rem;
+  font-weight: 680;
+  transition:
+    border-color var(--mc-motion-fast) ease,
+    background var(--mc-motion-fast) ease,
+    transform var(--mc-motion-fast) ease;
+}
+
+.actionLink {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.85rem;
+}
+
+.actionLink:hover,
+.actionButton:hover,
+.compareForm button:hover,
+.filterForm button:hover,
+.graphFilterForm button:hover,
+.catalogFilterForm button:hover,
+.explorerFilterForm button:hover,
+.adminForm button:hover,
+.dangerForm button:hover {
+  border-color: var(--mc-border-accent);
+  background: rgba(53, 205, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.compareForm input,
+.compareForm select,
+.filterForm input,
+.filterForm select,
+.graphFilterForm input,
+.graphFilterForm select,
+.catalogFilterForm input,
+.catalogFilterForm select,
+.explorerFilterForm input,
+.explorerFilterForm select,
+.adminForm input,
+.adminForm textarea,
+.dangerForm input {
+  border-color: var(--mc-border-strong);
+  background: rgba(7, 12, 20, 0.76);
+  color: var(--mc-text-primary);
+}
+
+.compareForm input::placeholder,
+.filterForm input::placeholder,
+.graphFilterForm input::placeholder,
+.catalogFilterForm input::placeholder,
+.explorerFilterForm input::placeholder,
+.adminForm input::placeholder,
+.adminForm textarea::placeholder,
+.dangerForm input::placeholder {
+  color: #56657a;
+}
+
+.useCaseCard {
+  min-height: 15rem;
+  padding: 1.35rem;
+  background: linear-gradient(145deg, rgba(18, 28, 42, 0.9), rgba(10, 16, 25, 0.88));
+}
+
+.useCaseCardFooter {
+  margin-top: auto;
+}
+
+.intelligenceHeading h2 {
+  font-weight: 690;
+  letter-spacing: -0.025em;
+}
+
+.graphStats span,
+.diagnosticGrid span {
+  min-height: 5rem;
+  align-content: space-between;
+  background: rgba(255, 255, 255, 0.016);
+}
+
+.pagination {
+  min-height: 2.75rem;
+}

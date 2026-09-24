@@ -2,7 +2,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--mc-space-6);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
 }
 
 .copy {
@@ -10,29 +10,29 @@
 }
 
 .eyebrow {
-  margin: 0 0 var(--mc-space-2);
+  margin: 0 0 var(--mc-space-3);
   color: var(--mc-text-accent);
   font-size: var(--mc-font-xs);
-  font-weight: 700;
-  letter-spacing: 0.14em;
+  font-weight: 800;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .title {
   margin: 0;
   color: var(--mc-text-primary);
-  font-size: clamp(2rem, 4vw, 3.25rem);
-  font-weight: 720;
-  letter-spacing: -0.045em;
-  line-height: 1.05;
+  font-size: clamp(2rem, 4.5vw, 3.7rem);
+  font-weight: 740;
+  letter-spacing: -0.055em;
+  line-height: 1.01;
 }
 
 .description {
   max-width: 46rem;
   margin: var(--mc-space-4) 0 0;
   color: var(--mc-text-secondary);
-  font-size: var(--mc-font-md);
-  line-height: 1.7;
+  font-size: clamp(0.94rem, 1.3vw, 1.05rem);
+  line-height: 1.75;
 }
 
 .actions {

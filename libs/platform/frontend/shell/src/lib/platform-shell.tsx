@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -13,6 +14,25 @@ import styles from './platform-shell.module.css';
 
 export interface PlatformShellProps {
   readonly children: ReactNode;
+  readonly identity: {
+    readonly displayName: string;
+    readonly role: 'admin' | 'user' | null;
+  };
+  readonly accountAction?: ReactNode;
+}
+
+function initials(displayName: string): string {
+  return displayName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
+}
+
+function currentSection(pathname: string): string {
+  if (pathname.startsWith('/rules')) return 'Rules intelligence';
+  return 'Operations overview';
 }
 
 function NavigationIcon({ icon }: { readonly icon: PlatformNavigationIcon }) {
@@ -43,7 +63,7 @@ function isCurrentPath(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function PlatformShell({ children }: PlatformShellProps) {
+export function PlatformShell({ accountAction, children, identity }: PlatformShellProps) {
   const pathname = usePathname();
 
   return (
@@ -54,17 +74,25 @@ export function PlatformShell({ children }: PlatformShellProps) {
 
       <aside className={styles.sidebar}>
         <div className={styles.brand}>
-          <span className={styles.brandMark} aria-hidden="true">
-            M
+          <span className={styles.brandMark}>
+            <Image src="/mercure-logo.png" alt="" width={38} height={38} priority unoptimized />
           </span>
           <span className={styles.brandCopy}>
             <strong>Mercure</strong>
-            <small>Security platform</small>
+            <small>Security operations</small>
+          </span>
+        </div>
+
+        <div className={styles.workspaceLabel}>
+          <span className={styles.workspacePulse} aria-hidden="true" />
+          <span>
+            <small>Workspace</small>
+            <strong>SOC Operations</strong>
           </span>
         </div>
 
         <nav aria-label="Primary navigation" className={styles.navigation}>
-          <p className={styles.navigationLabel}>Workspace</p>
+          <p className={styles.navigationLabel}>Command center</p>
           {platformNavigation.map((item) => {
             const current = isCurrentPath(pathname, item.href);
 
@@ -85,20 +113,30 @@ export function PlatformShell({ children }: PlatformShellProps) {
 
         <div className={styles.sidebarFooter}>
           <span className={styles.healthDot} aria-hidden="true" />
-          <span>
-            <strong>Foundation</strong>
-            <small>Platform baseline</small>
+          <span className={styles.footerCopy}>
+            <strong>Systems operational</strong>
+            <small>Identity · API · Database</small>
           </span>
         </div>
       </aside>
 
       <div className={styles.workspace}>
         <header className={styles.topbar}>
-          <div>
-            <p className={styles.topbarEyebrow}>Mercure</p>
-            <p className={styles.topbarTitle}>Security engineering workspace</p>
+          <div className={styles.topbarContext}>
+            <p className={styles.topbarEyebrow}>Mercure / Workspace</p>
+            <p className={styles.topbarTitle}>{currentSection(pathname)}</p>
           </div>
-          <span className={styles.environment}>Foundation</span>
+          <div className={styles.account}>
+            <span className={styles.environment}>Production</span>
+            <span className={styles.avatar} aria-hidden="true">
+              {initials(identity.displayName)}
+            </span>
+            <span className={styles.accountCopy}>
+              <strong>{identity.displayName}</strong>
+              <small>{identity.role === 'admin' ? 'Administrator' : 'Analyst'}</small>
+            </span>
+            {accountAction ? <div className={styles.accountAction}>{accountAction}</div> : null}
+          </div>
         </header>
 
         <main id="platform-main" tabIndex={-1} className={styles.main}>

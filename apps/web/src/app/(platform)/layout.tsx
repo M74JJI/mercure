@@ -1,10 +1,20 @@
 import type { ReactNode } from 'react';
 
-import { requireMercureIdentity } from '@mercure/platform-frontend-identity-feature';
+import {
+  IdentitySignOutButton,
+  requireMercureIdentity,
+} from '@mercure/platform-frontend-identity-feature';
 import { PlatformShell } from '@mercure/platform-frontend-shell';
 
 export default async function PlatformLayout({ children }: Readonly<{ children: ReactNode }>) {
-  await requireMercureIdentity();
+  const identity = await requireMercureIdentity();
 
-  return <PlatformShell>{children}</PlatformShell>;
+  return (
+    <PlatformShell
+      identity={{ displayName: identity.displayName, role: identity.role }}
+      accountAction={<IdentitySignOutButton compact />}
+    >
+      {children}
+    </PlatformShell>
+  );
 }

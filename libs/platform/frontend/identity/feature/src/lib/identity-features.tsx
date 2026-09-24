@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Image from 'next/image';
 import type { ReactNode } from 'react';
 
 import {
@@ -39,8 +40,15 @@ function IdentityFrame({
   return (
     <main className={styles.page}>
       <section className={styles.card} aria-labelledby="identity-title">
-        <div className={styles.brandMark} aria-hidden="true">
-          M
+        <div className={styles.brandMark}>
+          <Image
+            src="/mercure-logo.png"
+            alt="Mercure"
+            width={64}
+            height={64}
+            priority
+            unoptimized
+          />
         </div>
         <p className={styles.eyebrow}>{eyebrow}</p>
         <h1 id="identity-title" className={styles.title}>

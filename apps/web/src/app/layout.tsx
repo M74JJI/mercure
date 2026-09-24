@@ -7,10 +7,10 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Mercure',
+    default: 'Mercure Security Operations',
     template: '%s | Mercure',
   },
-  description: 'Mercure modular security engineering platform',
+  description: 'Mercure unified cybersecurity operations platform',
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
