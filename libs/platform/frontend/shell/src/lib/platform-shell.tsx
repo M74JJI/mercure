@@ -14,10 +14,7 @@ import styles from './platform-shell.module.css';
 
 export interface PlatformShellProps {
   readonly children: ReactNode;
-  readonly identity: {
-    readonly displayName: string;
-    readonly role: 'admin' | 'user' | null;
-  };
+  readonly identity: { readonly displayName: string; readonly role: 'admin' | 'user' | null };
   readonly accountAction?: ReactNode;
 }
 
@@ -30,11 +27,6 @@ function initials(displayName: string): string {
     .join('');
 }
 
-function currentSection(pathname: string): string {
-  if (pathname.startsWith('/rules')) return 'Rules intelligence';
-  return 'Operations overview';
-}
-
 function NavigationIcon({ icon }: { readonly icon: PlatformNavigationIcon }) {
   if (icon === 'overview') {
     return (
@@ -43,59 +35,42 @@ function NavigationIcon({ icon }: { readonly icon: PlatformNavigationIcon }) {
       </svg>
     );
   }
-
-  if (icon === 'rules') {
-    return (
-      <svg aria-hidden="true" viewBox="0 0 24 24" className={styles.navIcon}>
-        <path d="M6.25 3.5h11.5A2.25 2.25 0 0 1 20 5.75v12.5a2.25 2.25 0 0 1-2.25 2.25H6.25A2.25 2.25 0 0 1 4 18.25V5.75A2.25 2.25 0 0 1 6.25 3.5m1.5 4a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5zm0 4a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5zm0 4a.75.75 0 0 0 0 1.5h5.5a.75.75 0 0 0 0-1.5z" />
-      </svg>
-    );
-  }
-
-  return null;
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={styles.navIcon}>
+      <path d="M6.25 3.5h11.5A2.25 2.25 0 0 1 20 5.75v12.5a2.25 2.25 0 0 1-2.25 2.25H6.25A2.25 2.25 0 0 1 4 18.25V5.75A2.25 2.25 0 0 1 6.25 3.5m1.5 4a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5zm0 4a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5zm0 4a.75.75 0 0 0 0 1.5h5.5a.75.75 0 0 0 0-1.5z" />
+    </svg>
+  );
 }
 
 function isCurrentPath(pathname: string, href: string): boolean {
-  if (href === '/') {
-    return pathname === '/';
-  }
-
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function PlatformShell({ accountAction, children, identity }: PlatformShellProps) {
   const pathname = usePathname();
-
   return (
     <div className={styles.shell}>
       <a className={styles.skipLink} href="#platform-main">
         Skip to main content
       </a>
-
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
+      <header className={styles.topbar}>
+        <Link href="/" className={styles.brand} aria-label="Mercure overview">
           <span className={styles.brandMark}>
-            <Image src="/mercure-logo.png" alt="" width={38} height={38} priority unoptimized />
+            <Image src="/mercure-logo.png" alt="" width={32} height={32} priority unoptimized />
           </span>
-          <span className={styles.brandCopy}>
-            <strong>Mercure</strong>
-            <small>Security operations</small>
-          </span>
-        </div>
-
-        <div className={styles.workspaceLabel}>
-          <span className={styles.workspacePulse} aria-hidden="true" />
           <span>
-            <small>Workspace</small>
-            <strong>SOC Operations</strong>
+            <strong>Mercure</strong>
+            <small>Security Operations</small>
           </span>
+        </Link>
+
+        <div className={styles.workspacePicker}>
+          <span className={styles.healthDot} /> SOC Workspace <b>⌄</b>
         </div>
 
         <nav aria-label="Primary navigation" className={styles.navigation}>
-          <p className={styles.navigationLabel}>Command center</p>
           {platformNavigation.map((item) => {
             const current = isCurrentPath(pathname, item.href);
-
             return (
               <Link
                 key={item.id}
@@ -111,38 +86,28 @@ export function PlatformShell({ accountAction, children, identity }: PlatformShe
           })}
         </nav>
 
-        <div className={styles.sidebarFooter}>
-          <span className={styles.healthDot} aria-hidden="true" />
-          <span className={styles.footerCopy}>
-            <strong>Systems operational</strong>
-            <small>Identity · API · Database</small>
+        <div className={styles.toolbar}>
+          <div className={styles.search} aria-label="Search is a visual placeholder">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="m20 20-4.3-4.3m2.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
+            </svg>
+            <span>Search workspace</span>
+            <kbd>⌘ K</kbd>
+          </div>
+          <span className={styles.environment}>Production</span>
+          <span className={styles.avatar} aria-hidden="true">
+            {initials(identity.displayName)}
           </span>
+          <span className={styles.accountCopy}>
+            <strong>{identity.displayName}</strong>
+            <small>{identity.role === 'admin' ? 'Administrator' : 'Analyst'}</small>
+          </span>
+          {accountAction ? <div className={styles.accountAction}>{accountAction}</div> : null}
         </div>
-      </aside>
-
-      <div className={styles.workspace}>
-        <header className={styles.topbar}>
-          <div className={styles.topbarContext}>
-            <p className={styles.topbarEyebrow}>Mercure / Workspace</p>
-            <p className={styles.topbarTitle}>{currentSection(pathname)}</p>
-          </div>
-          <div className={styles.account}>
-            <span className={styles.environment}>Production</span>
-            <span className={styles.avatar} aria-hidden="true">
-              {initials(identity.displayName)}
-            </span>
-            <span className={styles.accountCopy}>
-              <strong>{identity.displayName}</strong>
-              <small>{identity.role === 'admin' ? 'Administrator' : 'Analyst'}</small>
-            </span>
-            {accountAction ? <div className={styles.accountAction}>{accountAction}</div> : null}
-          </div>
-        </header>
-
-        <main id="platform-main" tabIndex={-1} className={styles.main}>
-          {children}
-        </main>
-      </div>
+      </header>
+      <main id="platform-main" tabIndex={-1} className={styles.main}>
+        {children}
+      </main>
     </div>
   );
 }
