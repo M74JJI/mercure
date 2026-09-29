@@ -49,6 +49,13 @@ function NavigationIcon({ icon }: { readonly icon: PlatformNavigationIcon }) {
       </svg>
     );
   }
+  if (icon === 'design-system') {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 24 24" className={styles.navIcon}>
+        <path d="m12 2.7 8.2 4.1L12 10.9 3.8 6.8zm-6.1 6 6.1 3.05 6.1-3.05 2.1 1.05L12 13.85 3.8 9.75zm0 4 6.1 3.05 6.1-3.05 2.1 1.05L12 17.85l-8.2-4.1zm0 4 6.1 3.05 6.1-3.05 2.1 1.05L12 21.85l-8.2-4.1z" />
+      </svg>
+    );
+  }
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" className={styles.navIcon}>
       <path d="M6.25 3.5h11.5A2.25 2.25 0 0 1 20 5.75v12.5a2.25 2.25 0 0 1-2.25 2.25H6.25A2.25 2.25 0 0 1 4 18.25V5.75A2.25 2.25 0 0 1 6.25 3.5m1.5 4a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5zm0 4a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5zm0 4a.75.75 0 0 0 0 1.5h5.5a.75.75 0 0 0 0-1.5z" />

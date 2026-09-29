@@ -1,4 +1,4 @@
-export type PlatformNavigationIcon = 'overview' | 'rules' | 'audit' | 'status';
+export type PlatformNavigationIcon = 'overview' | 'rules' | 'audit' | 'status' | 'design-system';
 
 export interface PlatformNavigationItem {
   readonly id: string;
@@ -31,5 +31,11 @@ export const platformNavigation = [
     label: 'Status',
     href: '/status',
     icon: 'status',
+  },
+  {
+    id: 'design-system',
+    label: 'Design system',
+    href: '/design-system',
+    icon: 'design-system',
   },
 ] as const satisfies readonly PlatformNavigationItem[];
