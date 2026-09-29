@@ -7,16 +7,42 @@ import {
   ClipboardCheckIcon,
   CopyIcon,
   DatabaseIcon,
+  FileTextIcon,
+  InboxIcon,
   InfoIcon,
+  MoreHorizontalIcon,
   SearchIcon,
+  SendIcon,
   ShieldCheckIcon,
   SparklesIcon,
   TerminalIcon,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
+import { toast } from 'sonner';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../ui/alert-dialog';
+import { AspectRatio } from '../ui/aspect-ratio';
+import {
+  Attachment,
+  AttachmentContent,
+  AttachmentDescription,
+  AttachmentMedia,
+  AttachmentTitle,
+} from '../ui/attachment';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import {
@@ -28,8 +54,43 @@ import {
   BreadcrumbSeparator,
 } from '../ui/breadcrumb';
 import { Button } from '../ui/button';
+import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from '../ui/button-group';
+import { Bubble, BubbleContent, BubbleGroup } from '../ui/bubble';
+import { Calendar } from '../ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '../ui/carousel';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { Checkbox } from '../ui/checkbox';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from '../ui/combobox';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandShortcut,
+} from '../ui/command';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from '../ui/context-menu';
 import {
   Dialog,
   DialogContent,
@@ -38,17 +99,111 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog';
+import { DirectionProvider } from '../ui/direction';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '../ui/drawer';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '../ui/empty';
+import { Field, FieldDescription, FieldGroup, FieldLabel } from '../ui/field';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../ui/form';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '../ui/hover-card';
 import { Input } from '../ui/input';
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '../ui/input-group';
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '../ui/input-otp';
+import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '../ui/item';
+import { Kbd, KbdGroup } from '../ui/kbd';
 import { Label } from '../ui/label';
+import { Marker, MarkerContent, MarkerIcon } from '../ui/marker';
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarShortcut,
+  MenubarTrigger,
+} from '../ui/menubar';
+import {
+  Message,
+  MessageAvatar,
+  MessageContent,
+  MessageFooter,
+  MessageHeader,
+} from '../ui/message';
+import {
+  MessageScroller,
+  MessageScrollerButton,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+} from '../ui/message-scroller';
+import { NativeSelect, NativeSelectOption } from '../ui/native-select';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from '../ui/navigation-menu';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '../ui/pagination';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Progress } from '../ui/progress';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
+import { ScrollArea } from '../ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Separator } from '../ui/separator';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '../ui/sheet';
+import {
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+} from '../ui/sidebar';
 import { Skeleton } from '../ui/skeleton';
 import { Slider } from '../ui/slider';
 import { Spinner } from '../ui/spinner';
 import { Switch } from '../ui/switch';
+import { Toaster } from '../ui/sonner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Textarea } from '../ui/textarea';
@@ -280,20 +435,41 @@ type AlertVariant = NonNullable<React.ComponentProps<typeof Alert>['variant']>;
 type ToggleVariant = NonNullable<React.ComponentProps<typeof Toggle>['variant']>;
 type ToggleSize = NonNullable<React.ComponentProps<typeof Toggle>['size']>;
 
-function GenericSpecimen({ entry }: { readonly entry: CatalogEntry }) {
+function FormSpecimen() {
+  const form = useForm<{ query: string }>({ defaultValues: { query: '' } });
+
   return (
-    <div className={styles.genericSpecimen}>
-      <span className={styles.genericIcon}>
-        <SparklesIcon />
-      </span>
-      <div>
-        <strong>{entry.name}</strong>
-        <p>{entry.description}</p>
-      </div>
-      <Badge variant="outline">Installed</Badge>
-    </div>
+    <Form {...form}>
+      <form className={styles.controlStack} onSubmit={form.handleSubmit(() => undefined)}>
+        <FormField
+          control={form.control}
+          name="query"
+          rules={{ required: 'Search value is required.' }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Investigation query</FormLabel>
+              <FormControl>
+                <Input placeholder="event.dataset:security" {...field} />
+              </FormControl>
+              <FormDescription>Lucene syntax supported.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" size="sm">
+          Validate query
+        </Button>
+      </form>
+    </Form>
   );
 }
+
+const CHART_DATA = [
+  { hour: '08:00', events: 42 },
+  { hour: '10:00', events: 68 },
+  { hour: '12:00', events: 51 },
+  { hour: '14:00', events: 87 },
+] as const;
 
 function ComponentSpecimen({
   entry,
@@ -311,6 +487,18 @@ function ComponentSpecimen({
           <ShieldCheckIcon /> Authorize action
         </Button>
       );
+    case 'button-group':
+      return (
+        <ButtonGroup>
+          <Button variant="outline">Acknowledge</Button>
+          <ButtonGroupSeparator />
+          <ButtonGroupText>3 alerts</ButtonGroupText>
+          <ButtonGroupSeparator />
+          <Button variant="outline" size="icon" aria-label="More actions">
+            <MoreHorizontalIcon />
+          </Button>
+        </ButtonGroup>
+      );
     case 'badge':
       return <Badge variant={variant as BadgeVariant}>Operational</Badge>;
     case 'alert':
@@ -320,6 +508,18 @@ function ComponentSpecimen({
           <AlertTitle>Telemetry pipeline healthy</AlertTitle>
           <AlertDescription>All events were processed inside the target SLO.</AlertDescription>
         </Alert>
+      );
+    case 'empty':
+      return (
+        <Empty className={styles.controlWidth}>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <InboxIcon />
+            </EmptyMedia>
+            <EmptyTitle>No open findings</EmptyTitle>
+            <EmptyDescription>New findings appear here after collection.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       );
     case 'avatar':
       return (
@@ -341,6 +541,120 @@ function ComponentSpecimen({
           </BreadcrumbList>
         </Breadcrumb>
       );
+    case 'command':
+      return (
+        <Command className={styles.controlWidth}>
+          <CommandInput placeholder="Jump to…" />
+          <CommandList>
+            <CommandEmpty>No command found.</CommandEmpty>
+            <CommandGroup heading="Platform">
+              <CommandItem>
+                <ShieldCheckIcon /> Security status <CommandShortcut>⌘S</CommandShortcut>
+              </CommandItem>
+              <CommandItem>
+                <DatabaseIcon /> Audit events <CommandShortcut>⌘A</CommandShortcut>
+              </CommandItem>
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      );
+    case 'dropdown-menu':
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">Case actions</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem>Assign analyst</DropdownMenuItem>
+            <DropdownMenuItem>Export evidence</DropdownMenuItem>
+            <DropdownMenuItem variant="destructive">Close incident</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    case 'menubar':
+      return (
+        <Menubar>
+          <MenubarMenu>
+            <MenubarTrigger>Case</MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem>
+                New investigation <MenubarShortcut>⌘N</MenubarShortcut>
+              </MenubarItem>
+              <MenubarItem>Export timeline</MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+          <MenubarMenu>
+            <MenubarTrigger>View</MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem>Focus mode</MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+        </Menubar>
+      );
+    case 'navigation-menu':
+      return (
+        <NavigationMenu viewport={false}>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuLink href="#">Overview</NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>Operations</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <NavigationMenuLink href="#">Audit trail</NavigationMenuLink>
+                <NavigationMenuLink href="#">System status</NavigationMenuLink>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+      );
+    case 'pagination':
+      return (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious href="#" />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink href="#" isActive>
+                1
+              </PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink href="#">2</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext href="#" />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      );
+    case 'sidebar':
+      return (
+        <SidebarProvider className="min-h-0 w-72 rounded-lg border bg-sidebar p-2">
+          <SidebarGroup>
+            <SidebarGroupLabel>Security operations</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton isActive>
+                    <ShieldCheckIcon /> <span>Overview</span>
+                  </SidebarMenuButton>
+                  <SidebarMenuBadge>12</SidebarMenuBadge>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton>
+                    <DatabaseIcon /> <span>Audit trail</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarProvider>
+      );
     case 'card':
       return (
         <Card className={styles.sampleCard}>
@@ -360,6 +674,33 @@ function ComponentSpecimen({
           <Label htmlFor="sample-checkbox">Include resolved events</Label>
         </div>
       );
+    case 'combobox':
+      return (
+        <Combobox items={['Critical', 'High', 'Medium', 'Low']} defaultValue="High">
+          <ComboboxInput className={styles.controlWidth} placeholder="Select severity…" />
+          <ComboboxContent>
+            <ComboboxList>
+              {['Critical', 'High', 'Medium', 'Low'].map((item) => (
+                <ComboboxItem key={item} value={item}>
+                  {item}
+                </ComboboxItem>
+              ))}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+      );
+    case 'field':
+      return (
+        <FieldGroup className={styles.controlWidth}>
+          <Field>
+            <FieldLabel htmlFor="field-indicator">Indicator</FieldLabel>
+            <Input id="field-indicator" placeholder="198.51.100.42" />
+            <FieldDescription>IPv4, domain, URL, or file hash.</FieldDescription>
+          </Field>
+        </FieldGroup>
+      );
+    case 'form':
+      return <FormSpecimen />;
     case 'input':
       return (
         <Input
@@ -367,6 +708,51 @@ function ComponentSpecimen({
           placeholder="Search components…"
           aria-invalid={variant === 'invalid'}
         />
+      );
+    case 'input-group':
+      return (
+        <InputGroup className={styles.controlWidth}>
+          <InputGroupAddon>
+            <SearchIcon />
+          </InputGroupAddon>
+          <InputGroupInput placeholder="Search telemetry…" />
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton aria-label="Run search">
+              <SendIcon />
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
+      );
+    case 'input-otp':
+      return (
+        <InputOTP maxLength={6} defaultValue="724851">
+          <InputOTPGroup>
+            <InputOTPSlot index={0} />
+            <InputOTPSlot index={1} />
+            <InputOTPSlot index={2} />
+          </InputOTPGroup>
+          <InputOTPSeparator />
+          <InputOTPGroup>
+            <InputOTPSlot index={3} />
+            <InputOTPSlot index={4} />
+            <InputOTPSlot index={5} />
+          </InputOTPGroup>
+        </InputOTP>
+      );
+    case 'label':
+      return (
+        <div className={styles.controlStack}>
+          <Label htmlFor="label-control">Case reference</Label>
+          <Input id="label-control" defaultValue="INC-2048" />
+        </div>
+      );
+    case 'native-select':
+      return (
+        <NativeSelect defaultValue="production" aria-label="Environment">
+          <NativeSelectOption value="production">Production</NativeSelectOption>
+          <NativeSelectOption value="staging">Staging</NativeSelectOption>
+          <NativeSelectOption value="development">Development</NativeSelectOption>
+        </NativeSelect>
       );
     case 'textarea':
       return (
@@ -432,6 +818,20 @@ function ComponentSpecimen({
           <Spinner /> Loading telemetry
         </div>
       );
+    case 'sonner':
+      return (
+        <>
+          <Button
+            variant="outline"
+            onClick={() =>
+              toast.success('Evidence preserved', { description: 'Audit trail updated.' })
+            }
+          >
+            Show notification
+          </Button>
+          <Toaster position="bottom-right" />
+        </>
+      );
     case 'separator':
       return (
         <div className={styles.separatorSample}>
@@ -439,6 +839,58 @@ function ComponentSpecimen({
           <Separator />
           <span>Production</span>
         </div>
+      );
+    case 'collapsible':
+      return (
+        <Collapsible className={styles.controlWidth} defaultOpen>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              Advanced evidence <ChevronRightIcon />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2 rounded-md border p-3 text-sm text-muted-foreground">
+            Correlation ID, source collector, and normalized event metadata.
+          </CollapsibleContent>
+        </Collapsible>
+      );
+    case 'direction':
+      return (
+        <DirectionProvider dir="rtl" direction="rtl">
+          <div dir="rtl" className="w-72 rounded-lg border p-4 text-right">
+            <strong>اتجاه من اليمين إلى اليسار</strong>
+            <p className="mt-1 text-sm text-muted-foreground">محتوى آمن ومتوافق مع اللغات.</p>
+          </div>
+        </DirectionProvider>
+      );
+    case 'resizable':
+      return (
+        <ResizablePanelGroup
+          orientation="horizontal"
+          className="h-40 w-full max-w-xl rounded-lg border"
+        >
+          <ResizablePanel defaultSize={45} className="flex items-center justify-center text-sm">
+            Event list
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel
+            defaultSize={55}
+            className="flex items-center justify-center bg-muted/30 text-sm"
+          >
+            Evidence detail
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      );
+    case 'scroll-area':
+      return (
+        <ScrollArea className="h-40 w-80 rounded-lg border p-3">
+          <div className="space-y-2">
+            {Array.from({ length: 10 }, (_, index) => (
+              <div key={index} className="rounded-md bg-muted/50 px-3 py-2 text-sm">
+                Audit event #{2048 + index}
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       );
     case 'tabs':
       return (
@@ -466,6 +918,96 @@ function ComponentSpecimen({
           </AccordionItem>
         </Accordion>
       );
+    case 'aspect-ratio':
+      return (
+        <AspectRatio ratio={16 / 9} className="w-80 overflow-hidden rounded-lg border bg-muted">
+          <div className="flex size-full items-center justify-center bg-gradient-to-br from-emerald-950 to-slate-950 text-sm text-emerald-200">
+            16:9 investigation canvas
+          </div>
+        </AspectRatio>
+      );
+    case 'attachment':
+      return (
+        <Attachment state="done">
+          <AttachmentMedia>
+            <FileTextIcon />
+          </AttachmentMedia>
+          <AttachmentContent>
+            <AttachmentTitle>incident-timeline.json</AttachmentTitle>
+            <AttachmentDescription>184 KB · evidence preserved</AttachmentDescription>
+          </AttachmentContent>
+        </Attachment>
+      );
+    case 'calendar':
+      return (
+        <Calendar mode="single" defaultMonth={new Date(2026, 8)} selected={new Date(2026, 8, 29)} />
+      );
+    case 'carousel':
+      return (
+        <Carousel className="w-72" opts={{ loop: true }}>
+          <CarouselContent>
+            {['Detection', 'Investigation', 'Response'].map((item, index) => (
+              <CarouselItem key={item}>
+                <Card>
+                  <CardContent className="flex h-28 items-center justify-center">
+                    <strong>
+                      {index + 1}. {item}
+                    </strong>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="left-2" />
+          <CarouselNext className="right-2" />
+        </Carousel>
+      );
+    case 'chart':
+      return (
+        <ChartContainer
+          className="h-52 w-full max-w-xl"
+          config={{ events: { label: 'Events', color: 'var(--chart-1)' } }}
+        >
+          <BarChart accessibilityLayer data={CHART_DATA}>
+            <CartesianGrid vertical={false} />
+            <XAxis dataKey="hour" tickLine={false} axisLine={false} />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Bar dataKey="events" fill="var(--color-events)" radius={4} />
+          </BarChart>
+        </ChartContainer>
+      );
+    case 'item':
+      return (
+        <Item variant="outline" className={styles.controlWidth}>
+          <ItemMedia variant="icon">
+            <ShieldCheckIcon />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>Identity service</ItemTitle>
+            <ItemDescription>OIDC discovery and token validation healthy.</ItemDescription>
+          </ItemContent>
+          <ItemActions>
+            <Badge>Healthy</Badge>
+          </ItemActions>
+        </Item>
+      );
+    case 'kbd':
+      return (
+        <KbdGroup>
+          <Kbd>Ctrl</Kbd>
+          <span>+</span>
+          <Kbd>K</Kbd>
+        </KbdGroup>
+      );
+    case 'marker':
+      return (
+        <Marker variant="separator" className={styles.controlWidth}>
+          <MarkerIcon>
+            <ShieldCheckIcon />
+          </MarkerIcon>
+          <MarkerContent>Trusted platform boundary</MarkerContent>
+        </Marker>
+      );
     case 'dialog':
       return (
         <Dialog>
@@ -482,6 +1024,69 @@ function ComponentSpecimen({
           </DialogContent>
         </Dialog>
       );
+    case 'alert-dialog':
+      return (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive">Revoke token</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Revoke this access token?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Active sessions using this token will stop immediately.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction variant="destructive">Revoke</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      );
+    case 'context-menu':
+      return (
+        <ContextMenu>
+          <ContextMenuTrigger className="flex h-28 w-72 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+            Right-click investigation artifact
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem>Open evidence</ContextMenuItem>
+            <ContextMenuItem>
+              Copy hash <ContextMenuShortcut>⌘C</ContextMenuShortcut>
+            </ContextMenuItem>
+            <ContextMenuItem variant="destructive">Remove</ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      );
+    case 'drawer':
+      return (
+        <Drawer>
+          <DrawerTrigger asChild>
+            <Button variant="outline">Open drawer</Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Incident summary</DrawerTitle>
+              <DrawerDescription>Review evidence before escalation.</DrawerDescription>
+            </DrawerHeader>
+          </DrawerContent>
+        </Drawer>
+      );
+    case 'hover-card':
+      return (
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <Button variant="link">@security-platform</Button>
+          </HoverCardTrigger>
+          <HoverCardContent>
+            <strong>Security Platform</strong>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Owns identity, audit, and shared infrastructure.
+            </p>
+          </HoverCardContent>
+        </HoverCard>
+      );
     case 'popover':
       return (
         <Popover>
@@ -490,6 +1095,20 @@ function ComponentSpecimen({
           </PopoverTrigger>
           <PopoverContent>Compact supporting controls belong here.</PopoverContent>
         </Popover>
+      );
+    case 'sheet':
+      return (
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline">Open side panel</Button>
+          </SheetTrigger>
+          <SheetContent>
+            <SheetHeader>
+              <SheetTitle>Detection details</SheetTitle>
+              <SheetDescription>Inspect evidence without losing table context.</SheetDescription>
+            </SheetHeader>
+          </SheetContent>
+        </Sheet>
       );
     case 'tooltip':
       return (
@@ -554,8 +1173,58 @@ function ComponentSpecimen({
           <ToggleGroupItem value="list">List</ToggleGroupItem>
         </ToggleGroup>
       );
+    case 'bubble':
+      return (
+        <BubbleGroup className="w-80">
+          <Bubble variant="muted">
+            <BubbleContent>Summarize authentication failures from last hour.</BubbleContent>
+          </Bubble>
+          <Bubble variant="tinted" align="end">
+            <BubbleContent>14 failures found across 3 identities.</BubbleContent>
+          </Bubble>
+        </BubbleGroup>
+      );
+    case 'message':
+      return (
+        <Message className="w-96">
+          <MessageAvatar>
+            <AvatarFallback>AI</AvatarFallback>
+          </MessageAvatar>
+          <MessageContent>
+            <MessageHeader>Mercure Assistant · now</MessageHeader>
+            <Bubble variant="muted">
+              <BubbleContent>
+                Credential abuse pattern detected in identity telemetry.
+              </BubbleContent>
+            </Bubble>
+            <MessageFooter>Sources: Keycloak, API audit trail</MessageFooter>
+          </MessageContent>
+        </Message>
+      );
+    case 'message-scroller':
+      return (
+        <MessageScrollerProvider>
+          <MessageScroller className="h-48 w-96 rounded-lg border">
+            <MessageScrollerViewport>
+              <MessageScrollerContent className="gap-3 p-3">
+                {Array.from({ length: 6 }, (_, index) => (
+                  <MessageScrollerItem key={index}>
+                    <Bubble
+                      variant={index % 2 === 0 ? 'muted' : 'tinted'}
+                      align={index % 2 === 0 ? 'start' : 'end'}
+                    >
+                      <BubbleContent>Investigation message {index + 1}</BubbleContent>
+                    </Bubble>
+                  </MessageScrollerItem>
+                ))}
+              </MessageScrollerContent>
+            </MessageScrollerViewport>
+            <MessageScrollerButton />
+          </MessageScroller>
+        </MessageScrollerProvider>
+      );
     default:
-      return <GenericSpecimen entry={entry} />;
+      return null;
   }
 }
 
