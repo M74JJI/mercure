@@ -210,6 +210,46 @@ import { Textarea } from '../ui/textarea';
 import { Toggle } from '../ui/toggle';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { PageHeader } from '../page-header';
+import { Panel } from '../panel';
+import { CodeBlock } from '../patterns/code-block';
+import { DataState } from '../patterns/data-state';
+import {
+  DescriptionDetails,
+  DescriptionItem,
+  DescriptionList,
+  DescriptionTerm,
+} from '../patterns/description-list';
+import { Inline, ResponsiveGrid, SplitLayout, Stack } from '../patterns/layout';
+import { MetricCard } from '../patterns/metric-card';
+import {
+  PageLayout,
+  PageLayoutActions,
+  PageLayoutBody,
+  PageLayoutDescription,
+  PageLayoutEyebrow,
+  PageLayoutHeader,
+  PageLayoutHeading,
+  PageLayoutTitle,
+} from '../patterns/page-layout';
+import {
+  Section,
+  SectionActions,
+  SectionContent,
+  SectionDescription,
+  SectionHeader,
+  SectionTitle,
+} from '../patterns/section';
+import { StatusIndicator } from '../patterns/status-indicator';
+import {
+  Timeline,
+  TimelineDescription,
+  TimelineItem,
+  TimelineTime,
+  TimelineTitle,
+} from '../patterns/timeline';
+import { Toolbar, ToolbarGroup, ToolbarLabel } from '../patterns/toolbar';
+import { StatusBadge } from '../status-badge';
 
 import styles from './design-system-catalog.module.css';
 
@@ -221,12 +261,14 @@ type Category =
   | 'Forms'
   | 'Layout'
   | 'Navigation'
-  | 'Overlays';
+  | 'Overlays'
+  | 'Patterns';
 
 interface CatalogEntry {
   readonly id: string;
   readonly name: string;
   readonly exportName: string;
+  readonly importPath: string;
   readonly category: Category;
   readonly description: string;
   readonly variants: readonly string[];
@@ -290,6 +332,23 @@ const GROUPS: Readonly<Record<Category, readonly string[]>> = {
   ],
   Layout: ['collapsible', 'direction', 'resizable', 'scroll-area', 'separator'],
   'AI surfaces': ['bubble', 'message', 'message-scroller'],
+  Patterns: [
+    'page-header',
+    'page-layout',
+    'panel',
+    'section',
+    'stack',
+    'responsive-grid',
+    'split-layout',
+    'toolbar',
+    'metric-card',
+    'status-badge',
+    'status-indicator',
+    'description-list',
+    'timeline',
+    'code-block',
+    'data-state',
+  ],
 };
 
 const EXPORT_NAMES: Readonly<Record<string, string>> = {
@@ -307,6 +366,21 @@ const EXPORT_NAMES: Readonly<Record<string, string>> = {
   'radio-group': 'RadioGroup',
   'scroll-area': 'ScrollArea',
   'toggle-group': 'ToggleGroup',
+  'page-header': 'PageHeader',
+  'page-layout': 'PageLayout',
+  panel: 'Panel',
+  section: 'Section',
+  stack: 'Stack',
+  'responsive-grid': 'ResponsiveGrid',
+  'split-layout': 'SplitLayout',
+  toolbar: 'Toolbar',
+  'metric-card': 'MetricCard',
+  'status-badge': 'StatusBadge',
+  'status-indicator': 'StatusIndicator',
+  'description-list': 'DescriptionList',
+  timeline: 'Timeline',
+  'code-block': 'CodeBlock',
+  'data-state': 'DataState',
 };
 
 const DESCRIPTIONS: Readonly<Record<string, string>> = {
@@ -329,6 +403,28 @@ const DESCRIPTIONS: Readonly<Record<string, string>> = {
   table: 'Present dense operational records with clear row and column relationships.',
   tabs: 'Switch between related views without losing the page context.',
   tooltip: 'Provide short supplementary labels for icon-only or unfamiliar controls.',
+  'page-header': 'Legacy-compatible page heading with eyebrow, description, and action regions.',
+  'page-layout':
+    'Standardize page width, responsive padding, heading hierarchy, actions, and body spacing.',
+  panel: 'Legacy-compatible surface for bordered, muted, and raised content regions.',
+  section:
+    'Compose titled application surfaces with consistent padding, tones, actions, and content.',
+  stack: 'Apply approved vertical rhythm without feature-owned spacing rules.',
+  'responsive-grid': 'Create responsive dashboard grids using approved column and gap contracts.',
+  'split-layout':
+    'Build primary-content and contextual-aside layouts with stable responsive behavior.',
+  toolbar:
+    'Group filters, search, bulk actions, and view controls in one responsive command surface.',
+  'metric-card':
+    'Present operational KPIs with semantic tones, labels, deltas, and optional icons.',
+  'status-badge': 'Legacy-compatible compact status label for existing feature surfaces.',
+  'status-indicator': 'Show live health or lifecycle state using text plus a semantic status dot.',
+  'description-list':
+    'Display aligned metadata and technical facts with correct description-list semantics.',
+  timeline: 'Present chronological audit, deployment, incident, or investigation events.',
+  'code-block': 'Display copyable code, commands, configuration, and integration examples.',
+  'data-state':
+    'Standardize empty, loading, and error states with accessible live-region behavior.',
 };
 
 function titleCase(value: string): string {
@@ -395,11 +491,64 @@ function optionsFor(id: string): Pick<CatalogEntry, 'variants' | 'sizes' | 'stat
       states: ['unchecked', 'checked', 'indeterminate', 'disabled', 'invalid'],
     };
   }
+  if (id === 'section') {
+    return {
+      variants: ['default', 'muted', 'transparent', 'elevated'],
+      sizes: ['sm', 'default', 'lg'],
+      states: ['default', 'with actions', 'dense'],
+    };
+  }
+  if (id === 'metric-card' || id === 'status-indicator') {
+    return {
+      variants: ['neutral', 'positive', 'warning', 'critical', 'info'],
+      sizes: ['default'],
+      states: ['default', 'live', 'with delta'],
+    };
+  }
+  if (id === 'data-state') {
+    return {
+      variants: ['empty', 'loading', 'error'],
+      sizes: ['default'],
+      states: ['passive', 'with action'],
+    };
+  }
+  if (id === 'status-badge') {
+    return {
+      variants: ['neutral', 'positive', 'accent'],
+      sizes: ['default'],
+      states: ['default'],
+    };
+  }
+  if (id === 'panel') {
+    return {
+      variants: ['default', 'muted', 'raised'],
+      sizes: ['default'],
+      states: ['default', 'interactive'],
+    };
+  }
+  if (id === 'responsive-grid') {
+    return {
+      variants: ['2 columns', '3 columns', '4 columns'],
+      sizes: ['sm', 'default', 'lg'],
+      states: ['mobile', 'tablet', 'desktop'],
+    };
+  }
   return {
     variants: ['default'],
     sizes: ['default'],
     states: ['default', 'interactive', 'disabled'],
   };
+}
+
+function importPathFor(id: string, category: Category): string {
+  if (['page-header', 'panel', 'status-badge'].includes(id)) {
+    return '@mercure/platform-frontend-design-system';
+  }
+  if (category === 'Patterns') {
+    const path = ['stack', 'responsive-grid', 'split-layout'].includes(id) ? 'layout' : id;
+    return `@mercure/platform-frontend-design-system/patterns/${path}`;
+  }
+  return `@mercure/platform-frontend-design-system/ui/${id}`;
 }
 
 const COMPONENTS: readonly CatalogEntry[] = Object.entries(GROUPS).flatMap(([category, ids]) =>
@@ -410,6 +559,7 @@ const COMPONENTS: readonly CatalogEntry[] = Object.entries(GROUPS).flatMap(([cat
       name: titleCase(id),
       exportName: EXPORT_NAMES[id] ?? titleCase(id).replaceAll(' ', ''),
       category: category as Category,
+      importPath: importPathFor(id, category as Category),
       description:
         DESCRIPTIONS[id] ??
         `A production-ready ${titleCase(id).toLowerCase()} primitive for consistent Mercure interfaces.`,
@@ -1223,6 +1373,226 @@ function ComponentSpecimen({
           </MessageScroller>
         </MessageScrollerProvider>
       );
+    case 'page-header':
+      return (
+        <PageHeader
+          eyebrow="Security operations"
+          title="Investigation workspace"
+          description="Review correlated evidence and coordinate response."
+          actions={<Button size="sm">Create investigation</Button>}
+        />
+      );
+    case 'page-layout':
+      return (
+        <PageLayout width="full" className="rounded-xl border bg-background py-5">
+          <PageLayoutHeader>
+            <PageLayoutHeading>
+              <PageLayoutEyebrow>Security operations</PageLayoutEyebrow>
+              <PageLayoutTitle>Investigation workspace</PageLayoutTitle>
+              <PageLayoutDescription>
+                Shared hierarchy, responsive spacing, and action placement.
+              </PageLayoutDescription>
+            </PageLayoutHeading>
+            <PageLayoutActions>
+              <Button variant="outline">Export</Button>
+              <Button>Open case</Button>
+            </PageLayoutActions>
+          </PageLayoutHeader>
+          <PageLayoutBody className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+            Feature content begins here.
+          </PageLayoutBody>
+        </PageLayout>
+      );
+    case 'panel':
+      return (
+        <Panel tone={variant as 'default' | 'muted' | 'raised'} className="w-full max-w-xl p-5">
+          <strong>Shared application surface</strong>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Consistent border, background, radius, and elevation.
+          </p>
+        </Panel>
+      );
+    case 'section':
+      return (
+        <Section
+          tone={variant as 'default' | 'muted' | 'transparent' | 'elevated'}
+          padding={size === 'default' ? 'default' : (size as 'sm' | 'lg')}
+          className="w-full max-w-xl"
+        >
+          <SectionHeader>
+            <div>
+              <SectionTitle>Detection coverage</SectionTitle>
+              <SectionDescription>Controls observed across production sources.</SectionDescription>
+            </div>
+            <SectionActions>
+              <Button variant="outline" size="sm">
+                Details
+              </Button>
+            </SectionActions>
+          </SectionHeader>
+          <SectionContent className="text-sm text-muted-foreground">
+            184 of 200 controls verified.
+          </SectionContent>
+        </Section>
+      );
+    case 'stack':
+      return (
+        <Stack gap="sm" className="w-full max-w-sm rounded-lg border p-4">
+          <strong>Vertical rhythm</strong>
+          <span className="rounded bg-muted p-2 text-sm">First content block</span>
+          <span className="rounded bg-muted p-2 text-sm">Second content block</span>
+          <Inline gap="sm">
+            <Badge>Shared</Badge>
+            <Badge variant="outline">Responsive</Badge>
+          </Inline>
+        </Stack>
+      );
+    case 'responsive-grid': {
+      const columnCount = Number.parseInt(variant, 10) as 2 | 3 | 4;
+      return (
+        <ResponsiveGrid
+          columns={columnCount}
+          gap={size as 'sm' | 'default' | 'lg'}
+          className="w-full"
+        >
+          {['Identity', 'API', 'Database', 'Web'].slice(0, columnCount).map((item) => (
+            <MetricCard key={item} label={item} value="Healthy" tone="positive" />
+          ))}
+        </ResponsiveGrid>
+      );
+    }
+    case 'split-layout':
+      return (
+        <SplitLayout className="w-full" aside="narrow">
+          <Section>
+            <SectionTitle>Primary workspace</SectionTitle>
+            <SectionDescription>Table, graph, or editor.</SectionDescription>
+          </Section>
+          <Section tone="muted">
+            <SectionTitle>Context panel</SectionTitle>
+            <SectionDescription>Metadata and actions.</SectionDescription>
+          </Section>
+        </SplitLayout>
+      );
+    case 'toolbar':
+      return (
+        <Toolbar className="w-full">
+          <ToolbarGroup>
+            <ToolbarLabel>Scope</ToolbarLabel>
+            <Button size="sm" variant="secondary">
+              Production
+            </Button>
+            <Button size="sm" variant="ghost">
+              Staging
+            </Button>
+          </ToolbarGroup>
+          <ToolbarGroup>
+            <Input className="w-52" placeholder="Search events…" />
+            <Button size="sm">Filter</Button>
+          </ToolbarGroup>
+        </Toolbar>
+      );
+    case 'metric-card':
+      return (
+        <MetricCard
+          className="w-72"
+          tone={variant as 'neutral' | 'positive' | 'warning' | 'critical' | 'info'}
+          label="Detection coverage"
+          value="98.7%"
+          delta="+1.2% this week"
+          icon={<ShieldCheckIcon />}
+        />
+      );
+    case 'status-badge':
+      return (
+        <StatusBadge tone={variant as 'neutral' | 'positive' | 'accent'}>Operational</StatusBadge>
+      );
+    case 'status-indicator':
+      return (
+        <StatusIndicator
+          tone={variant as 'neutral' | 'positive' | 'warning' | 'critical' | 'info'}
+          pulse
+        >
+          Live telemetry healthy
+        </StatusIndicator>
+      );
+    case 'description-list':
+      return (
+        <DescriptionList className="w-full max-w-xl">
+          <DescriptionItem>
+            <DescriptionTerm>Correlation ID</DescriptionTerm>
+            <DescriptionDetails>req_8f2d9a11</DescriptionDetails>
+          </DescriptionItem>
+          <DescriptionItem>
+            <DescriptionTerm>Environment</DescriptionTerm>
+            <DescriptionDetails>Production</DescriptionDetails>
+          </DescriptionItem>
+          <DescriptionItem>
+            <DescriptionTerm>Identity</DescriptionTerm>
+            <DescriptionDetails>mohamed.hajji@mercure.one</DescriptionDetails>
+          </DescriptionItem>
+          <DescriptionItem>
+            <DescriptionTerm>Latency</DescriptionTerm>
+            <DescriptionDetails>42 ms</DescriptionDetails>
+          </DescriptionItem>
+        </DescriptionList>
+      );
+    case 'timeline':
+      return (
+        <Timeline className="w-full max-w-lg">
+          <TimelineItem tone="positive">
+            <TimelineTitle>Rule package approved</TimelineTitle>
+            <TimelineDescription>Production deployment authorized.</TimelineDescription>
+            <TimelineTime>09:42 UTC</TimelineTime>
+          </TimelineItem>
+          <TimelineItem tone="info">
+            <TimelineTitle>Validation completed</TimelineTitle>
+            <TimelineDescription>Schema and policy checks passed.</TimelineDescription>
+            <TimelineTime>09:38 UTC</TimelineTime>
+          </TimelineItem>
+          <TimelineItem>
+            <TimelineTitle>Draft created</TimelineTitle>
+            <TimelineTime>09:21 UTC</TimelineTime>
+          </TimelineItem>
+        </Timeline>
+      );
+    case 'code-block':
+      return (
+        <CodeBlock
+          className="w-full max-w-xl"
+          title="Use shared page layout"
+          language="tsx"
+          code={
+            'import { PageLayout } from \'@mercure/platform-frontend-design-system/patterns/page-layout\';\n\n<PageLayout width="wide">…</PageLayout>'
+          }
+        />
+      );
+    case 'data-state':
+      return (
+        <DataState
+          className="w-full max-w-xl"
+          variant={variant as 'empty' | 'loading' | 'error'}
+          title={
+            variant === 'loading'
+              ? 'Loading telemetry'
+              : variant === 'error'
+                ? 'Telemetry unavailable'
+                : 'No events found'
+          }
+          description={
+            variant === 'error'
+              ? 'Retry or inspect service health.'
+              : 'Adjust filters or select another environment.'
+          }
+          action={
+            variant === 'loading' ? undefined : (
+              <Button size="sm" variant="outline">
+                {variant === 'error' ? 'Retry' : 'Clear filters'}
+              </Button>
+            )
+          }
+        />
+      );
     default:
       return null;
   }
@@ -1235,7 +1605,7 @@ function usageFor(entry: CatalogEntry, variant: string, size: string): string {
   ]
     .filter(Boolean)
     .join(' ');
-  return `import { ${entry.exportName} } from '@mercure/platform-frontend-design-system/ui/${entry.id}';\n\nexport function Example() {\n  return <${entry.exportName}${options ? ` ${options}` : ''}>Content</${entry.exportName}>;\n}`;
+  return `import { ${entry.exportName} } from '${entry.importPath}';\n\nexport function Example() {\n  return <${entry.exportName}${options ? ` ${options}` : ''}>Content</${entry.exportName}>;\n}`;
 }
 
 export function DesignSystemCatalog() {
@@ -1286,11 +1656,11 @@ export function DesignSystemCatalog() {
         </div>
         <div className={styles.heroStats}>
           <div>
-            <strong>61</strong>
+            <strong>{COMPONENTS.length}</strong>
             <span>components</span>
           </div>
           <div>
-            <strong>8</strong>
+            <strong>{Object.keys(GROUPS).length}</strong>
             <span>families</span>
           </div>
           <div>
@@ -1353,7 +1723,7 @@ export function DesignSystemCatalog() {
             </div>
             <div className={styles.importPath}>
               <span>Import</span>
-              <code>@mercure/platform-frontend-design-system/ui/{selected.id}</code>
+              <code>{selected.importPath}</code>
             </div>
           </header>
 
