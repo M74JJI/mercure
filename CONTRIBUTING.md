@@ -9,8 +9,8 @@ Use the repository-pinned Node.js and pnpm versions.
 ```bash
 corepack enable
 pnpm install --frozen-lockfile
-docker compose -f deploy/local/postgres.compose.yml up -d
-pnpm db:migrate:deploy
+pnpm dev:setup
+pnpm dev
 ```
 
 Before opening a pull request, run the same core gates used by CI:
@@ -47,6 +47,9 @@ Do not push directly to `main`. Changes must pass the protected-branch ruleset a
 - Do not bypass Nx module boundaries.
 - Do not move backend business logic, persistence, filesystem processing, or authorization into the browser.
 - Architecture changes that weaken or alter a locked principle require an ADR.
+
+Generate new capabilities with `pnpm module:new <kebab-case-name>` and follow
+`docs/development/add-module.md`. Do not hand-create an alternative module topology.
 
 ## Security-sensitive changes
 

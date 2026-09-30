@@ -54,6 +54,9 @@ jobs:
       - name: Check formatting
         run: pnpm format
 
+      - name: Verify module generator
+        run: pnpm module:new:check
+
       - name: Lint
         run: pnpm exec nx run-many -t lint --verbose
 

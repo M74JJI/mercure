@@ -10,6 +10,12 @@
       "options": {
         "command": "tsc --noEmit -p libs/platform/frontend/design-system/tsconfig.lib.json"
       }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config libs/platform/frontend/design-system/vitest.config.ts"
+      }
     }
   }
 }

@@ -1,4 +1,5 @@
-export type PlatformNavigationIcon = 'overview' | 'rules' | 'audit' | 'status' | 'design-system';
+export type PlatformNavigationIcon =
+  'overview' | 'rules' | 'audit' | 'status' | 'design-system' | 'module';
 
 export interface PlatformNavigationItem {
   readonly id: string;
@@ -38,4 +39,5 @@ export const platformNavigation = [
     href: '/design-system',
     icon: 'design-system',
   },
+  // module-generator:navigation
 ] as const satisfies readonly PlatformNavigationItem[];

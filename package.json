@@ -11,8 +11,13 @@
   },
   "scripts": {
     "repo:setup": "git config core.hooksPath .githooks",
+    "dev": "node scripts/development/start-local.mjs",
+    "dev:setup": "node scripts/development/setup-local.mjs",
+    "dev:services:down": "docker compose -f deploy/local/platform.compose.yml down",
     "nx": "nx",
     "graph": "nx graph",
+    "module:new": "node scripts/development/create-module.mjs",
+    "module:new:check": "node --test scripts/development/create-module.test.mjs",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "nx run-many -t lint",

@@ -16,6 +16,7 @@ out/
 .env
 .env.*
 !.env.example
+!.env.local.example
 *.local
 
 # Logs and temporary files
@@ -36,6 +37,7 @@ Thumbs.db
 # Local databases / volumes
 .postgres/
 volumes/
+.local/
 
 # AI / coding-agent tooling residue (never commit)
 .ai/

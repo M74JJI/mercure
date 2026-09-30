@@ -15,14 +15,14 @@ corepack enable
 pnpm install --frozen-lockfile
 ```
 
-For local PostgreSQL:
+Start the complete local PostgreSQL and Keycloak foundation, generate the database client, and apply migrations:
 
 ```bash
-docker compose -f deploy/local/postgres.compose.yml up -d
-pnpm db:migrate:deploy
+pnpm dev:setup
+pnpm dev
 ```
 
-Copy `.env.example` to an untracked local environment file and replace values as appropriate. Never commit real credentials or secrets.
+`dev:setup` creates an untracked `.env.local` from `.env.local.example` when one does not already exist. Never commit real credentials or secrets. Stop local infrastructure with `pnpm dev:services:down`.
 
 Common workspace checks:
 
@@ -59,3 +59,6 @@ A successful build is not by itself a production approval. Follow `docs/operatio
 The production observability expectations are defined in `docs/operations/observability.md`.
 
 Contribution and repository workflow requirements are documented in `CONTRIBUTING.md`.
+
+New product capabilities must start with the module generator and follow
+`docs/development/add-module.md`.
